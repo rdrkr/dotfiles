@@ -1,0 +1,9 @@
+.DS_Store
+*.log
+
+.config/configstore/update-notifier-\@google/
+.config/github-copilot/
+
+.homebridge/backups/instance-backups/
+
+.gk/repoMapping.json

@@ -1,0 +1,16 @@
+lastupdatecheck: 0
+recentrepos:
+    - /Users/ronendruker/dotfiles
+    - /Users/ronendruker/Development/repos/dotfiles
+startuppopupversion: 5
+lastversion: 0.53.0
+customcommandshistory:
+    - q
+hidecommandlog: false
+ignorewhitespaceindiffview: false
+diffcontextsize: 3
+renamesimilaritythreshold: 50
+localbranchsortorder: recency
+remotebranchsortorder: alphabetical
+gitlogorder: topo-order
+gitlogshowgraph: always
