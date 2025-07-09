@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+# SketchyBar Main Configuration
+# This is the entry point for the SketchyBar configuration
+# 
+# See README.md for organizational principles and structure documentation
+
+# Load Core Configuration
+source "$HOME/.config/sketchybar/config/globals.sh"
+source "$HOME/.config/sketchybar/config/bar.sh"
+source "$HOME/.config/sketchybar/config/defaults.sh"
+source "$HOME/.config/sketchybar/config/events.sh"
+
+# Load Items (define what appears on the bar)
+source "$ITEM_DIR/app/apple.sh"
+source "$ITEM_DIR/workspace/workspaces.sh"
+source "$ITEM_DIR/spacers.sh"
+source "$ITEM_DIR/app/app_info.sh"
+source "$ITEM_DIR/system/system_monitor.sh"
+source "$ITEM_DIR/right_spacer.sh"
+source "$ITEM_DIR/system/system_status.sh"
+source "$ITEM_DIR/workspace/aerospace_mode.sh"
+source "$ITEM_DIR/system/github.sh"
+
+# Load Segments (group items visually)
+source "$SEGMENT_DIR/left/apple_workspace.sh"
+source "$SEGMENT_DIR/left/app_info.sh"
+source "$SEGMENT_DIR/center/aerospace_mode.sh"
+source "$SEGMENT_DIR/right/system_monitor.sh"
+source "$SEGMENT_DIR/right/system_status.sh"
+
+# Finalize Configuration
+sketchybar --update
+
+# Initialize Dynamic Content
+sketchybar --trigger aerospace_mode_change
+
+# Initialize current workspace highlighting
+CURRENT_WORKSPACE=$(aerospace list-workspaces --focused)
+sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$CURRENT_WORKSPACE

@@ -1,0 +1,17 @@
+# ShellCheck configuration for SketchyBar repository
+# Optimized for macOS configuration and SketchyBar scripts
+
+# Default shell to bash since sketchybarrc and most scripts use bash
+shell=bash
+
+# Disable some checks that may not be relevant for configuration scripts
+disable=SC1091  # Not following sourced files (common in config scripts)
+disable=SC2034  # Variable appears unused (common for exported vars in themes)
+disable=SC2154  # Variable referenced but not assigned (common for sourced theme vars)
+disable=SC2086  # Double quote to prevent globbing (sometimes intentional in sketchybar)
+
+# Enable additional checks
+enable=require-variable-braces
+
+# Source additional external sources that may be common
+external-sources=true

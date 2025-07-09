@@ -1,0 +1,123 @@
+[[profiles]]
+id = 'C47ADC8F-C592-4D32-BE30-E9F49AB616B0'
+name = 'Multi'
+
+[[profiles.workspaces]]
+assignAppShortcut = 'ctrl+shift+1'
+display = 'DELL U2515H'
+id = '0A6A26F5-59EF-4F24-99B3-B3CE0423B2A2'
+name = 'Main'
+shortcut = 'ctrl+1'
+symbolIconName = 'house'
+
+[[profiles.workspaces.apps]]
+bundleIdentifier = 'com.apple.Safari'
+iconPath = '/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns'
+name = 'Safari'
+
+[[profiles.workspaces.apps]]
+bundleIdentifier = 'dev.warp.Warp-Stable'
+iconPath = '/Applications/Warp.app/Contents/Resources/Warp.icns'
+name = 'Warp'
+
+[[profiles.workspaces]]
+assignAppShortcut = 'ctrl+shift+3'
+display = 'DELL U2515H'
+id = '4FF04703-28CD-46CD-BD72-A899EB93BD7D'
+name = 'IDE'
+shortcut = 'ctrl+3'
+symbolIconName = 'swift'
+
+[[profiles.workspaces.apps]]
+bundleIdentifier = 'com.jetbrains.intellij.ce'
+iconPath = '/Applications/IntelliJ IDEA Community Edition.app/Contents/Resources/idea.icns'
+name = 'IntelliJ IDEA'
+
+[[profiles.workspaces]]
+assignAppShortcut = 'ctrl+shift+4'
+display = 'PHL 243V7'
+id = '8627C7DD-1D65-4F57-8C2A-73E2B2A83D45'
+name = 'Social'
+shortcut = 'ctrl+4'
+symbolIconName = 'message'
+
+[[profiles.workspaces.apps]]
+bundleIdentifier = 'com.apple.mail'
+iconPath = '/System/Applications/Mail.app/Contents/Resources/ApplicationIcon.icns'
+name = 'Mail'
+
+[[profiles.workspaces.apps]]
+bundleIdentifier = 'com.apple.MobileSMS'
+iconPath = '/System/Applications/Messages.app/Contents/Resources/AppIcon.icns'
+name = 'Messages'
+
+[[profiles.workspaces.apps]]
+bundleIdentifier = 'com.automattic.beeper.desktop'
+iconPath = '/Applications/Beeper Desktop.app/Contents/Resources/icon.icns'
+name = 'Beeper'
+
+[[profiles]]
+id = '877FCE45-32AF-4FF1-99F4-06A6E58512E9'
+name = 'Single'
+
+[[profiles.workspaces]]
+assignAppShortcut = 'ctrl+shift+1'
+display = 'Built-in Retina Display'
+id = '49B5B6ED-69AB-412E-99CC-669A73CC82A1'
+name = 'Browser'
+shortcut = 'ctrl+1'
+symbolIconName = 'globe'
+
+[[profiles.workspaces.apps]]
+bundleIdentifier = 'com.apple.Safari'
+iconPath = '/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns'
+name = 'Safari'
+
+[[profiles.workspaces]]
+assignAppShortcut = 'ctrl+shift+2'
+display = 'Built-in Retina Display'
+id = 'EBE2D836-885E-48C2-8D42-44B1E3DBCCCB'
+name = 'Terminal'
+shortcut = 'ctrl+2'
+symbolIconName = 'apple.terminal'
+
+[[profiles.workspaces.apps]]
+bundleIdentifier = 'dev.warp.Warp-Stable'
+iconPath = '/Applications/Warp.app/Contents/Resources/Warp.icns'
+name = 'Warp'
+
+[[profiles.workspaces]]
+assignAppShortcut = 'ctrl+shift+3'
+display = 'Built-in Retina Display'
+id = 'D439E080-2D51-4A03-ADFF-4171103E730A'
+name = 'IDE'
+shortcut = 'ctrl+3'
+symbolIconName = 'swift'
+
+[[profiles.workspaces.apps]]
+bundleIdentifier = 'com.jetbrains.intellij.ce'
+iconPath = '/Applications/IntelliJ IDEA Community Edition.app/Contents/Resources/idea.icns'
+name = 'IntelliJ IDEA'
+
+[[profiles.workspaces]]
+assignAppShortcut = 'ctrl+shift+4'
+display = 'Built-in Retina Display'
+id = 'B96F3255-F0FF-4089-8380-66D0A4E56A2D'
+name = 'Social'
+shortcut = 'ctrl+4'
+symbolIconName = 'message'
+
+[[profiles.workspaces.apps]]
+bundleIdentifier = 'com.apple.mail'
+iconPath = '/System/Applications/Mail.app/Contents/Resources/ApplicationIcon.icns'
+name = 'Mail'
+
+[[profiles.workspaces.apps]]
+bundleIdentifier = 'com.apple.MobileSMS'
+iconPath = '/System/Applications/Messages.app/Contents/Resources/AppIcon.icns'
+name = 'Messages'
+
+[[profiles.workspaces.apps]]
+bundleIdentifier = 'com.automattic.beeper.desktop'
+iconPath = '/Applications/Beeper Desktop.app/Contents/Resources/icon.icns'
+name = 'Beeper'

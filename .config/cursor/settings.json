@@ -1,0 +1,35 @@
+{
+    "cursor.cpp.disabledLanguages": [
+        "plaintext",
+        "markdown",
+        "scminput"
+    ],
+    "github.copilot.enable": {
+        "*": false,
+        "plaintext": false,
+        "markdown": false,
+        "scminput": false
+    },
+    "editor.accessibilitySupport": "on",
+    "workbench.colorTheme": "Gruvbox Dark Medium",
+    "editor.fontSize": 14,
+    "workbench.preferredDarkColorTheme": "Visual Studio 2017 Dark - C++",
+    "workbench.preferredHighContrastColorTheme": "Gruvbox Dark Medium",
+    "debug.console.fontSize": 14,
+    "scm.inputFontSize": 14,
+    "terminal.integrated.fontSize": 14,
+    "editor.fontFamily": "'JetBrainsMono Nerd Font Mono'",
+    "accessibility.signalOptions.volume": 0,
+    "terminal.integrated.fontWeight": "300",
+    "terminal.integrated.fontWeightBold": "600",
+    "editor.fontVariations": false,
+    "gitlens.views.commitDetails.files.layout": "list",
+    "explorer.confirmDelete": false,
+    "git.autofetch": true,
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "explorer.confirmDragAndDrop": false,
+    "window.openFilesInNewWindow": "on",
+    "lldb.library": "/Applications/Xcode.app/Contents/SharedFrameworks/LLDB.framework/Versions/A/LLDB",
+    "lldb.launch.expressions": "native",
+    "git.openRepositoryInParentFolders": "never",
+}

@@ -1,0 +1,15 @@
+.DS_Store
+*.keystore
+*.log
+
+.config/.android/cache/
+.config/colima/_*
+.config/configstore/update-notifier-\@google/
+.config/github-copilot/
+.config/raycast/
+
+.homebridge/backups/instance-backups/
+
+.gk/repoMapping.json
+
+.config/lazygit/state.yml

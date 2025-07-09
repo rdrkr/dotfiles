@@ -1,0 +1,3 @@
+--ignore=.stowrc
+--ignore=install.sh
+--ignore=DS_Store

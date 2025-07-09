@@ -1,0 +1,125 @@
+{
+  "theme": "custom",
+  "display": {
+    "style": "capsule",
+    "colorCompatibility": "auto",
+    "lines": [
+      {
+        "segments": {
+          "directory": {
+            "enabled": true,
+            "showBasename": true
+          },
+          "model": {
+            "enabled": true
+          },
+          "session": {
+            "enabled": false,
+            "type": "both",
+            "costSource": "calculated"
+          },
+          "today": {
+            "enabled": false,
+            "type": "both"
+          },
+          "block": {
+            "enabled": false,
+            "type": "weighted",
+            "burnType": "tokens"
+          },
+          "version": {
+            "enabled": false
+          },
+          "metrics": {
+            "enabled": false,
+            "showResponseTime": false,
+            "showLastResponseTime": false,
+            "showDuration": false,
+            "showMessageCount": true,
+            "showLinesAdded": false,
+            "showLinesRemoved": false
+          },
+          "context": {
+            "enabled": true,
+            "showPercentageOnly": true
+          },
+          "tmux": {
+            "enabled": false
+          },
+          "git": {
+            "enabled": true,
+            "showSha": false,
+            "showWorkingTree": true,
+            "showOperation": true,
+            "showTag": true,
+            "showTimeSinceCommit": false,
+            "showStashCount": true,
+            "showUpstream": false,
+            "showRepoName": false
+          }
+        }
+      }
+    ]
+  },
+  "colors": {
+    "custom": {
+      "directory": {
+        "bg": "#458588",
+        "fg": "#ebdbb2"
+      },
+      "git": {
+        "bg": "#98971a",
+        "fg": "#282828"
+      },
+      "model": {
+        "bg": "#b16286",
+        "fg": "#ebdbb2"
+      },
+      "session": {
+        "bg": "#689d6a",
+        "fg": "#282828"
+      },
+      "block": {
+        "bg": "#d79921",
+        "fg": "#282828"
+      },
+      "today": {
+        "bg": "#d65d0e",
+        "fg": "#282828"
+      },
+      "tmux": {
+        "bg": "#a89984",
+        "fg": "#282828"
+      },
+      "context": {
+        "bg": "#cc241d",
+        "fg": "#ebdbb2"
+      },
+      "metrics": {
+        "bg": "#ebdbb2",
+        "fg": "#282828"
+      },
+      "version": {
+        "bg": "#a89984",
+        "fg": "#282828"
+      }
+    }
+  },
+  "budget": {
+    "session": {
+      "warningThreshold": 80
+    },
+    "today": {
+      "amount": 5.0,
+      "warningThreshold": 80
+    },
+    "block": {
+      "amount": 20000000,
+      "type": "tokens",
+      "warningThreshold": 80
+    }
+  },
+  "modelContextLimits": {
+    "sonnet": 200000
+  }
+}
