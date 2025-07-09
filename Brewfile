@@ -1,4 +1,5 @@
 tap "blacktop/tap"
+tap "nikitabobko/tap"
 # Programmable completion for Bash 3.2
 brew "bash-completion"
 # Console Matrix
@@ -25,6 +26,8 @@ brew "python@3.13"
 brew "lua"
 # Package manager for the Lua programming language
 brew "luarocks"
+# Blazingly fast interpolated LUT generator and applicator for color palettes
+brew "lutgen"
 # Generate a markdown TOC (table of contents) with Remarkable
 brew "markdown-toc"
 # Fast, flexible, config-based cli for linting Markdown/CommonMark files
@@ -43,16 +46,22 @@ brew "rust"
 brew "shallow-backup"
 # Cross-shell prompt for astronauts
 brew "starship"
+# Organize software neatly under a single directory tree (e.g. /usr/local)
+brew "stow"
 # Terminal multiplexer
 brew "tmux"
 # Find and verify credentials
 brew "trufflehog"
 # Internet file retriever
 brew "wget"
+# AeroSpace is an i3-like tiling window manager for macOS
+cask "aerospace"
 # Enable Windows-like alt-tab
 cask "alt-tab"
 # iOS App Store alternative
 cask "altserver"
+# Tools for building Android applications
+cask "android-studio"
 # Display management tool
 cask "betterdisplay"
 # Compare files and folders
@@ -61,6 +70,8 @@ cask "beyond-compare@4"
 cask "chatgpt"
 # Anthropic's official Claude AI desktop app
 cask "claude"
+# C and C++ IDE
+cask "clion"
 # Node-based image, video and audio generator
 cask "comfyui"
 # Write, edit, and chat about your code with AI
@@ -71,10 +82,14 @@ cask "cyberduck"
 cask "discord"
 # Window peeking utility app
 cask "dockdoor"
+# Client for the Dropbox cloud storage service
+cask "dropbox"
 # Assign keys, and then decorate and label them
 cask "elgato-stream-deck"
 # Utility for customizing which browser to start
 cask "finicky"
+# Hybrid IDE and text editor
+cask "fleet"
 cask "font-fira-code-nerd-font"
 cask "font-jetbrains-mono-nerd-font"
 # Terminal emulator that uses platform-native UI and GPU acceleration
@@ -97,6 +112,8 @@ cask "homerow"
 cask "iina"
 # HTTP and GraphQL Client
 cask "insomnia"
+# Java IDE by JetBrains
+cask "intellij-idea"
 # Download manager
 cask "jdownloader"
 # JetBrains tools manager
@@ -111,14 +128,22 @@ cask "kid3"
 cask "lyricsfinder"
 # Mouse utility to add gesture functions and smooth scrolling to 3rd party mice
 cask "mac-mouse-fix"
+# Provides updates to various Microsoft products
+cask "microsoft-auto-update"
+# Meet, chat, call, and collaborate in just one place
+cask "microsoft-teams"
 # Get up and running with large language models locally
 cask "ollama-app"
 # Utility to uninstall apps and remove leftover files from old/uninstalled apps
 cask "pearcleaner"
 # Home media server
 cask "plex-media-server"
+# IDE for professional Python development
+cask "pycharm"
 # Control your tools with a few keystrokes
 cask "raycast"
+# Rust IDE
+cask "rustrover"
 # Digital design and prototyping platform
 cask "sketch"
 # Text editor for code, markup and prose
@@ -131,6 +156,10 @@ cask "touch-portal"
 cask "visual-studio-code"
 # Rust-based terminal
 cask "warp"
+# Video communication and virtual meeting platform
+cask "webex"
+# Video communication and virtual meeting platform
+cask "zoom"
 mas "1Password 7", id: 1333542190
 mas "Actions", id: 1586435171
 mas "Amphetamine", id: 937984704

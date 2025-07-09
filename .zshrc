@@ -5,7 +5,10 @@ export PATH="$PATH:$HOME/.local/bin"
 
 # starship
 export STARSHIP_CONFIG=~/.config/starship/starship.toml
-eval "$(starship init zsh)"
+
+if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
+  eval "$(starship init zsh)"
+fi
 
 # Enable auto-complete
 autoload -Uz compinit

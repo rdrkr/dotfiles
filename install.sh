@@ -1,7 +1,23 @@
 #!/bin/bash
 
+# --- Go to dotfiles repo directory ---
+# Store the original directory and change to the script's directory.
+# This allows the script to be run from any location.
+ORIGINAL_DIR=$(pwd)
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+cd "$SCRIPT_DIR"
+# Restore the original directory when the script exits.
+trap 'cd "$ORIGINAL_DIR"' EXIT
+
+
 # --- Configuration ---
 DRY_RUN=false
+
+# --- macOS Plist Configuration ---
+MACOS_CONFIG_DIR="${SCRIPT_DIR}/.config/macos"
+MACOS_PREFS_DIR="${HOME}/Library/Preferences"
+PLIST_FILES=("com.apple.Terminal.plist" "com.apple.dock.plist" "com.apple.finder.plist")
+APP_NAMES=("Terminal" "Dock" "Finder")
 
 # --- Colors ---
 NC="\033[0m" # No Color
@@ -19,18 +35,19 @@ C_PEACH="\033[38;2;250;179;135m"
 # --- Logo ---
 print_logo() {
     echo -e "${C_LAVENDER}"
-    echo "██████╗   ██████╗ ████████╗ ███████╗ ██╗  ██╗     ███████╗ ███████╗"
+    echo -n "██████╗   ██████╗  ████████╗ ███████╗ ██╗ ██╗      ███████╗ ███████╗"
     echo -e "${C_BLUE}"
-    echo "██╔══██╗ ██╔═══██╗ ╚══██╔══╝ ██╔════╝ ██║ ██║      ██╔════╝ ██╔════╝"
+    echo -n "██╔══██╗ ██╔═══██╗ ╚══██╔══╝ ██╔════╝ ██║ ██║      ██╔════╝ ██╔════╝"
     echo -e "${C_SAPPHIRE}"
-    echo "██║  ██║ ██║   ██║    ██║    █████╗   ██║ ██║      █████╗   ███████╗"
+    echo -n "██║  ██║ ██║   ██║    ██║    █████╗   ██║ ██║      █████╗   ███████╗"
     echo -e "${C_SKY}"
-    echo "██║  ██║ ██║   ██║    ██║    ██╔══╝   ██║ ██║      ██╔════╝ ╚════██║"
+    echo -n "██║  ██║ ██║   ██║    ██║    ██╔══╝   ██║ ██║      ██╔════╝ ╚════██║"
     echo -e "${C_TEAL}"
-    echo "██████╔╝ ╚██████╔╝    ██║    ██╗      ██║ ███████╗ ███████║ ███████║"
+    echo -n "██████╔╝ ╚██████╔╝    ██║    ██║      ██║ ███████╗ ███████║ ███████║"
     echo -e "${C_GREEN}"
-    echo "╚═════╝   ╚═════╝     ╚═╝    ╚══════╝ ╚═╝ ╚══════╝ ╚══════╝ ╚══════╝"
+    echo -n "╚═════╝   ╚═════╝     ╚═╝    ╚═╝      ╚═╝ ╚══════╝ ╚══════╝ ╚══════╝"
     echo -e "${NC}"
+    echo
 }
 
 # --- Functions ---
@@ -59,6 +76,7 @@ print_help() {
     echo "Commands:"
     echo "  restore      Restore dotfiles and install dependencies"
     echo "  backup       Update Brewfile with current setup"
+    echo "  schedule     Schedule hourly backups using cron"
     echo ""
     echo "Options:"
     echo "  -h, --help     Show this help message and exit"
@@ -127,7 +145,31 @@ restore() {
         exit 1
     fi
 
-    echo -e "\n${C_GREEN}All done! Your dotfiles are set up.${NC}\n"
+    echo -e "
+${C_GREEN}All done! Your dotfiles are set up.${NC}
+"
+
+    print_header "Restoring macOS configurations..."
+    for i in "${!PLIST_FILES[@]}"; do
+        local plist_file="${PLIST_FILES[$i]}"
+        local source_path="${MACOS_CONFIG_DIR}/${plist_file}"
+        local dest_path="${MACOS_PREFS_DIR}/${plist_file}"
+        local app_name="${APP_NAMES[$i]}"
+
+        # First, copy the current plist to the dotfiles to check for changes
+        run_command "cp \"${dest_path}\" \"${source_path}\""
+
+        if [ -z "$(git status --porcelain \"${source_path}\")" ]; then
+            print_success "${plist_file} is already up to date. No changes needed."
+        else
+            run_command "git restore \"${source_path}\""
+            run_command "cp \"${source_path}\" \"${dest_path}\""
+            print_success "${plist_file} restored."
+            print_warning "Restarting ${app_name} for changes to take effect..."
+            run_command "killall ${app_name}"
+            print_success "${app_name} restarted."
+        fi
+    done
 }
 
 backup() {
@@ -139,18 +181,50 @@ backup() {
     fi
     print_success "Brewfile updated successfully."
 
+    print_header "Backing up macOS configurations..."
+    for i in "${!PLIST_FILES[@]}"; do
+        local plist_file="${PLIST_FILES[$i]}"
+        run_command "cp ${MACOS_PREFS_DIR}/${plist_file} ${MACOS_CONFIG_DIR}/${plist_file}"
+        print_success "${plist_file} backed up."
+    done
+
     if [ "$DRY_RUN" = false ]; then
-        if [ -n "$(git status --porcelain Brewfile)" ]; then
-            print_warning "Brewfile has changes. Committing and pushing..."
-            run_command "git add Brewfile"
-            run_command "git commit -m 'Update Brewfile'"
+        if [ -n "$(git status --porcelain)" ]; then
+            print_warning "Changes detected. Committing and pushing..."
+            run_command "git add ."
+            run_command "git commit -m 'Automated backup: Update dotfiles'"
             run_command "git push"
-            print_success "Brewfile changes committed and pushed."
+            run_command "osascript -e 'display notification \"Changes detected. dotfiles updated\" with title \"Dotfiles\"'"
+            print_success "Changes committed and pushed."
         else
-            print_success "No changes to Brewfile. Nothing to commit."
+            print_success "No changes detected. Nothing to commit."
         fi
     fi
 }
+
+schedule() {
+    print_header "Scheduling Hourly Backups..."
+    local script_path=$(realpath "$0")
+    local cron_job="0 * * * * $script_path backup"
+
+    if [ "$DRY_RUN" = true ]; then
+        print_warning "[DRY RUN] Would check for and add the following cron job:"
+        echo "$cron_job"
+        return
+    fi
+
+    if ! crontab -l | grep -Fq "$cron_job"; then
+        (crontab -l 2>/dev/null; echo "$cron_job") | crontab -
+        if [ $? -ne 0 ]; then
+            print_error "Failed to schedule backup."
+            exit 1
+        fi
+        print_success "Backup scheduled to run hourly."
+    else
+        print_success "Backup is already scheduled."
+    fi
+}
+
 
 # --- Argument Parsing ---
 COMMAND=""
@@ -167,7 +241,7 @@ do
         DRY_RUN=true
         shift
         ;;
-        restore|backup)
+        restore|backup|schedule)
         COMMAND=$key
         shift
         ;;
@@ -198,5 +272,8 @@ case $COMMAND in
     ;;
     backup)
     backup
+    ;;
+    schedule)
+    schedule
     ;;
 esac
