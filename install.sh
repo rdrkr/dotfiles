@@ -91,12 +91,30 @@ run_command() {
     fi
 }
 
+run_stow() {
+    print_header "Running stow..."
+    if command -v stow &> /dev/null; then
+        run_command "stow ."
+        if [ $? -ne 0 ] && [ "$DRY_RUN" = false ]; then
+            print_error "Stow command failed."
+            exit 1
+        fi
+        print_success "Stow command completed successfully."
+    else
+        print_error "Stow is not installed. Please install it first (e.g., 'brew install stow')."
+        exit 1
+    fi
+}
+
 restore() {
     print_header "Starting Restore..."
 
     # 1. Install Homebrew
     print_header "Checking for Homebrew..."
     if ! command -v brew &> /dev/null; then
+        print_warning "xcode command line tools. Installing..."
+        xcode-select --install || true
+        
         print_warning "Homebrew not found. Installing..."
         run_command '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
         if [ $? -ne 0 ] && [ "$DRY_RUN" = false ]; then
@@ -131,19 +149,7 @@ restore() {
         print_warning "Brewfile not found. Skipping brew bundle."
     fi
 
-    # 3. Run stow
-    print_header "Running stow..."
-    if command -v stow &> /dev/null; then
-        run_command "stow ."
-        if [ $? -ne 0 ] && [ "$DRY_RUN" = false ]; then
-            print_error "Stow command failed."
-            exit 1
-        fi
-        print_success "Stow command completed successfully."
-    else
-        print_error "Stow is not installed. Please install it first (e.g., 'brew install stow')."
-        exit 1
-    fi
+    run_stow
 
     echo -e "
 ${C_GREEN}All done! Your dotfiles are set up.${NC}
@@ -181,6 +187,8 @@ backup() {
     fi
     print_success "Brewfile updated successfully."
 
+    run_stow
+
     print_header "Backing up macOS configurations..."
     for i in "${!PLIST_FILES[@]}"; do
         local plist_file="${PLIST_FILES[$i]}"
@@ -205,12 +213,24 @@ backup() {
 schedule() {
     print_header "Scheduling Hourly Backups..."
     local script_path=$(realpath "$0")
+    local cron_job_path="PATH=/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin"
     local cron_job="0 * * * * $script_path backup"
 
     if [ "$DRY_RUN" = true ]; then
         print_warning "[DRY RUN] Would check for and add the following cron job:"
         echo "$cron_job"
         return
+    fi
+
+    if ! crontab -l | grep -Fq "$cron_job_path"; then
+        (crontab -l 2>/dev/null; echo "$cron_job_path") | crontab -
+        if [ $? -ne 0 ]; then
+            print_error "Failed to set crontab path."
+            exit 1
+        fi
+        print_success "crontab PATH is set."
+    else
+        print_success "crontab PATH is already set."
     fi
 
     if ! crontab -l | grep -Fq "$cron_job"; then

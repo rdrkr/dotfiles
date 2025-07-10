@@ -1,9 +1,13 @@
 tap "blacktop/tap"
 tap "nikitabobko/tap"
+# Code searching, linting, rewriting
+brew "ast-grep"
 # Programmable completion for Bash 3.2
 brew "bash-completion"
 # Console Matrix
 brew "cmatrix"
+# Simple, fast and user-friendly alternative to find
+brew "fd"
 # Play, record, convert, and stream audio and video
 brew "ffmpeg"
 # Command-line fuzzy finder written in Go
@@ -16,6 +20,8 @@ brew "gemini-cli"
 brew "gofumpt"
 # Like cURL, but for gRPC
 brew "grpcurl"
+# Integration point for ghcide and haskell-ide-engine. One IDE to rule them all
+brew "haskell-language-server"
 # Improved top (interactive process viewer)
 brew "htop"
 # Simple terminal UI for git commands
@@ -40,8 +46,14 @@ brew "neofetch"
 brew "neovim"
 # Execute binaries from Python packages in isolated environments
 brew "pipx"
+# Code formatter for JavaScript, CSS, JSON, GraphQL, Markdown, YAML
+brew "prettier"
+# Search tool like grep and The Silver Searcher
+brew "ripgrep"
 # Safe, concurrent, practical language
 brew "rust"
+# Experimental Rust compiler front-end for IDEs
+brew "rust-analyzer"
 # Git-integrated backup tool for macOS and Linux devs
 brew "shallow-backup"
 # Cross-shell prompt for astronauts
@@ -54,6 +66,8 @@ brew "tmux"
 brew "trufflehog"
 # Internet file retriever
 brew "wget"
+# Extensible command-line tool to format YAML files
+brew "yamlfmt"
 # AeroSpace is an i3-like tiling window manager for macOS
 cask "aerospace"
 # Enable Windows-like alt-tab
@@ -187,7 +201,6 @@ mas "Slack", id: 803453959
 mas "SmartDNSProxy", id: 1471096079
 mas "Tag Editor 2", id: 984278082
 mas "Tailscale", id: 1475387142
-mas "TapTab", id: 1659363738
 mas "Telegram", id: 747648890
 mas "TestFlight", id: 899247664
 mas "The Unarchiver", id: 425424353
