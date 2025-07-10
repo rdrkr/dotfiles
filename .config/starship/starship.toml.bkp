@@ -40,7 +40,7 @@ $time\
 $fill\
 [](fg:level_7)\
 $battery\
-[](fg:level_7)   \
+[](fg:level_7)  \
 $line_break$character\
 """
 
@@ -49,7 +49,7 @@ right_format = """
 
 # Sets user-defined palette
 # Palettes must be defined _after_ this line
-palette = "gruvbox_dark"
+palette = "catppuccin_macchiato"
 
 # Palette definitions
 [palettes.catppuccin_latte]
@@ -76,7 +76,7 @@ level_2 = "#f5a97f" # peach
 level_3 = "#eed49f" # yellow
 level_4 = "#a6da95" # green
 level_5 = "#91d7e3" # sky
-level_6 = "#8aadf4" # bluecd
+level_6 = "#8aadf4" # blue
 level_7 = "#7287fd" # lavender
 
 [palettes.catppuccin_mocha]
