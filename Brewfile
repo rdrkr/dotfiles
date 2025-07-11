@@ -4,8 +4,12 @@ tap "nikitabobko/tap"
 brew "ast-grep"
 # Programmable completion for Bash 3.2
 brew "bash-completion"
+# Resource monitor. C++ version and continuation of bashtop and bpytop
+brew "btop"
 # Console Matrix
 brew "cmatrix"
+# More intuitive version of du in rust
+brew "dust"
 # Simple, fast and user-friendly alternative to find
 brew "fd"
 # Play, record, convert, and stream audio and video
@@ -22,8 +26,6 @@ brew "gofumpt"
 brew "grpcurl"
 # Integration point for ghcide and haskell-ide-engine. One IDE to rule them all
 brew "haskell-language-server"
-# Improved top (interactive process viewer)
-brew "htop"
 # Simple terminal UI for git commands
 brew "lazygit"
 # Interpreted, interactive, object-oriented programming language
@@ -68,6 +70,8 @@ brew "trufflehog"
 brew "wget"
 # Extensible command-line tool to format YAML files
 brew "yamlfmt"
+# Blazing fast terminal file manager written in Rust, based on async I/O
+brew "yazi"
 # AeroSpace is an i3-like tiling window manager for macOS
 cask "aerospace"
 # Enable Windows-like alt-tab

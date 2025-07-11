@@ -11,6 +11,19 @@ if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
   eval "$(starship init zsh)"
 fi
 
-# Enable auto-complete
+# yazi
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	IFS= read -r -d '' cwd < "$tmp"
+	[ -n "$cwd" ] && [ "$cwd" != "$PWD" ] && builtin cd -- "$cwd"
+	rm -f -- "$tmp"
+}
+
+# editor
+export EDITOR=nvim
+export VISUAL="$EDITOR"
+
+# auto-complete
 autoload -Uz compinit
 compinit
