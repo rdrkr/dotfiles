@@ -20,6 +20,8 @@ brew "fzf"
 brew "node"
 # Interact with Google Gemini AI models from the command-line
 brew "gemini-cli"
+# Interpreter for PostScript and PDF
+brew "ghostscript"
 # Stricter gofmt
 brew "gofumpt"
 # Like cURL, but for gRPC
@@ -62,6 +64,8 @@ brew "shallow-backup"
 brew "starship"
 # Organize software neatly under a single directory tree (e.g. /usr/local)
 brew "stow"
+# Modernized, complete, self-contained TeX/LaTeX engine
+brew "tectonic"
 # Terminal multiplexer
 brew "tmux"
 # Find and verify credentials
