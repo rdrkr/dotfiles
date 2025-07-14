@@ -203,6 +203,7 @@ mas "Numbers", id: 409203825
 mas "Pages", id: 409201541
 mas "PiPifier", id: 1160374471
 mas "Prime Video", id: 545519333
+mas "Raycast Companion", id: 6738274497
 mas "RetroArch", id: 6499539433
 mas "Shazam", id: 897118787
 mas "Slack", id: 803453959
