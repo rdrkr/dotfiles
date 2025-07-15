@@ -1,8 +1,8 @@
 export PATH="/opt/homebrew/opt/python@3.13/bin:$PATH"
-export XDG_CONFIG_HOME="$HOME/.config"
-
-# Created by `pipx` on 2025-05-20 14:16:07
+export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH"
 export PATH="$PATH:$HOME/.local/bin"
+
+export XDG_CONFIG_HOME="$HOME/.config"
 
 # starship
 export STARSHIP_CONFIG=~/.config/starship/starship.toml
