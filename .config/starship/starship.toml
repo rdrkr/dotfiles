@@ -165,11 +165,11 @@ truncation_symbol = "…/"
 # Here is how you can shorten some long paths by text replacement
 # similar to mapped_locations in Oh My Posh:
 [directory.substitutions]
-"Documents" = "󰈙 "
-"Downloads" = " "
-"Music" = "󰝚 "
-"Pictures" = " "
-"Development" = "󰲋 "
+"Documents" = "󰈙"
+"Downloads" = ""
+"Music" = "󰝚"
+"Pictures" = ""
+"Development" = "󰲋"
 
 #### Section 3 ####
 [buf]
@@ -233,7 +233,7 @@ style = "bg:level_4 bold"
 format = '[ $symbol($version )]($style)'
 
 [nodejs]
-symbol = ""
+symbol = " "
 style = "bg:level_4 bold"
 format = '[ $symbol($version )]($style)'
 
@@ -243,7 +243,7 @@ style = "bg:level_4 bold"
 format = '[ $symbol($version )]($style)'
 
 [rust]
-symbol = ""
+symbol = " "
 style = "bg:level_4 bold"
 format = '[ $symbol($version )]($style)'
 
@@ -275,7 +275,7 @@ format = '[ $symbol $context ]($style)'
 #### Section 5 ####
 [time]
 disabled = false
-time_format = "%R" # Hour:Minute Format
+time_format = "%R"             # Hour:Minute Format
 style = "bg:level_6 bold"
 format = '[  $time ]($style)'
 
