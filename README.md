@@ -4,23 +4,37 @@ My personal dotfiles, managed with `stow` and a custom installer script.
 
 ## 🚀 Installation
 
-1. **Install Homebrew and Git:**
+1. Install XCode Command Line Tools:
 
-    ```bash
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && brew install git
-    ```
+   ```bash
+   xcode-select --install
+   ```
 
-2. **Clone the repository:**
+   If you encounter an error, you can also try:
 
-    ```bash
-    git clone https://github.com/rdrkr/dotfiles.git ~/.dotfiles
-    ```
+   ```bash
+   sudo xcode-select --reset
+   ```
 
-3. **Navigate to the repository:**
+   This step is necessary to ensure that the required build tools are available.
 
-    ```bash
-    cd ~/.dotfiles
-    ```
+2. **Install Homebrew and Git:**
+
+   ```bash
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && brew install git
+   ```
+
+3. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/rdrkr/dotfiles.git ~/.dotfiles
+   ```
+
+4. **Navigate to the repository:**
+
+   ```bash
+   cd ~/.dotfiles
+   ```
 
 ## 🛠️ Usage
 

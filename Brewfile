@@ -1,4 +1,6 @@
 tap "blacktop/tap"
+tap "felixkratz/formulae"
+tap "koekeishiya/formulae"
 tap "nikitabobko/tap"
 # Code searching, linting, rewriting
 brew "ast-grep"
@@ -78,6 +80,12 @@ brew "wget"
 brew "yamlfmt"
 # Blazing fast terminal file manager written in Rust, based on async I/O
 brew "yazi"
+# Custom macOS statusbar with shell plugin, interaction and graph support
+brew "felixkratz/formulae/sketchybar"
+# Simple hotkey-daemon for macOS.
+brew "koekeishiya/formulae/skhd"
+# A tiling window manager for macOS based on binary space partitioning.
+brew "koekeishiya/formulae/yabai"
 # AeroSpace is an i3-like tiling window manager for macOS
 cask "aerospace"
 # Enable Windows-like alt-tab
@@ -115,6 +123,7 @@ cask "finicky"
 # Hybrid IDE and text editor
 cask "fleet"
 cask "font-fira-code-nerd-font"
+cask "font-hack-nerd-font"
 cask "font-jetbrains-mono-nerd-font"
 # Terminal emulator that uses platform-native UI and GPU acceleration
 cask "ghostty"
