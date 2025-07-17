@@ -143,6 +143,8 @@ cask "handbrake-app"
 cask "homerow"
 # Free and open-source media player
 cask "iina"
+# Tool to optimise images to a smaller size
+cask "imageoptim"
 # HTTP and GraphQL Client
 cask "insomnia"
 # Java IDE by JetBrains
