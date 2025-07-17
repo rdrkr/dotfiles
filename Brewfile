@@ -80,6 +80,8 @@ brew "wget"
 brew "yamlfmt"
 # Blazing fast terminal file manager written in Rust, based on async I/O
 brew "yazi"
+# A window border system for macOS
+brew "felixkratz/formulae/borders"
 # Custom macOS statusbar with shell plugin, interaction and graph support
 brew "felixkratz/formulae/sketchybar"
 # Simple hotkey-daemon for macOS.

@@ -50,7 +50,7 @@ PLUGIN_DIR="$HOME/.config/sketchybar/plugins"
 
 FONT="JetBrainsMono Nerd Font"
 
-PADDINGS=3
+PADDINGS=4
 
 POPUP_BORDER_WIDTH=2
 POPUP_CORNER_RADIUS=11
