@@ -223,6 +223,7 @@ mas "RetroArch", id: 6499539433
 mas "Shazam", id: 897118787
 mas "Slack", id: 803453959
 mas "SmartDNSProxy", id: 1471096079
+mas "TabDirector", id: 6502719125
 mas "Tag Editor 2", id: 984278082
 mas "Tailscale", id: 1475387142
 mas "Telegram", id: 747648890
