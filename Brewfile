@@ -96,6 +96,8 @@ cask "alt-tab"
 cask "altserver"
 # Tools for building Android applications
 cask "android-studio"
+# Universal chat app powered by Matrix
+cask "beeper"
 # Display management tool
 cask "betterdisplay"
 # Compare files and folders
