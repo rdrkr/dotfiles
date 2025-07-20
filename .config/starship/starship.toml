@@ -2,7 +2,7 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
 format = """
-[](level_1)\
+[](fg:level_1)\
 $os\
 $username\
 [](bg:level_2 fg:level_1)\
@@ -60,6 +60,7 @@ level_4 = "#40a02b" # green
 level_5 = "#04a5e5" # sky
 level_6 = "#1e66f5" # blue
 level_7 = "#7287fd" # lavender
+text = "#ffffff"    # white
 
 [palettes.catppuccin_frappe]
 level_1 = "#e78284" # red
@@ -69,6 +70,7 @@ level_4 = "#a6d189" # green
 level_5 = "#99d1db" # sky
 level_6 = "#8caaee" # blue
 level_7 = "#7287fd" # lavender
+text = "#ffffff"    # white
 
 [palettes.catppuccin_macchiato]
 level_1 = "#ed8796" # red
@@ -78,6 +80,7 @@ level_4 = "#a6da95" # green
 level_5 = "#91d7e3" # sky
 level_6 = "#8aadf4" # bluecd
 level_7 = "#7287fd" # lavender
+text = "#ffffff"    # white
 
 [palettes.catppuccin_mocha]
 level_1 = "#f38ba8" # red
@@ -87,6 +90,7 @@ level_4 = "#a6e3a1" # green
 level_5 = "#89dceb" # sky
 level_6 = "#89b4fa" # blue
 level_7 = "#7287fd" # lavender
+text = "#ffffff"    # white
 
 [palettes.m365princess]
 level_1 = "#9A348E" # plum
@@ -96,6 +100,7 @@ level_4 = "#86BBD8" # sky
 level_5 = "#047E84" # teal
 level_6 = "#33658A" # teal_blue
 level_7 = "#7287fd" # lavender
+text = "#ffffff"    # white
 
 [palettes.gruvbox_dark]
 level_1 = '#cc241d' # red
@@ -105,6 +110,7 @@ level_4 = '#98971a' # green
 level_5 = '#689d6a' # aqua
 level_6 = '#458588' # blue
 level_7 = '#b16286' # purple
+text = "#ebdbb2"    # cream
 
 [line_break]
 disabled = false
@@ -121,8 +127,8 @@ symbol = ' '
 # and use the os module below
 [username]
 show_always = true
-style_user = "bg:level_1 bold"
-style_root = "bg:level_1 bold"
+style_user = "bg:level_1 bold fg:text"
+style_root = "bg:level_1 bold fg:text"
 format = '[ $user ]($style)'
 disabled = false
 
@@ -130,7 +136,7 @@ disabled = false
 # represents the current operating system
 [os]
 disabled = false
-style = "bg:level_1 bold"
+style = "bg:level_1 bold fg:text"
 
 [os.symbols]
 Windows = "󰍲"
@@ -157,7 +163,7 @@ Pop = ""
 
 #### Section 2 ####
 [directory]
-style = "bg:level_2 bold"
+style = "bg:level_2 bold fg:text"
 format = "[ $path ]($style)"
 truncation_length = 3
 truncation_symbol = "…/"
@@ -174,109 +180,109 @@ truncation_symbol = "…/"
 #### Section 3 ####
 [buf]
 symbol = " "
-style = "bg:level_4 bold"
+style = "bg:level_4 bold fg:text"
 format = '[ $symbol($version )]($style)'
 
 [c]
 symbol = " "
-style = "bg:level_4 bold"
+style = "bg:level_4 bold fg:text"
 format = '[ $symbol($version )]($style)'
 
 [cpp]
 symbol = " "
-style = "bg:level_4 bold"
+style = "bg:level_4 bold fg:text"
 format = '[ $symbol($version )]($style)'
 
 [dotnet]
 symbol = " "
-style = "bg:level_4 bold"
+style = "bg:level_4 bold fg:text"
 format = '[ $symbol($version )]($style)'
 
 [elixir]
 symbol = " "
-style = "bg:level_4 bold"
+style = "bg:level_4 bold fg:text"
 format = '[ $symbol($version )]($style)'
 
 [elm]
 symbol = " "
-style = "bg:level_4 bold"
+style = "bg:level_4 bold fg:text"
 format = '[ $symbol($version )]($style)'
 
 [golang]
 symbol = " "
-style = "bg:level_4 bold"
+style = "bg:level_4 bold fg:text"
 format = '[ $symbol]($style)'
 
 [gradle]
 symbol = " "
-style = "bg:level_4 bold"
+style = "bg:level_4 bold fg:text"
 format = '[ $symbol($version )]($style)'
 
 [kotlin]
 symbol = " "
-style = "bg:level_4 bold"
+style = "bg:level_4 bold fg:text"
 format = '[ $symbol($version )]($style)'
 
 [haskell]
 symbol = " "
-style = "bg:level_4 bold"
+style = "bg:level_4 bold fg:text"
 format = '[ $symbol($version )]($style)'
 
 [java]
 symbol = " "
-style = "bg:level_4 bold"
+style = "bg:level_4 bold fg:text"
 format = '[ $symbol($version )]($style)'
 
 [julia]
 symbol = " "
-style = "bg:level_4 bold"
+style = "bg:level_4 bold fg:text"
 format = '[ $symbol($version )]($style)'
 
 [nodejs]
 symbol = " "
-style = "bg:level_4 bold"
+style = "bg:level_4 bold fg:text"
 format = '[ $symbol($version )]($style)'
 
 [nim]
 symbol = "󰆥 "
-style = "bg:level_4 bold"
+style = "bg:level_4 bold fg:text"
 format = '[ $symbol($version )]($style)'
 
 [rust]
 symbol = " "
-style = "bg:level_4 bold"
+style = "bg:level_4 bold fg:text"
 format = '[ $symbol($version )]($style)'
 
 [scala]
 symbol = " "
-style = "bg:level_4 bold"
+style = "bg:level_4 bold fg:text"
 format = '[ $symbol($version )]($style)'
 
 [swift]
 symbol = " "
-style = "bg:level_4 bold"
+style = "bg:level_4 bold fg:text"
 format = '[ $symbol($version )]($style)'
 
 #### Section 4 ####
 [git_branch]
 symbol = ""
-style = "bg:level_3 bold"
+style = "bg:level_3 bold fg:text"
 format = '[ $symbol $branch ]($style)'
 
 [git_status]
-style = "bg:level_3 bold"
+style = "bg:level_3 bold fg:text"
 format = '[$all_status$ahead_behind ]($style)'
 
 [docker_context]
 symbol = " "
-style = "bg:level_5 bold"
+style = "bg:level_5 bold fg:text"
 format = '[ $symbol $context ]($style)'
 
 #### Section 5 ####
 [time]
 disabled = false
-time_format = "%R"             # Hour:Minute Format
-style = "bg:level_6 bold"
+time_format = "%R"                # Hour:Minute Format
+style = "bg:level_6 bold fg:text"
 format = '[  $time ]($style)'
 
 #### Section 6 (Right) ####
@@ -286,15 +292,15 @@ format = '[$symbol$percentage]($style)'
 
 [[battery.display]]
 threshold = 100
-style = "bg:level_7 bold"
+style = "bg:level_7 bold fg:text"
 
 [[battery.display]]
 threshold = 20
-style = 'bg:level_7 bold'
+style = 'bg:level_7 bold fg:text'
 
 [[battery.display]]
 threshold = 10
-style = 'bg:level_7 bold'
+style = 'bg:level_7 bold fg:text'
 
 #### Prompt Section ####
 [character]
