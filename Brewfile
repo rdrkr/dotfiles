@@ -10,6 +10,8 @@ brew "bash-completion"
 brew "btop"
 # Console Matrix
 brew "cmatrix"
+# Container runtimes on MacOS (and Linux) with minimal setup
+brew "colima"
 # More intuitive version of du in rust
 brew "dust"
 # Simple, fast and user-friendly alternative to find
@@ -30,6 +32,10 @@ brew "gofumpt"
 brew "grpcurl"
 # Integration point for ghcide and haskell-ide-engine. One IDE to rule them all
 brew "haskell-language-server"
+# Tools and libraries to manipulate images in many formats
+brew "imagemagick"
+# Lightweight and flexible command-line JSON processor
+brew "jq"
 # Simple terminal UI for git commands
 brew "lazygit"
 # Interpreted, interactive, object-oriented programming language
@@ -54,14 +60,20 @@ brew "neovim"
 brew "openjdk@21"
 # Execute binaries from Python packages in isolated environments
 brew "pipx"
+# PDF rendering library (based on the xpdf-3.0 code base)
+brew "poppler"
 # Code formatter for JavaScript, CSS, JSON, GraphQL, Markdown, YAML
 brew "prettier"
+# SVG rendering tool and library
+brew "resvg"
 # Search tool like grep and The Silver Searcher
 brew "ripgrep"
 # Safe, concurrent, practical language
 brew "rust"
 # Experimental Rust compiler front-end for IDEs
 brew "rust-analyzer"
+# 7-Zip is a file archiver with a high compression ratio
+brew "sevenzip"
 # Git-integrated backup tool for macOS and Linux devs
 brew "shallow-backup"
 # Cross-shell prompt for astronauts
@@ -80,6 +92,8 @@ brew "wget"
 brew "yamlfmt"
 # Blazing fast terminal file manager written in Rust, based on async I/O
 brew "yazi"
+# Shell extension to navigate your filesystem faster
+brew "zoxide"
 # A window border system for macOS
 brew "felixkratz/formulae/borders"
 # Custom macOS statusbar with shell plugin, interaction and graph support
@@ -129,6 +143,7 @@ cask "fleet"
 cask "font-fira-code-nerd-font"
 cask "font-hack-nerd-font"
 cask "font-jetbrains-mono-nerd-font"
+cask "font-symbols-only-nerd-font"
 # Terminal emulator that uses platform-native UI and GPU acceleration
 cask "ghostty"
 # Free and open-source image editor
