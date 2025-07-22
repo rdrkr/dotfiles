@@ -3,16 +3,12 @@
 
 export default {
   defaultBrowser: "Safari",
-/*
   handlers: [
     {
-      // Open google.com and *.google.com urls in Google Chrome
       match: [
-        "google.com*", // match google.com urls
-        finicky.matchDomains(/.*\.google.com/) // use helper function to match on domain only
+        "meet.google.com*",
       ],
       browser: "Google Chrome"
     }
   ]
-*/
 }
