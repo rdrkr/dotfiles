@@ -120,6 +120,8 @@ cask "beyond-compare@4"
 cask "chatgpt"
 # Anthropic's official Claude AI desktop app
 cask "claude"
+# Terminal-based AI coding assistant
+cask "claude-code"
 # C and C++ IDE
 cask "clion"
 # Node-based image, video and audio generator
