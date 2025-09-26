@@ -266,7 +266,7 @@ format = '[ $symbol($version )]($style)'
 [swift]
 symbol = " "
 style = "bg:level_4 bold fg:text"
-format = '[ $symbol($version )]($style)'
+format = '[ $symbol]($style)'
 
 #### Section 4 ####
 [git_branch]
