@@ -4,6 +4,7 @@ tap "felixkratz/formulae"
 tap "koekeishiya/formulae"
 tap "mocki-toki/formulae"
 tap "nikitabobko/tap"
+tap "rdrkr/tap"
 # Code searching, linting, rewriting
 brew "ast-grep"
 # Improved shell history for zsh, bash, fish and nushell
@@ -12,8 +13,14 @@ brew "atuin"
 brew "bash"
 # Programmable completion for Bash 3.2
 brew "bash-completion"
+# Python code formatter
+brew "black"
 # Resource monitor. C++ version and continuation of bashtop and bpytop
 brew "btop"
+# Multi-shell multi-command argument completer
+brew "carapace"
+# Linter/analyzer for Makefiles
+brew "checkmake"
 # Console Matrix
 brew "cmatrix"
 # Dependency manager for Cocoa projects
@@ -22,9 +29,13 @@ brew "cocoapods"
 brew "colima"
 # Pack, ship and run any application as a lightweight container
 brew "docker"
+# Docker CLI plugin for extended build capabilities with BuildKit
+brew "docker-buildx"
+# Isolated development environments using Docker
+brew "docker-compose"
 # More intuitive version of du in rust
 brew "dust"
-# Platform built on V8 to build network applications
+# Open-source, cross-platform JavaScript runtime environment
 brew "node"
 # AST-based pattern checker for JavaScript
 brew "eslint"
@@ -56,14 +67,16 @@ brew "haskell-language-server"
 brew "imagemagick"
 # Install and debug iPhone apps from the command-line
 brew "ios-deploy"
+# Sort Python imports automatically
+brew "isort"
 # Lightweight and flexible command-line JSON processor
 brew "jq"
 # Lazier way to manage everything docker
 brew "lazydocker"
 # Simple terminal UI for git commands
 brew "lazygit"
-# Interpreted, interactive, object-oriented programming language
-brew "python@3.13"
+# Graphical front-end for GCC's coverage testing tool (gcov)
+brew "lcov"
 # Powerful, lightweight programming language
 brew "lua"
 # Package manager for the Lua programming language
@@ -74,30 +87,50 @@ brew "markdown-toc"
 brew "markdownlint-cli2"
 # Mac App Store command-line interface
 brew "mas"
+# Experimental optional static type checker for Python
+brew "mypy"
 # Fast, highly customisable system info script
 brew "neofetch"
 # Ambitious Vim-fork focused on extensibility and agility
 brew "neovim"
+# Open-source, cross-platform JavaScript runtime environment
+brew "node@22"
+# Modern shell for the GitHub era
+brew "nushell"
+# AI coding agent, built for the terminal
+brew "opencode"
 # Development kit for the Java programming language
 brew "openjdk@21"
 # Identify unused code in Swift projects
 brew "periphery"
 # Bash completion for Pip
 brew "pip-completion"
+# Interpreted, interactive, object-oriented programming language
+brew "python@3.13"
 # Execute binaries from Python packages in isolated environments
 brew "pipx"
+# Python package management tool
+brew "poetry"
 # PDF rendering library (based on the xpdf-3.0 code base)
 brew "poppler"
 # Modern API client that lives in your terminal
 brew "posting"
+# Framework for managing multi-language pre-commit hooks
+brew "pre-commit"
 # Code formatter for JavaScript, CSS, JSON, GraphQL, Markdown, YAML
 brew "prettier"
+# Python interface to Tcl/Tk
+brew "python-tk@3.13"
 # Interpreted, interactive, object-oriented programming language
 brew "python@3.11"
+# Your all-in-one OpenAPI utility
+brew "redocly-cli"
 # SVG rendering tool and library
 brew "resvg"
 # Search tool like grep and The Silver Searcher
 brew "ripgrep"
+# Extremely fast Python linter, written in Rust
+brew "ruff"
 # Safe, concurrent, practical language
 brew "rust"
 # Experimental Rust compiler front-end for IDEs
@@ -106,6 +139,10 @@ brew "rust-analyzer"
 brew "sevenzip"
 # Git-integrated backup tool for macOS and Linux devs
 brew "shallow-backup"
+# Static analysis and lint tool, for (ba)sh scripts
+brew "shellcheck"
+# Autoformat shell script source code
+brew "shfmt"
 # Cross-shell prompt for astronauts
 brew "starship"
 # Organize software neatly under a single directory tree (e.g. /usr/local)
@@ -118,8 +155,12 @@ brew "swiftlint"
 brew "tectonic"
 # Terminal multiplexer
 brew "tmux"
+# Display directories as trees (with optional color/HTML output)
+brew "tree"
 # Find and verify credentials
 brew "trufflehog"
+# Extremely fast Python package installer and resolver, written in Rust
+brew "uv"
 # Internet file retriever
 brew "wget"
 # Little beautifier tool for xcodebuild
@@ -140,6 +181,8 @@ brew "zsh-autosuggestions"
 brew "zsh-completions"
 # Fish shell like syntax highlighting for zsh
 brew "zsh-syntax-highlighting"
+# Tiling window manager for macOS
+brew "acsandmann/tap/rift"
 # A window border system for macOS
 brew "felixkratz/formulae/borders", args: ["HEAD"]
 # Custom macOS statusbar with shell plugin, interaction and graph support
@@ -150,6 +193,8 @@ brew "koekeishiya/formulae/skhd"
 brew "koekeishiya/formulae/yabai"
 # AeroSpace is an i3-like tiling window manager for macOS
 cask "aerospace"
+# Image editing and design software
+cask "affinity"
 # Enable Windows-like alt-tab
 cask "alt-tab"
 # iOS App Store alternative
@@ -182,6 +227,8 @@ cask "cursor-cli"
 cask "cyberduck"
 # Voice and text chat software
 cask "discord"
+# Disk usage utility
+cask "disk-inventory-x"
 # Window peeking utility app
 cask "dockdoor"
 # Client for the Dropbox cloud storage service
@@ -287,7 +334,6 @@ mas "Bandwidth+", id: 490461369
 mas "Cloud Battery", id: 1481005137
 mas "Dark Reader for Safari", id: 1438243180
 mas "Developer", id: 640199958
-mas "Draw Things", id: 6444050820
 mas "Equinox", id: 1591510203
 mas "iMovie", id: 408981434
 mas "Infuse", id: 1136220934
@@ -297,7 +343,6 @@ mas "Mic Drop", id: 1489816366
 mas "Numbers", id: 409203825
 mas "Pages", id: 409201541
 mas "Perplexity", id: 6714467650
-mas "PiPifier", id: 1160374471
 mas "RetroArch", id: 6499539433
 mas "Shazam", id: 897118787
 mas "Slack", id: 803453959
@@ -355,3 +400,5 @@ vscode "vscjava.vscode-gradle"
 vscode "vscjava.vscode-java-debug"
 vscode "vscjava.vscode-java-test"
 vscode "vscjava.vscode-maven"
+go "golang.org/x/tools/gopls"
+go "honnef.co/go/tools/cmd/staticcheck"

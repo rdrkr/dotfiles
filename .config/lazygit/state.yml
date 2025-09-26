@@ -1,10 +1,14 @@
 lastupdatecheck: 0
 recentrepos:
-    - /Users/ronendruker/Development/repos/AeroSpaceBar
     - /Users/ronendruker/dotfiles
+    - /Users/ronendruker/Development/repos/affilibuster
+    - /Users/ronendruker/Development/repos/AeroSpaceBar
+    - /Users/ronendruker/Development/repos/paddle-openapi
+    - /Users/ronendruker/Development/repos/aerospacebar-app
+    - /Users/ronendruker/Development/repos/rdrkr.github.io
+    - /Users/ronendruker/Development/repos/homebrew-tap
     - /Users/ronendruker/Development/repos/refactoring-kotlin-rdrkr
     - /Users/ronendruker/Development/repos/calculator-app
-    - /Users/ronendruker/Development/repos/affilibuster
     - /Users/ronendruker/Development/repos/fusion
     - /Users/ronendruker/Development/repos/guide-flow
     - /Users/ronendruker/Development/repos/safari-tab-switcher
@@ -14,5 +18,7 @@ startuppopupversion: 5
 didshowhunkstaginghint: false
 lastversion: 0.55.1
 customcommandshistory:
+    - git revert -n b7a997b58a06
+    - git revert -n
     - q
 hidecommandlog: false

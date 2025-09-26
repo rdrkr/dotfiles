@@ -1,5 +1,6 @@
 export PATH="/opt/homebrew/opt/python@3.13/bin:$PATH"
 export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH"
+export PATH="/opt/homebrew/opt/node@22/bin:$PATH"
 export PATH="$PATH:$HOME/.local/bin:$HOME/local/bin"
 
 export XDG_CONFIG_HOME="$HOME/.config"
@@ -30,11 +31,18 @@ export VISUAL="$EDITOR"
 # fzf key bindings and fuzzy completion
 source <(fzf --zsh)
 
-# claude code power line
+# claude Code
 export CLAUDE_POWERLINE_CONFIG=~/.config/claude/powerline/config.json
 export CLAUDE_POWERLINE_DEBUG=0
 
+# claude-switcher
+alias ccs="~/scripts/ccswitch.sh"
+alias ccs1="ccs --switch-to 1"
+alias ccs2="ccs --switch-to 2"
+
 if type brew &>/dev/null; then
+  export DISABLE_AUTOUPDATER=1
+
   export ZSH_HIGHLIGHT_HIGHLIGHTERS_DIR=/opt/homebrew/share/zsh-syntax-highlighting/highlighters
   source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
@@ -45,5 +53,10 @@ if type brew &>/dev/null; then
   FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
   autoload -Uz compinit
   compinit
+fi
+
+# ghostty
+if [ -n "$GHOSTTY_RESOURCES_DIR" ]; then
+  nu
 fi
 

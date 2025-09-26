@@ -1,5 +1,5 @@
 # rift config
-# Copy this file to ~/.rift.toml or $HOME/.rift.toml
+# Copy this file to ~/.config/rift/config.toml or $HOME~/.config/rift/config.toml
 
 [settings]
 # Animations
@@ -35,6 +35,9 @@ animation_easing = "ease_in_out_cubic"
 focus_follows_mouse = true
 mouse_follows_focus = false
 mouse_hides_on_focus = true
+# focus_follows_mouse_disable_hotkey temporarily suspends focus-follows-mouse while held
+# e.g. "Fn"; omit or set to null to keep focus-follows-mouse always active
+#focus_follows_mouse_disable_hotkey = "Fn"
 
 # Prevent certain apps from stealing focus/causing workspace switches
 # Provide bundle identifiers (e.g., "com.apple.Spotlight")
@@ -61,6 +64,11 @@ auto_focus_blacklist = []
 # ]
 
 run_on_start = []
+
+# Hot Reloading
+# - If true, rift will watch the config file for changes and reload automatically.
+# - If false, your config changes will only apply when restarting rift.
+hot_reload = true
 
 [settings.layout]
 # Layout system
@@ -105,6 +113,42 @@ vert_placement = "left"
 # how thick the line indicator will be (in px)
 thickness = 3.0
 
+# experimental mission control
+[settings.ui.mission_control]
+enabled = false
+# enable fade animation when entering/exiting mission control
+fade_enabled = false
+# native macos mission control fade is about 180ms
+fade_duration_ms = 180.0
+
+# Trackpad gestures
+[settings.gestures]
+# Enable horizontal swipes to switch virtual workspaces
+enabled = false
+# Invert horizontal direction (swap next/prev)
+invert_horizontal_swipe = false
+# Maximum vertical travel allowed for the horizontal swipe to register.
+# Accepts normalized fraction (0..1) or percent (0..100). Example: 0.4 or 40.0
+swipe_vertical_tolerance = 0.4
+# Skip empty workspaces when swiping
+skip_empty = true
+# Number of fingers required for swipe
+fingers = 3
+# Normalized horizontal distance (0..1) to trigger swipe for NSTouch-based detection
+distance_pct = 0.12
+# Haptic feedback on commit (generic | alignment | level_change)
+haptics_enabled = true
+haptic_pattern = "level_change"
+
+# Window snapping / drag-swap behavior
+[settings.window_snapping]
+# Fraction threshold (0.0..1.0) specifying how much of the dragged window
+# area must be overlapped by a candidate window in order to trigger a
+# swap while dragging. Typical values are around 0.2–0.4.
+# If you prefer more aggressive swapping, lower the value; increase it
+# to require greater overlap before a swap occurs.
+drag_swap_fraction = 0.3
+
 [virtual_workspaces]
 # Virtual workspaces
 # - enabled: if false, rift behaves like a simple tiling WM with a single space
@@ -116,10 +160,15 @@ default_workspace_count = 5
 auto_assign_windows = true
 preserve_focus_per_workspace = true
 
+# Default workspace to activate on startup (0-based index).
+# If omitted, defaults to 0 (first workspace). Must be less than default_workspace_count.
+# Uncomment to change:
+# default_workspace = 0
+
 # Workspace names (indexed order). If fewer than default_workspace_count are provided,
 # remaining workspaces are named "Workspace X".
 # Do not provide more names than default_workspace_count.
-workspace_names = ["first"]
+workspace_names = []
 
 # App rules (automatic assignment)
 # Define rules that match new windows and set properties (workspace, floating, etc).
@@ -133,6 +182,7 @@ workspace_names = ["first"]
 #
 # Rule options:
 #   - workspace (integer, 0-based): target workspace index. If omitted or invalid, uses the active workspace.
+#     Alternatively, `workspace` may be a workspace name string to target by name.
 #   - floating (boolean): whether matched windows should float by default.
 #
 # Matching behavior (summary):
@@ -183,25 +233,43 @@ workspace_names = ["first"]
 #
 # By default there are no app rules; add or uncomment rules below as needed.
 app_rules = [
-  { app_id = "com.apple.Safari", workspace = 0 },
-  { app_id = "dev.warp.Warp-Stable", workspace = 1 },
-  { app_id = "com.mitchellh.ghostty", workspace = 1 },
-  { app_id = "com.todesktop.230313mzl4w4u92", workspace = 1 }, # cursor
-  { app_id = "com.jetbrains.intellij.ce", workspace = 1 },
-  { app_id = "com.apple.dt.Xcode", workspace = 2 },
-  { app_id = "com.apple.mail", workspace = 3 },
-  { app_id = "com.apple.MobileSMS", workspace = 3 },
-  { app_id = "com.automattic.beeper.desktop", workspace = 3 },
-  { app_name = "contacts", floating = true },
-  { app_name = "phone", floating = true },
-  { app_name = "facetime", floating = true },
-  { app_name = "quicktime", floating = true },
-  { app_name = "finder", floating = true },
-  { app_name = "ollama", floating = true },
-  { app_name = "calendar", floating = true },
-  { app_name = "activity", floating = true },
-  { app_name = "gpt", floating = true },
+  { app_name = "Safari", workspace = 1, floating = false },
+  { app_name = "Warp", workspace = 1, floating = false },
+  { app_name = "Ghostty", workspace = 2, floating = false },
+  { app_name = "Cursor", workspace = 2, floating = false },
+  { app_name = "IntelliJ", workspace = 2, floating = false },
+  { app_name = "Xcode", workspace = 3, floating = false },
+  { app_name = "Messages", workspace = 4, floating = false },
+  { app_name = "WhatsApp", workspace = 4, floating = false },
+  { app_name = "Mail", title_substring = "messages)", workspace = 4, floating = false },
+  { app_name = "Mail", floating = true },
+  { app_name = "Contacts", floating = true },
+  { app_name = "Phone", floating = true },
+  { app_name = "FaceTime", floating = true },
+  { app_name = "QuickTime", floating = true },
+  { app_name = "Finder", floating = true },
+  { app_name = "Ollama", floating = true },
+  { app_name = "Calendar", floating = true },
+  { app_name = "Activity", floating = true },
+  { app_name = "GPT", floating = true },
+  { app_name = "Preview", floating = true },
+  { app_name = "Photos", floating = true },
+  { app_name = "Perplexity", floating = true },
+  { app_name = "Store", floating = true },
+  { app_name = "Passwords", floating = true },
+  { app_name = "Pearcleaner", floating = true },
+  { app_name = "Reminders", floating = true },
+  { app_name = "SF Symbols", floating = true },
+  { app_name = "Beeper", floating = true },
 ]
+
+# Modifier combinations that can be reused in key bindings
+# Define common modifier combinations to avoid repetition.
+# Example usage: with `comb1 = "Alt + Shift"`, you can write:
+#   "comb1 + H" = { move_node = "left" }
+[modifier_combinations]
+move_comb = "Ctrl + Shift"
+join_comb = "Ctrl + Alt + Shift"
 
 [keys]
 # Key binding syntax
@@ -211,7 +279,7 @@ app_rules = [
 # - Spacing is flexible: "Alt+Down" and "Alt + Down" are equivalent
 # - Key values map to commands (see list below)
 
-# commands
+# ommands
 # - toggle_space_activated
 # - next_workspace / prev_workspace
 # - switch_to_workspace = N
@@ -227,56 +295,59 @@ app_rules = [
 # - debug / serialize / save_and_exit
 # - show_timing
 
-# Focus
+"Alt + Z" = "toggle_space_activated"
+
 "Ctrl + Left" = { move_focus = "left" }
 "Ctrl + Down" = { move_focus = "down" }
 "Ctrl + Up" = { move_focus = "up" }
 "Ctrl + Right" = { move_focus = "right" }
 
-# Workspace
-"Ctrl + 1" = { switch_to_workspace = 0 }
-"Ctrl + 2" = { switch_to_workspace = 1 }
-"Ctrl + 3" = { switch_to_workspace = 2 }
-"Ctrl + 4" = { switch_to_workspace = 3 }
-"Ctrl + 5" = { switch_to_workspace = 4 }
+"move_comb + Left" = { move_node = "left" }
+"move_comb + Down" = { move_node = "down" }
+"move_comb + Up" = { move_node = "up" }
+"move_comb + Right" = { move_node = "right" }
 
-"Ctrl + Alt + Right" = "next_workspace"
-"Ctrl + Alt + Left" = "prev_workspace"
+"Alt + 1" = { switch_to_workspace = 1 }
+"Alt + 2" = { switch_to_workspace = 2 }
+"Alt + 3" = { switch_to_workspace = 3 }
+"Alt + 4" = { switch_to_workspace = 4 }
+"Alt + 5" = { switch_to_workspace = 5 }
 
-# Move node
-"Ctrl + Shift + Left" = { move_node = "left" }
-"Ctrl + Shift + Down" = { move_node = "down" }
-"Ctrl + Shift + Up" = { move_node = "up" }
-"Ctrl + Shift + Right" = { move_node = "right" }
+"move_comb + 1" = { move_window_to_workspace = 1 }
+"move_comb + 2" = { move_window_to_workspace = 2 }
+"move_comb + 3" = { move_window_to_workspace = 3 }
+"move_comb + 4" = { move_window_to_workspace = 4 }
+"move_comb + 5" = { move_window_to_workspace = 5 }
 
-# Move node to workspace
-"Ctrl + Shift + 1" = { move_window_to_workspace = 0 }
-"Ctrl + Shift + 2" = { move_window_to_workspace = 1 }
-"Ctrl + Shift + 3" = { move_window_to_workspace = 2 }
-"Ctrl + Shift + 4" = { move_window_to_workspace = 3 }
-"Ctrl + Shift + 5" = { move_window_to_workspace = 4 }
+#"Alt + Tab" = "switch_to_last_workspace"
 
-# Join with
-"Ctrl + Alt + Shift + Left" = { join_window = "left" }
-"Ctrl + Alt + Shift + Down" = { join_window = "down" }
-"Ctrl + Alt + Shift + Up" = { join_window = "up" }
-"Ctrl + Alt + Shift + Right" = { join_window = "right" }
-
-# Resize
-"Ctrl + Minus" = "resize_window_shrink"
-"Ctrl + Equal" = "resize_window_grow"
-
-# Layout
+"join_comb + Left" = { join_window = "left" }
+"join_comb + Right" = { join_window = "right" }
+"join_comb + Up" = { join_window = "up" }
+"join_comb + Down" = { join_window = "down" }
 "Alt + Comma" = "stack_windows"
-"Alt + Slash" = "unstack_windows"
+#"Alt + Slash" = "unstack_windows"
+"Alt + Ctrl + E" = "unjoin_windows" # FIXME: doesnt work
 
-# Unchanged bindings from old config
-"Alt + Z" = "toggle_space_activated"
-# "Alt + Tab" = "switch_to_last_workspace"
-"Alt + Ctrl + E" = "unjoin_windows"              # FIXME: doesnt work
-"Alt + Shift + Space" = "toggle_window_floating"
+"Alt + Slash" = "toggle_window_floating"
 "Alt + F" = "toggle_fullscreen"
-"Alt + Shift + D" = "debug"                      # prints layout tree
-"Alt + Ctrl + M" = "show_timing"
+#"comb1 + Ctrl + Space" = "toggle_focus_floating" # briefly bring focus to floating window
+
+# smartly resize windows
+"Alt + Shift + Equal" = "resize_window_grow"
+"Alt + Shift + Minus" = "resize_window_shrink"
+
+# disable hide application
+#"Command + H" = ""
+#"Command + Alt + H" = ""
+
+# if mission control is enabled
+# this will show an exploded view of the windows in the active workspace
+# "Alt + Ctrl + Shift + M" = "show_mission_control_current"
+# this will show the mission control view shown in the readme
+# "Alt + Ctrl + M" = "show_mission_control_all"
+
+"Alt + Shift + D" = "debug" # prints layout tree
+
 "Alt + Ctrl + S" = "serialize"
 "Alt + Ctrl + Q" = "save_and_exit"

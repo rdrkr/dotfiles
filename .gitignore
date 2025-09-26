@@ -2,11 +2,15 @@
 *.keystore
 *.log
 
+.colima/_*
+.colima/default/daemon/*
+.colima/ssh_config
 .config/.android/cache/
 .config/colima/_*
 .config/configstore/update-notifier-\@google/
 .config/github-copilot/
 .config/raycast/
+.config/nushell/history.txt
 
 .homebridge/backups/instance-backups/
 

@@ -109,11 +109,11 @@ ctrl-up = 'focus up --boundaries all-monitors-outer-frame'
 ctrl-right = 'focus right --boundaries all-monitors-outer-frame'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#workspace
-ctrl-1 = 'workspace 1'
-ctrl-2 = 'workspace 2'
-ctrl-3 = 'workspace 3'
-ctrl-4 = 'workspace 4'
-ctrl-5 = 'workspace 5'
+alt-1 = 'workspace 1'
+alt-2 = 'workspace 2'
+alt-3 = 'workspace 3'
+alt-4 = 'workspace 4'
+alt-5 = 'workspace 5'
 
 # 'workspace --wrap-around next'
 ctrl-alt-right = 'exec-and-forget aerospace list-workspaces --monitor focused --empty no | aerospace workspace --wrap-around next'
@@ -189,7 +189,7 @@ if.app-id = 'com.todesktop.230313mzl4w4u92' # cursor
 run = 'move-node-to-workspace 2'
 
 [[on-window-detected]]
-if.app-id = 'com.jetbrains.intellij.ce'
+if.app-name-regex-substring = 'intellij'
 run = 'move-node-to-workspace 2'
 
 [[on-window-detected]]
@@ -201,7 +201,7 @@ if.app-id = 'com.apple.MobileSMS'
 run = 'move-node-to-workspace 4'
 
 [[on-window-detected]]
-if.app-id = 'com.automattic.beeper.desktop'
+if.app-name-regex-substring = 'whatsapp'
 run = 'move-node-to-workspace 4'
 
 [[on-window-detected]]
@@ -271,10 +271,6 @@ if.app-name-regex-substring = 'java'
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-name-regex-substring = 'whatsapp'
-run = 'layout floating'
-
-[[on-window-detected]]
 if.app-name-regex-substring = 'passwords'
 run = 'layout floating'
 
@@ -288,6 +284,14 @@ run = 'layout floating'
 
 [[on-window-detected]]
 if.app-name-regex-substring = 'sf symbols'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'chrome'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.automattic.beeper.desktop'
 run = 'layout floating'
 
 [workspace-to-monitor-force-assignment]

@@ -32,4 +32,14 @@
     "lldb.library": "/Applications/Xcode.app/Contents/SharedFrameworks/LLDB.framework/Versions/A/LLDB",
     "lldb.launch.expressions": "native",
     "git.openRepositoryInParentFolders": "never",
+    "cSpell.userWords": [
+        "Druker",
+        "maxage",
+        "nuxt",
+        "Ronen",
+        "ronendruker",
+        "sitemapindex"
+    ],
+    "editor.tabCompletion": "on",
+    "lldb.suppressUpdateNotifications": true,
 }
