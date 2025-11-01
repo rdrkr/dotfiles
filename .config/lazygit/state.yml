@@ -1,7 +1,7 @@
 lastupdatecheck: 0
 recentrepos:
-    - /Users/ronendruker/dotfiles
     - /Users/ronendruker/Development/repos/affilibuster
+    - /Users/ronendruker/dotfiles
     - /Users/ronendruker/Development/repos/AeroSpaceBar
     - /Users/ronendruker/Development/repos/paddle-openapi
     - /Users/ronendruker/Development/repos/aerospacebar-app
@@ -16,7 +16,7 @@ recentrepos:
     - /Users/ronendruker/Development/repos/dotfiles
 startuppopupversion: 5
 didshowhunkstaginghint: false
-lastversion: 0.55.1
+lastversion: 0.56.0
 customcommandshistory:
     - git revert -n b7a997b58a06
     - git revert -n
