@@ -73,6 +73,11 @@ bundleIdentifier = 'com.apple.Safari'
 iconPath = '/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns'
 name = 'Safari'
 
+[[profiles.workspaces.apps]]
+bundleIdentifier = 'com.apple.Notes'
+iconPath = '/System/Applications/Notes.app/Contents/Resources/AppIcon.icns'
+name = 'Notes'
+
 [[profiles.workspaces]]
 assignAppShortcut = 'ctrl+shift+2'
 display = 'Built-in Retina Display'
