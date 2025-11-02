@@ -61,8 +61,6 @@ brew "gowall"
 brew "gradle-completion"
 # Like cURL, but for gRPC
 brew "grpcurl"
-# Integration point for ghcide and haskell-ide-engine. One IDE to rule them all
-brew "haskell-language-server"
 # Tools and libraries to manipulate images in many formats
 brew "imagemagick"
 # Install and debug iPhone apps from the command-line
@@ -233,8 +231,6 @@ cask "disk-inventory-x"
 cask "dockdoor"
 # Client for the Dropbox cloud storage service
 cask "dropbox"
-# Assign keys, and then decorate and label them
-cask "elgato-stream-deck"
 # Utility for customizing which browser to start
 cask "finicky"
 # Virtual workspace manager
