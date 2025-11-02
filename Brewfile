@@ -295,6 +295,8 @@ cask "microsoft-auto-update"
 cask "microsoft-teams"
 # Get up and running with large language models locally
 cask "ollama-app"
+# Finds large, unwanted files and deletes them
+cask "omnidisksweeper"
 # Utility to uninstall apps and remove leftover files from old/uninstalled apps
 cask "pearcleaner"
 # Home media server
