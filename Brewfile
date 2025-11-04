@@ -15,6 +15,8 @@ brew "bash"
 brew "bash-completion"
 # Python code formatter
 brew "black"
+# Open source, extensible AI agent that goes beyond code suggestions
+brew "block-goose-cli"
 # Resource monitor. C++ version and continuation of bashtop and bpytop
 brew "btop"
 # Multi-shell multi-command argument completer
