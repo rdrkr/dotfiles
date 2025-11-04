@@ -18,7 +18,5 @@ startuppopupversion: 5
 didshowhunkstaginghint: false
 lastversion: 0.56.0
 customcommandshistory:
-    - git revert -n b7a997b58a06
-    - git revert -n
-    - q
+    - git revert -n HEAD
 hidecommandlog: false
