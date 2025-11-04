@@ -325,9 +325,34 @@ cask "webex"
 cask "webstorm"
 # Video communication and virtual meeting platform
 cask "zoom"
+mas "1Password 7", id: 1333542190
+mas "Actions", id: 1586435171
+mas "Amphetamine", id: 937984704
+mas "Bandwidth+", id: 490461369
+mas "Cloud Battery", id: 1481005137
+mas "Dark Reader for Safari", id: 1438243180
+mas "Developer", id: 640199958
+mas "Equinox", id: 1591510203
+mas "iMovie", id: 408981434
+mas "Infuse", id: 1136220934
+mas "Keynote", id: 409183694
+mas "Mail Signature", id: 1595342317
+mas "Mic Drop", id: 1489816366
+mas "Numbers", id: 409203825
+mas "Pages", id: 409201541
+mas "Perplexity", id: 6714467650
+mas "RetroArch", id: 6499539433
+mas "Shazam", id: 897118787
+mas "Slack", id: 803453959
+mas "SmartDNSProxy", id: 1471096079
+mas "Tag Editor 2", id: 984278082
+mas "Tailscale", id: 1475387142
+mas "TestFlight", id: 899247664
+mas "The Unarchiver", id: 425424353
 mas "WhatsApp", id: 310633997
 mas "Windows App", id: 1295203466
 mas "Xcode", id: 497799835
+mas "Xmind", id: 1327661892
 vscode "bmewburn.vscode-intelephense-client"
 vscode "davidanson.vscode-markdownlint"
 vscode "dsznajder.es7-react-js-snippets"
