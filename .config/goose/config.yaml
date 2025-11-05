@@ -1,1 +1,4 @@
+GOOSE_MODEL: GLM-4.6
 ANTHROPIC_HOST: https://api.z.ai/api/anthropic
+GOOSE_MODE: auto
+GOOSE_PROVIDER: custom_z.ai
