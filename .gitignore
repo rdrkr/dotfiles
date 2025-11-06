@@ -9,11 +9,11 @@
 .config/colima/_*
 .config/configstore/update-notifier-\@google/
 .config/github-copilot/
-.config/raycast/
+.config/lazygit/state.yml
 .config/nushell/history.txt
+.config/raycast/
 
 .homebridge/backups/instance-backups/
 
 .gk/repoMapping.json
 
-.config/lazygit/state.yml
