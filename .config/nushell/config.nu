@@ -31,3 +31,9 @@ alias ccs = ~/scripts/ccswitch.sh
 alias ccs1 = ccs --switch-to 1
 alias ccs2 = ccs --switch-to 2
 
+# Claude Code Model Switcher Aliases
+alias cc = claude
+alias ccg = claude-glm
+alias ccg45 = claude-glm-4.5
+alias ccf = claude-glm-fast
+
