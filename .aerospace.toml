@@ -198,11 +198,11 @@ run = 'move-node-to-workspace 3'
 
 [[on-window-detected]]
 if.app-id = 'com.apple.MobileSMS'
-run = 'move-node-to-workspace 4'
+run = 'move-node-to-workspace 5'
 
 [[on-window-detected]]
 if.app-name-regex-substring = 'whatsapp'
-run = 'move-node-to-workspace 4'
+run = 'move-node-to-workspace 5'
 
 [[on-window-detected]]
 if.app-id = 'com.apple.mail'
@@ -212,7 +212,7 @@ run = 'layout floating'
 [[on-window-detected]]
 if.app-id = 'com.apple.mail'
 if.window-title-regex-substring = 'messages'
-run = ['layout tiling', 'move-node-to-workspace 4']
+run = ['layout tiling', 'move-node-to-workspace 5']
 
 [[on-window-detected]]
 if.app-name-regex-substring = 'contacts'
@@ -295,4 +295,4 @@ if.app-id = 'com.automattic.beeper.desktop'
 run = 'layout floating'
 
 [workspace-to-monitor-force-assignment]
-4 = 1
+5 = 1
