@@ -27,14 +27,6 @@ starship init nu | save -f ($nu.data-dir | path join "vendor/autoload/starship.n
 source $"($nu.cache-dir)/carapace.nu"
 
 # Claude
-def switch_claude_account_1 [] {
-  ccs --switch-to 1; cc
-}
-
-def switch_claude_account_2 [] {
-  ccs --switch-to 2; cc
-}
-
 $env.claude_powerline_config = "~/.config/claude/powerline/config.json"
 $env.claude_powerline_debug = 0
 $env.DEBUG = false
@@ -46,6 +38,15 @@ alias ccf = claude-glm-fast
 
 alias ccs = ~/scripts/ccswitch.sh
 alias ccl = ccs --list
+
+def --wrapped switch_claude_account_1 [...args] {
+  ccs --switch-to 1; cc ...$args
+}
+
+def --wrapped switch_claude_account_2 [...args] {
+  ccs --switch-to 2; cc ...$args
+}
+
 alias cc1 = switch_claude_account_1
 alias cc2 = switch_claude_account_2
 
