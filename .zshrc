@@ -31,20 +31,20 @@ export VISUAL="$EDITOR"
 # fzf key bindings and fuzzy completion
 source <(fzf --zsh)
 
-# claude Code
-export CLAUDE_POWERLINE_CONFIG=~/.config/claude/powerline/config.json
-export CLAUDE_POWERLINE_DEBUG=0
+# claude code
+export claude_powerline_config=~/.config/claude/powerline/config.json
+export claude_powerline_debug=0
+export DEBUG=false
 
-# claude-switcher
-alias ccs="~/scripts/ccswitch.sh"
-alias ccs1="ccs --switch-to 1"
-alias ccs2="ccs --switch-to 2"
-
-# Claude Code Model Switcher Aliases
 alias cc='claude'
 alias ccg='claude-glm'
 alias ccg45='claude-glm-4.5'
 alias ccf='claude-glm-fast'
+
+alias ccs="~/scripts/ccswitch.sh"
+alias ccl="ccs --list"
+alias cc1="ccs --switch-to 1 && cc"
+alias cc2="ccs --switch-to 2 && cc"
 
 if type brew &>/dev/null; then
   export DISABLE_AUTOUPDATER=1
