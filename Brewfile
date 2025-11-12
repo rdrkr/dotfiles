@@ -7,8 +7,6 @@ tap "nikitabobko/tap"
 tap "rdrkr/tap"
 # Code searching, linting, rewriting
 brew "ast-grep"
-# Improved shell history for zsh, bash, fish and nushell
-brew "atuin"
 # Bourne-Again SHell, a UNIX command interpreter
 brew "bash"
 # Programmable completion for Bash 3.2
@@ -175,12 +173,6 @@ brew "yamlfmt"
 brew "yazi"
 # Shell extension to navigate your filesystem faster
 brew "zoxide"
-# Fish-like fast/unobtrusive autosuggestions for zsh
-brew "zsh-autosuggestions"
-# Additional completion definitions for zsh
-brew "zsh-completions"
-# Fish shell like syntax highlighting for zsh
-brew "zsh-syntax-highlighting"
 # Tiling window manager for macOS
 brew "acsandmann/tap/rift"
 # A window border system for macOS
@@ -353,6 +345,7 @@ mas "TestFlight", id: 899247664
 mas "The Unarchiver", id: 425424353
 mas "WhatsApp", id: 310633997
 mas "Windows App", id: 1295203466
+mas "Xcode", id: 497799835
 mas "Xmind", id: 1327661892
 vscode "bmewburn.vscode-intelephense-client"
 vscode "davidanson.vscode-markdownlint"
