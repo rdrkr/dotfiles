@@ -2,11 +2,6 @@
 export XDG_CONFIG_HOME="$HOME/.config"
 
 if [[ -f "/opt/homebrew/bin/brew" ]] then
-  export PATH="/opt/homebrew/opt/python@3.13/bin:$PATH"
-  export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH"
-  export PATH="/opt/homebrew/opt/node@22/bin:$PATH"
-  export PATH="$PATH:$HOME/.local/bin:$HOME/local/bin"
-
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
@@ -110,4 +105,12 @@ eval "$(zoxide init --cmd cd zsh)"
 #if [ -n "$GHOSTTY_RESOURCES_DIR" ]; then
 #  nu
 #fi
+
+# paths
+if [[ -f "/opt/homebrew/bin/brew" ]] then
+  export PATH="/opt/homebrew/opt/python@3.13/bin:$PATH"
+  export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH"
+  export PATH="/opt/homebrew/opt/node@22/bin:$PATH"
+  export PATH="$PATH:$HOME/.local/bin:$HOME/local/bin"
+fi
 
