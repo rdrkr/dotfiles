@@ -173,8 +173,8 @@ Pop = ''
 [directory]
 style = 'bg:level_2 bold fg:text'
 format = '[ $path]($style)'
-#truncation_length = 3
-#truncation_symbol = '…/'
+truncation_length = 4
+truncation_symbol = '…/'
 
 # Here is how you can shorten some long paths by text replacement
 # similar to mapped_locations in Oh My Posh:
@@ -188,6 +188,7 @@ format = '[ $path]($style)'
 #### Section 3 ####
 [git_branch]
 symbol = ''
+truncation_length = 10
 style = 'bg:level_3 bold fg:text'
 format = '[ $symbol $branch]($style)'
 

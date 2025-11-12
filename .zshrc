@@ -1,9 +1,28 @@
+# initialization
 export PATH="/opt/homebrew/opt/python@3.13/bin:$PATH"
 export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH"
 export PATH="/opt/homebrew/opt/node@22/bin:$PATH"
 export PATH="$PATH:$HOME/.local/bin:$HOME/local/bin"
 
 export XDG_CONFIG_HOME="$HOME/.config"
+
+if type brew &>/dev/null; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+
+  export DISABLE_AUTOUPDATER=1
+
+  export ZSH_HIGHLIGHT_HIGHLIGHTERS_DIR=/opt/homebrew/share/zsh-syntax-highlighting/highlighters
+  source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+  export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=8"
+  source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+  # auto-complete
+  FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
+fi
+
+# load completions
+autoload -Uz compinit && compinit
 
 # starship
 export STARSHIP_CONFIG=~/.config/starship/starship.toml
@@ -36,33 +55,22 @@ export claude_powerline_config=~/.config/claude/powerline/config.json
 export claude_powerline_debug=0
 export DEBUG=false
 
+# aliases
+alias ls='ls --color'
+alias vim='nvim'
+alias c='clear'
 alias cc='claude'
 alias ccg='claude-glm'
 alias ccg45='claude-glm-4.5'
 alias ccf='claude-glm-fast'
-
 alias ccs="~/scripts/ccswitch.sh"
 alias ccl="ccs --list"
 alias cc1="ccs --switch-to 1 && cc"
 alias cc2="ccs --switch-to 2 && cc"
 
-if type brew &>/dev/null; then
-  export DISABLE_AUTOUPDATER=1
-
-  export ZSH_HIGHLIGHT_HIGHLIGHTERS_DIR=/opt/homebrew/share/zsh-syntax-highlighting/highlighters
-  source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-
-  export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=8"
-  source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-
-  # auto-complete
-  FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
-  autoload -Uz compinit
-  compinit
-fi
-
 # ghostty
-if [ -n "$GHOSTTY_RESOURCES_DIR" ]; then
-  nu
-fi
+#if [ -n "$GHOSTTY_RESOURCES_DIR" ]; then
+#  nu
+#fi
+
 
