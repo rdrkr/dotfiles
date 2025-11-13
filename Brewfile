@@ -283,8 +283,6 @@ cask "mac-mouse-fix"
 cask "microsoft-auto-update"
 # Meet, chat, call, and collaborate in just one place
 cask "microsoft-teams"
-# Get up and running with large language models locally
-cask "ollama-app"
 # Finds large, unwanted files and deletes them
 cask "omnidisksweeper"
 # Utility to uninstall apps and remove leftover files from old/uninstalled apps
