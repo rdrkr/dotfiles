@@ -2,6 +2,7 @@
 export XDG_CONFIG_HOME="$HOME/.config"
 
 if [[ -f "/opt/homebrew/bin/brew" ]] then
+  export FPATH="$(brew --prefix)/share/zsh-completions:$FPATH"
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
