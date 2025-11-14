@@ -100,7 +100,7 @@ alias cc2="ccs --switch-to 2 && cc"
 
 # shell integrations
 eval "$(fzf --zsh)"
-eval "$(zoxide init --cmd cd zsh)"
+eval "$(zoxide init zsh)"
 
 # ghostty
 #if [ -n "$GHOSTTY_RESOURCES_DIR" ]; then
