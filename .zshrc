@@ -61,8 +61,8 @@ export EDITOR=nvim
 export VISUAL="$EDITOR"
 
 # claude code
-export claude_powerline_config=~/.config/claude/powerline/config.json
-export claude_powerline_debug=0
+export CLAUDE_POWERLINE_CONFIG=~/.config/claude/powerline/config.json
+export CLAUDE_POWERLINE_DEBUG=0
 export DEBUG=false
 
 # history
