@@ -289,6 +289,8 @@ cask "omnidisksweeper"
 cask "pearcleaner"
 # Home media server
 cask "plex-media-server"
+# VPN client focusing on security
+cask "protonvpn"
 # IDE for professional Python development
 cask "pycharm"
 # Control your tools with a few keystrokes
