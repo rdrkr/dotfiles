@@ -44,7 +44,6 @@ custom-shader-animation = true
 font-family = "JetBrainsMono Nerd Font Mono"
 font-size = 14
 shell-integration-features = no-cursor
-#command = /opt/homebrew/bin/nu
 shell-integration = zsh
 macos-titlebar-style = "hidden"
 window-padding-x = 16

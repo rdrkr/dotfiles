@@ -30,6 +30,7 @@ zinit light zsh-users/zsh-completions
 zinit light zsh-users/zsh-autosuggestions
 zinit light Aloxaf/fzf-tab
 zinit light matheusml/zsh-ai
+zinit light jeffreytse/zsh-vi-mode
 
 # add in snippets
 zinit snippet OMZL::git.zsh
@@ -52,6 +53,9 @@ if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
   eval "$(starship init zsh)"
 fi
 
+# zsh-vi-mode
+ZVM_SYSTEM_CLIPBOARD_ENABLED=true
+
 # yazi
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
@@ -71,7 +75,7 @@ export CLAUDE_POWERLINE_DEBUG=0
 export DEBUG=false
 
 # history
-HISTSIZE=5000
+HISTSIZE=10000
 HISTFILE=~/.zsh_history
 SAVEHIST=$HISTSIZE
 HISTDUP=erase
