@@ -30,7 +30,7 @@ zinit light zsh-users/zsh-completions
 zinit light zsh-users/zsh-autosuggestions
 zinit light Aloxaf/fzf-tab
 zinit light matheusml/zsh-ai
-zinit light jeffreytse/zsh-vi-mode
+#zinit light jeffreytse/zsh-vi-mode
 
 # add in snippets
 zinit snippet OMZL::git.zsh
