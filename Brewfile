@@ -219,8 +219,6 @@ cask "cursor-cli"
 cask "cyberduck"
 # Voice and text chat software
 cask "discord"
-# Disk usage utility
-cask "disk-inventory-x"
 # Window peeking utility app
 cask "dockdoor"
 # Client for the Dropbox cloud storage service
