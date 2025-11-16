@@ -6,6 +6,10 @@ if [[ -f "/opt/homebrew/bin/brew" ]] then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
+if [[ -f .env ]] then
+  source .env
+fi
+
 # zinit
 # set the directory we want to store zinit and plugins
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
@@ -25,6 +29,7 @@ zinit light zsh-users/zsh-syntax-highlighting
 zinit light zsh-users/zsh-completions
 zinit light zsh-users/zsh-autosuggestions
 zinit light Aloxaf/fzf-tab
+zinit light matheusml/zsh-ai
 
 # add in snippets
 zinit snippet OMZL::git.zsh
@@ -82,10 +87,12 @@ setopt hist_find_no_dups
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 zstyle ':completion:*' menu no
+zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
 zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 
 # aliases
+alias l='nu -c ls'
 alias ls='ls --color'
 alias vim='nvim'
 alias c='clear'
@@ -101,6 +108,7 @@ alias cc2="ccs --switch-to 2 && cc"
 # shell integrations
 eval "$(fzf --zsh)"
 eval "$(zoxide init zsh)"
+source <(carapace _carapace)
 
 # ghostty
 #if [ -n "$GHOSTTY_RESOURCES_DIR" ]; then
