@@ -50,4 +50,4 @@ window-padding-x = 16
 window-padding-y = 16
 
 keybind = shift+enter=text:\x1b\r
-
+keybind = alt+shift+j=write_scrollback_file:open
