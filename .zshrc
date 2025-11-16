@@ -1,13 +1,13 @@
 # initialization
-export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_CONFIG_HOME="${HOME}/.config"
 
 if [[ -f "/opt/homebrew/bin/brew" ]] then
-  export FPATH="$(brew --prefix)/share/zsh-completions:$FPATH"
+  export FPATH="$(brew --prefix)/share/zsh-completions:${FPATH}"
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
-if [[ -f .env ]] then
-  source .env
+if [[ -f "${HOME}/.env" ]] then
+  source "${HOME}/.env"
 fi
 
 # zinit
@@ -90,6 +90,11 @@ zstyle ':completion:*' menu no
 zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
 zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
+
+# bind keys
+#bindkey -v
+#bindkey ^R history-incremental-search-backward 
+#bindkey ^S history-incremental-search-forward
 
 # aliases
 alias l='nu -c ls'
