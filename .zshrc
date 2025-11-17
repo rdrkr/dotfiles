@@ -101,7 +101,10 @@ zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 #bindkey ^S history-incremental-search-forward
 
 # aliases
-alias l='nu -c ls'
+l() {
+  nu -c "ls $@"
+}
+
 alias ls='ls --color'
 alias vim='nvim'
 alias c='clear'
