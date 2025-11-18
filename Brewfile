@@ -336,7 +336,6 @@ mas "Perplexity", id: 6714467650
 mas "RetroArch", id: 6499539433
 mas "Shazam", id: 897118787
 mas "Slack", id: 803453959
-mas "SmartDNSProxy", id: 1471096079
 mas "Tag Editor 2", id: 984278082
 mas "Tailscale", id: 1475387142
 mas "TestFlight", id: 899247664

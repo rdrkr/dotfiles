@@ -110,7 +110,7 @@ l() {
   nu -c "ls $@"
 }
 
-alias ls='ls --color'
+alias ls='ls --color=always'
 alias vim='nvim'
 alias c='clear'
 alias update-all='brew update && brew upgrade && brew cleanup --prune=all && mas upgrade && zinit self-update && zinit update'

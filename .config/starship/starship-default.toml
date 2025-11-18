@@ -1,5 +1,14 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
+# Hide empty line when no modules are active
+format = """($all
+)$character"""
+
+add_newline = true
+
+[line_break]
+disabled = true
+
 [aws]
 symbol = " "
 
@@ -31,6 +40,7 @@ symbol = " "
 symbol = " "
 
 [directory]
+disabled = true
 read_only = " 󰌾"
 
 [docker_context]
