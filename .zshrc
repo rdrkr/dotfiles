@@ -74,6 +74,11 @@ export CLAUDE_POWERLINE_CONFIG=~/.config/claude/powerline/config.json
 export CLAUDE_POWERLINE_DEBUG=0
 export DEBUG=false
 
+# tmux
+function chpwd() {
+  [[ -n "$TMUX" ]] && tmux refresh-client -S
+}
+
 # history
 HISTSIZE=10000
 HISTFILE=~/.zsh_history
