@@ -41,8 +41,8 @@ theme = Gruvbox Dark
 cursor-style = block
 custom-shader = ~/.config/ghostty/shaders/cursor-smear.glsl
 custom-shader-animation = true
-# command = /bin/zsh -l -c "tmux new-session"
-command = /bin/zsh -l -c 'echo -n "Start tmux? [Y/n]: "; read -k 1 answer; echo; if [[ "$answer" == $'\''\n'\'' || "$answer" =~ ^[Yy] ]]; then tmux new-session; else exec zsh -l; fi'
+command = /bin/zsh -l -c "tmux new-session"
+# command = /bin/zsh -l -c 'echo -n "Start tmux? [Y/n]: "; read -k 1 answer; echo; if [[ "$answer" == $'\''\n'\'' || "$answer" =~ ^[Yy] ]]; then tmux new-session; else exec zsh -l; fi'
 font-family = "JetBrainsMono Nerd Font Mono"
 font-size = 14
 shell-integration-features = no-cursor
