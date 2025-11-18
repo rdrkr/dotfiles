@@ -17,3 +17,5 @@
 
 .gk/repoMapping.json
 
+.config/antigravity-proxy/accounts.json
+.config/antigravity-proxy/usage-history.json

@@ -41,7 +41,7 @@ default-root-container-orientation = 'auto'
 # See https://nikitabobko.github.io/AeroSpace/guide#on-focus-changed-callbacks
 # See https://nikitabobko.github.io/AeroSpace/commands#move-mouse
 # Fallback value (if you omit the key): on-focused-monitor-changed = []
-on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
+# on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 
 # You can effectively turn off macOS "Hide application" (cmd-h) feature by toggling this flag
 # Useful if you don't use this macOS feature, but accidentally hit cmd-h or cmd-alt-h key
@@ -114,11 +114,12 @@ alt-2 = 'workspace 2'
 alt-3 = 'workspace 3'
 alt-4 = 'workspace 4'
 alt-5 = 'workspace 5'
+alt-6 = 'workspace 6'
 
 # 'workspace --wrap-around next'
-ctrl-alt-right = 'exec-and-forget aerospace list-workspaces --monitor focused --empty no | aerospace workspace --wrap-around next'
+ctrl-alt-right = 'exec-and-forget aerospace list-workspaces --monitor focused --empty no | aerospace workspace --stdin --wrap-around next'
 # 'workspace --wrap-around prev'
-ctrl-alt-left = 'exec-and-forget aerospace list-workspaces --monitor focused --empty no | aerospace workspace --wrap-around prev'
+ctrl-alt-left = 'exec-and-forget aerospace list-workspaces --monitor focused --empty no | aerospace workspace --stdin --wrap-around prev'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move
 ctrl-shift-left = 'move left'
@@ -132,6 +133,7 @@ ctrl-shift-2 = 'move-node-to-workspace 2'
 ctrl-shift-3 = 'move-node-to-workspace 3'
 ctrl-shift-4 = 'move-node-to-workspace 4'
 ctrl-shift-5 = 'move-node-to-workspace 5'
+ctrl-shift-6 = 'move-node-to-workspace 6'
 
 ctrl-alt-shift-left = 'join-with left'
 ctrl-alt-shift-down = 'join-with down'
@@ -183,10 +185,10 @@ run = 'move-node-to-workspace 2'
 # [[on-window-detected]]
 # if.app-id = 'com.mitchellh.ghostty'
 # run = 'move-node-to-workspace 2'
-
-[[on-window-detected]]
-if.app-id = 'com.todesktop.230313mzl4w4u92' # cursor
-run = 'move-node-to-workspace 2'
+# 
+# [[on-window-detected]]
+# if.app-id = 'com.todesktop.230313mzl4w4u92' # cursor
+# run = 'move-node-to-workspace 2'
 
 [[on-window-detected]]
 if.app-name-regex-substring = 'intellij'
@@ -213,6 +215,10 @@ run = 'layout floating'
 if.app-id = 'com.apple.mail'
 if.window-title-regex-substring = 'messages'
 run = ['layout tiling', 'move-node-to-workspace 5']
+
+[[on-window-detected]]
+if.app-id = 'com.automattic.beeper.desktop'
+run = 'layout floating'
 
 [[on-window-detected]]
 if.app-name-regex-substring = 'contacts'
@@ -287,11 +293,11 @@ if.app-name-regex-substring = 'sf symbols'
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-name-regex-substring = 'chrome'
+if.app-name-regex-substring = 'teamviewer'
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-id = 'com.automattic.beeper.desktop'
+if.app-name-regex-substring = 'chrome'
 run = 'layout floating'
 
 [workspace-to-monitor-force-assignment]

@@ -1,6 +1,9 @@
 tap "acsandmann/tap"
+tap "barutsrb/tap"
 tap "blacktop/tap"
 tap "felixkratz/formulae"
+tap "gentleman-programming/tap"
+tap "hamed-elfayome/claude-usage"
 tap "koekeishiya/formulae"
 tap "mocki-toki/formulae"
 tap "nikitabobko/tap"
@@ -17,6 +20,8 @@ brew "black"
 brew "block-goose-cli"
 # Resource monitor. C++ version and continuation of bashtop and bpytop
 brew "btop"
+# Real-time data compression library
+brew "lzo"
 # Multi-shell multi-command argument completer
 brew "carapace"
 # Linter/analyzer for Makefiles
@@ -41,7 +46,7 @@ brew "node"
 brew "eslint"
 # Simple, fast and user-friendly alternative to find
 brew "fd"
-# Play, record, convert, and stream audio and video
+# Play, record, convert, and stream select audio and video codecs
 brew "ffmpeg"
 # Command-line fuzzy finder written in Go
 brew "fzf"
@@ -51,8 +56,12 @@ brew "gemini-cli"
 brew "gh"
 # Interpreter for PostScript and PDF
 brew "ghostscript"
+# Git extension for versioning large files
+brew "git-lfs"
 # Audit git repos for secrets
 brew "gitleaks"
+# Library for USB device access
+brew "libusb"
 # Stricter gofmt
 brew "gofumpt"
 # Tool to convert a Wallpaper's color scheme / palette
@@ -61,10 +70,12 @@ brew "gowall"
 brew "gradle-completion"
 # Like cURL, but for gRPC
 brew "grpcurl"
-# Tools and libraries to manipulate images in many formats
+# Tools and libraries to manipulate images in select formats
 brew "imagemagick"
 # Install and debug iPhone apps from the command-line
 brew "ios-deploy"
+# Update of iperf: measures TCP, UDP, and SCTP bandwidth
+brew "iperf3"
 # Sort Python imports automatically
 brew "isort"
 # Lightweight and flexible command-line JSON processor
@@ -85,6 +96,12 @@ brew "markdown-toc"
 brew "markdownlint-cli2"
 # Mac App Store command-line interface
 brew "mas"
+# Java-based project management
+brew "maven"
+# Simple tool to make locally trusted development certificates
+brew "mkcert"
+# Deep clean and optimize your Mac
+brew "mole"
 # Experimental optional static type checker for Python
 brew "mypy"
 # Fast, highly customisable system info script
@@ -95,10 +112,14 @@ brew "neovim"
 brew "node@22"
 # Modern shell for the GitHub era
 brew "nushell"
+# Search tool like grep and The Silver Searcher
+brew "ripgrep"
 # AI coding agent, built for the terminal
 brew "opencode"
 # Development kit for the Java programming language
 brew "openjdk@21"
+# PAM module for reattaching to the user's GUI (Aqua) session
+brew "pam-reattach"
 # Identify unused code in Swift projects
 brew "periphery"
 # Bash completion for Pip
@@ -123,10 +144,10 @@ brew "python-tk@3.13"
 brew "python@3.11"
 # Your all-in-one OpenAPI utility
 brew "redocly-cli"
+# Command-line interface for Render
+brew "render"
 # SVG rendering tool and library
 brew "resvg"
-# Search tool like grep and The Silver Searcher
-brew "ripgrep"
 # Extremely fast Python linter, written in Rust
 brew "ruff"
 # Safe, concurrent, practical language
@@ -155,6 +176,8 @@ brew "tectonic"
 brew "tmux"
 # Display directories as trees (with optional color/HTML output)
 brew "tree"
+# Parser generator tool
+brew "tree-sitter-cli"
 # Find and verify credentials
 brew "trufflehog"
 # Extremely fast Python package installer and resolver, written in Rust
@@ -179,12 +202,14 @@ brew "acsandmann/tap/rift"
 brew "felixkratz/formulae/borders", args: ["HEAD"]
 # Custom macOS statusbar with shell plugin, interaction and graph support
 brew "felixkratz/formulae/sketchybar"
+# Interactive TUI installer for Gentleman.Dots development environment
+brew "gentleman-programming/tap/gentleman-dots"
 # Simple hotkey-daemon for macOS.
 brew "koekeishiya/formulae/skhd"
 # A tiling window manager for macOS based on binary space partitioning.
 brew "koekeishiya/formulae/yabai"
 # AeroSpace is an i3-like tiling window manager for macOS
-cask "aerospace"
+cask "nikitabobko/tap/aerospace"
 # Image editing and design software
 cask "affinity"
 # Enable Windows-like alt-tab
@@ -193,6 +218,8 @@ cask "alt-tab"
 cask "altserver"
 # Tools for building Android applications
 cask "android-studio"
+# AI Coding Agent IDE
+cask "antigravity"
 # Inspect application bundles
 cask "apparency"
 # Universal chat app powered by Matrix
@@ -207,10 +234,8 @@ cask "chatgpt"
 cask "claude"
 # Terminal-based AI coding assistant
 cask "claude-code"
-# C and C++ IDE
-cask "clion"
-# Node-based image, video and audio generator
-cask "comfyui"
+# Native macOS menu bar app for monitoring Claude AI usage limits
+cask "hamed-elfayome/claude-usage/claude-usage-tracker"
 # Write, edit, and chat about your code with AI
 cask "cursor"
 # Command-line agent for Cursor
@@ -219,16 +244,10 @@ cask "cursor-cli"
 cask "cyberduck"
 # Voice and text chat software
 cask "discord"
-# Window peeking utility app
-cask "dockdoor"
 # Client for the Dropbox cloud storage service
 cask "dropbox"
 # Utility for customizing which browser to start
 cask "finicky"
-# Virtual workspace manager
-cask "flashspace"
-# Hybrid IDE and text editor
-cask "fleet"
 cask "font-fira-code-nerd-font"
 cask "font-hack-nerd-font"
 cask "font-jetbrains-mono-nerd-font"
@@ -239,8 +258,6 @@ cask "font-symbols-only-nerd-font"
 cask "ghostty@tip"
 # Free and open-source image editor
 cask "gimp"
-# Git client focusing on productivity
-cask "gitkraken"
 # CLI for GitKraken
 cask "gitkraken-cli"
 # Web browser
@@ -259,8 +276,6 @@ cask "imageoptim"
 cask "inkscape"
 # HTTP and GraphQL Client
 cask "insomnia"
-# IDE for Java development - community edition
-cask "intellij-idea-ce"
 # Download manager
 cask "jdownloader"
 # JetBrains tools manager
@@ -283,6 +298,8 @@ cask "microsoft-auto-update"
 cask "microsoft-teams"
 # Finds large, unwanted files and deletes them
 cask "omnidisksweeper"
+# Tiling window manager for macOS with Niri-inspired column-based layout
+cask "barutsrb/tap/omniwm"
 # Utility to uninstall apps and remove leftover files from old/uninstalled apps
 cask "pearcleaner"
 # Home media server
@@ -368,6 +385,7 @@ vscode "ms-python.flake8"
 vscode "ms-python.pylint"
 vscode "ms-python.python"
 vscode "ms-python.vscode-pylance"
+vscode "ms-python.vscode-python-envs"
 vscode "ms-toolsai.jupyter"
 vscode "ms-toolsai.jupyter-keymap"
 vscode "ms-toolsai.jupyter-renderers"
@@ -383,8 +401,6 @@ vscode "ms-vscode.vscode-typescript-next"
 vscode "redhat.java"
 vscode "rust-lang.rust-analyzer"
 vscode "shopify.ruby-lsp"
-vscode "visualstudioexptteam.intellicode-api-usage-examples"
-vscode "visualstudioexptteam.vscodeintellicode"
 vscode "vscjava.vscode-gradle"
 vscode "vscjava.vscode-java-debug"
 vscode "vscjava.vscode-java-test"

@@ -10,6 +10,9 @@ if [[ -f "${HOME}/.env" ]] then
   source "${HOME}/.env"
 fi
 
+# treats all special characters as word boundaries
+WORDCHARS=''
+
 # zinit
 # set the directory we want to store zinit and plugins
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
@@ -76,8 +79,47 @@ export DEBUG=false
 
 # tmux
 function chpwd() {
+  # update tmux status line
   [[ -n "$TMUX" ]] && tmux refresh-client -S
+
+  # tell Ghostty (and other OSC-7-aware terminals) the new CWD
+  if [[ -n "$TMUX" ]]; then
+    # Pass OSC 7 through tmux using passthrough sequence \ePtmux;...\e\\
+    # Inside, escape \e as \e\e
+    printf '\ePtmux;\e\e]7;file://%s%s\a\e\\' "$HOST" "$PWD"
+  else
+    printf '\e]7;file://%s%s\a' "$HOST" "$PWD"
+  fi
+
+  # Update parent tmux pwd file if it exists
+  [[ -n "$TMUX_PWD_FILE" ]] && echo "$PWD" > "$TMUX_PWD_FILE"
 }
+
+function notify() {
+  local title=$1 body=$2
+
+  if [[ -n "${TMUX}" ]]; then
+    printf "\ePtmux;\e\e]777;notify;%s;%s\a\e\\" "${title}" "${body}"
+  else
+    printf "\e]777;notify;%s;%s\a" "${title}" "${body}"
+  fi
+}
+
+# notify hooks
+function _notify_preexec() {
+  _NOTIFY_CMD="$1"
+}
+
+function _notify_precmd() {
+  if [[ -n "$_NOTIFY_CMD" ]]; then
+    notify "Command Finished" "$_NOTIFY_CMD"
+    unset _NOTIFY_CMD
+  fi
+}
+
+autoload -Uz add-zsh-hook
+add-zsh-hook preexec _notify_preexec
+add-zsh-hook precmd _notify_precmd
 
 # history
 HISTSIZE=10000
@@ -95,26 +137,36 @@ setopt hist_find_no_dups
 # completion styling
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
-zstyle ':completion:*' menu no
 zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
+## fzf-tab settings
+zstyle ':completion:*' menu no
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
-zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
+zstyle ':fzf-tab:*' query-string prefix first
+zstyle ':fzf-tab:*' continuous-trigger '/'
+zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
+zstyle ':fzf-tab:*' popup-min-size 40 20
+#zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 
-# bind keys
-#bindkey -v
-#bindkey ^R history-incremental-search-backward 
-#bindkey ^S history-incremental-search-forward
+# bind keyos
+bindkey -e                            # disable vi mode
+#bindkey -v                           # enable vi mode
+bindkey "^[[1;3C" forward-word        # autosuggest next word
+bindkey "^[[1;3D" backward-word       # autosuggest previous word
+bindkey "^[[1;3D" backward-word       # autosuggest previous word
+bindkey '^[^?'    backward-kill-word  # delete previous word
+#bindkey '^R'     history-incremental-search-backward 
+#bindkey '^S'     history-incremental-search-forward
 
 # aliases
-l() {
-  nu -c "ls $@"
-}
+l() { nu -c "ls $@" }
+which() { nu -c "which $@" }
 
 alias ls='ls --color=always'
 alias vim='nvim'
 alias c='clear'
-alias update-all='brew update && brew upgrade && brew cleanup --prune=all && mas upgrade && zinit self-update && zinit update'
+alias update-all='brew update && brew upgrade && brew cleanup --prune=all && mas upgrade && npm -g upgrade && zinit self-update && zinit update && zinit cclear'
 alias ua='update-all'
+
 alias cc='claude --dangerously-skip-permissions'
 alias ccg='claude-glm'
 alias ccg45='claude-glm-4.5'
@@ -124,21 +176,133 @@ alias ccl="ccs --list"
 alias cc1="ccs --switch-to 1 && cc"
 alias cc2="ccs --switch-to 2 && cc"
 
+# claude antigravity proxy handling
+function _claude_antigravity_run() {
+  local proxy_name="antigravity-claude-proxy"
+  local proxy_cmd="/opt/homebrew/bin/antigravity-claude-proxy"
+  local started_proxy=0
+
+  # Check if the proxy is already running (check process AND port)
+  # We start it if process is missing OR port 8080 is closed
+  if ! pgrep -f "$proxy_name" >/dev/null 2>&1 || ! nc -z 127.0.0.1 8080 >/dev/null 2>&1; then
+    echo "Starting antigravity proxy..."
+    # Start proxy in background
+    "$proxy_cmd" start >/dev/null 2>&1 &
+    local proxy_pid=$!
+    started_proxy=1
+
+    # Wait for the proxy to be ready on port 8080
+    local timeout=50 # 5 seconds
+    while ! nc -z 127.0.0.1 8080 >/dev/null 2>&1 && [[ $timeout -gt 0 ]]; do
+      sleep 0.1
+      ((timeout--))
+    done
+
+    if [[ $timeout -eq 0 ]]; then
+      echo "Warning: antigravity proxy failed to start or port 8080 is not responsive."
+    fi
+  fi
+
+  # Run Claude
+  command claude "$@"
+
+  # Cleanup
+  if [[ $started_proxy -eq 1 ]]; then
+    echo "Stopping antigravity proxy..."
+    # Kill the specific PID we started
+    kill "$proxy_pid" 2>/dev/null || true
+  fi
+}
+
+function claude-antigravity-opus() {
+  local -x CLAUDE_CONFIG_DIR=~/.claude-account-antigravity
+  local -x ANTHROPIC_AUTH_TOKEN="antigravity"
+  local -x ANTHROPIC_BASE_URL="http://localhost:8080"
+  local -x ANTHROPIC_MODEL="claude-opus-4-5-thinking"
+  local -x ANTHROPIC_DEFAULT_OPUS_MODEL="claude-opus-4-5-thinking"
+  local -x ANTHROPIC_DEFAULT_SONNET_MODEL="claude-sonnet-4-5-thinking"
+  local -x ANTHROPIC_DEFAULT_HAIKU_MODEL="gemini-2.5-flash-lite[1m]"
+  local -x CLAUDE_CODE_SUBAGENT_MODEL="claude-sonnet-4-5-thinking"
+  local -x ENABLE_EXPERIMENTAL_MCP_CLI="true"
+
+  _claude_antigravity_run "$@"
+}
+alias cco='claude-antigravity-opus'
+
+function claude-antigravity-gemini() {
+  local -x CLAUDE_CONFIG_DIR=~/.claude-account-antigravity
+  local -x ANTHROPIC_AUTH_TOKEN="antigravity"
+  local -x ANTHROPIC_BASE_URL="http://localhost:8080"
+  local -x ANTHROPIC_MODEL="gemini-3-pro-high[1m]"
+  local -x ANTHROPIC_DEFAULT_OPUS_MODEL="gemini-3-pro-high[1m]"
+  local -x ANTHROPIC_DEFAULT_SONNET_MODEL="gemini-3-flash[1m]"
+  local -x ANTHROPIC_DEFAULT_HAIKU_MODEL="gemini-2.5-flash-lite[1m]"
+  local -x CLAUDE_CODE_SUBAGENT_MODEL="gemini-3-flash[1m]"
+  local -x ENABLE_EXPERIMENTAL_MCP_CLI="true"
+
+  _claude_antigravity_run "$@"
+}
+alias ccg='claude-antigravity-gemini'
+
 # shell integrations
 eval "$(fzf --zsh)"
 eval "$(zoxide init zsh)"
 source <(carapace _carapace)
-
-# ghostty
-#if [ -n "$GHOSTTY_RESOURCES_DIR" ]; then
-#  nu
-#fi
 
 # paths
 if [[ -f "/opt/homebrew/bin/brew" ]] then
   export PATH="/opt/homebrew/opt/python@3.13/bin:$PATH"
   export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH"
   export PATH="/opt/homebrew/opt/node@22/bin:$PATH"
-  export PATH="$PATH:$HOME/.local/bin:$HOME/local/bin"
+  export DYLD_LIBRARY_PATH="/opt/homebrew/lib:/opt/homebrew/lib/pam:$DYLD_LIBRARY_PATH"
+fi
+
+export PATH="$PATH:$HOME/.local/bin:$HOME/local/bin"
+
+# added by antigravity
+export PATH="/Users/ronendruker/.antigravity/antigravity/bin:$PATH"
+
+# Auto-start tmux with persistent PWD
+if [[ "${TERM_PROGRAM}" == "ghostty" && -z "$TMUX" && -o interactive ]]; then
+  # Avoid nested/double tmux if the shell command line already invokes tmux
+  # (e.g. zsh -c 'tmux ...')
+  if ! ps -p $$ -o args= | grep -q "tmux"; then
+    # Define a temp file for PWD persistence
+    export TMUX_PWD_FILE="$(mktemp -t tmux-pwd.XXXXXX)"
+    
+    # Check for detached sessions
+    # Get list of detached session names (split by newline)
+    local -a _detached_sessions
+    _detached_sessions=("${(@f)$(tmux list-sessions -f "#{==:#{session_attached},0}" -F "#{session_name}" 2>/dev/null)}")
+    # Filter out empty elements (important when no sessions exist)
+    _detached_sessions=("${_detached_sessions[@]:#}")
+
+    if [[ ${#_detached_sessions[@]} -gt 0 ]]; then
+      local _target_session="${_detached_sessions[1]}"
+
+      # If there are more detached sessions, open another terminal window to handle them
+      if [[ ${#_detached_sessions[@]} -gt 1 ]]; then
+        nohup open -n -a Ghostty >/dev/null 2>&1 &
+      fi
+
+      tmux attach-session -t "$_target_session"
+    else
+      # Start new tmux session
+      # We use 'exec' to replace the shell if we didn't want to return, 
+      # but here we want to return to the parent shell with the new PWD.
+      tmux new-session -e TMUX_PWD_FILE="$TMUX_PWD_FILE"
+    fi
+    unset _detached_sessions
+    
+    # Upon exit, read the PWD and switch to it
+    if [[ -f "$TMUX_PWD_FILE" ]]; then
+       local last_pwd="$(cat "$TMUX_PWD_FILE")"
+       if [[ -n "$last_pwd" && -d "$last_pwd" ]]; then
+          builtin cd -- "$last_pwd"
+       fi
+       rm -f "$TMUX_PWD_FILE"
+    fi
+    unset TMUX_PWD_FILE
+  fi
 fi
 
