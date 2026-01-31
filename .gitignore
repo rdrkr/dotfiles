@@ -19,3 +19,21 @@
 
 .config/antigravity-proxy/accounts.json
 .config/antigravity-proxy/usage-history.json
+.claude/cache
+.claude/debug
+.claude/file-history
+.claude/paste-cache
+.claude/plugins/cache
+.claude/projects
+.claude/shell-snapshots
+.claude/statsig
+.claude/tasks
+.claude/todos
+.claude/.claude.json
+.claude/.claude.json.backup
+.claude/fetch-claude-usage.swift
+.claude/history.jsonl
+.claude/powerline/usage/today.json
+.claude/plugins/marketplaces
+.claude/plans
+.claude/stats-cache.json

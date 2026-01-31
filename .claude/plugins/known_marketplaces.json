@@ -1,0 +1,26 @@
+{
+  "claude-code-marketplace": {
+    "source": {
+      "source": "github",
+      "repo": "severity1/claude-code-marketplace"
+    },
+    "installLocation": "/Users/ronendruker/.claude/plugins/marketplaces/claude-code-marketplace",
+    "lastUpdated": "2026-01-30T09:30:43.347Z"
+  },
+  "claude-code-plugins": {
+    "source": {
+      "source": "github",
+      "repo": "anthropics/claude-code"
+    },
+    "installLocation": "/Users/ronendruker/.claude/plugins/marketplaces/claude-code-plugins",
+    "lastUpdated": "2026-01-31T09:17:08.963Z"
+  },
+  "claude-plugins-official": {
+    "source": {
+      "source": "github",
+      "repo": "anthropics/claude-plugins-official"
+    },
+    "installLocation": "/Users/ronendruker/.claude/plugins/marketplaces/claude-plugins-official",
+    "lastUpdated": "2026-01-30T11:40:19.671Z"
+  }
+}

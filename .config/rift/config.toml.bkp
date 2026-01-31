@@ -33,7 +33,7 @@ animation_easing = "ease_in_out"
 # - mouse_follows_focus: when focus changes, move the mouse to the focused window
 # - mouse_hides_on_focus: hide the mouse cursor after focusing a window
 focus_follows_mouse = true
-mouse_follows_focus = true
+mouse_follows_focus = false
 mouse_hides_on_focus = true
 # focus_follows_mouse_disable_hotkey temporarily suspends focus-follows-mouse while held
 # e.g. "Fn"; omit or set to null to keep focus-follows-mouse always active
@@ -97,7 +97,7 @@ new_window_placement = "master"
 # How much of each stacked window sticks out (in pixels)
 # Set to 0.0 to have them directly on top of each other.
 # Recommended: 30-50 for clear edges while keeping focus visible.
-stack_offset = 40.0
+stack_offset = 30.0
 
 # Default stacking orientation when creating a new stack.
 # Options:
@@ -116,14 +116,14 @@ default_orientation = "perpendicular"
 #   Use the display's UUID as the key (for example, from system profiler or via rift CLI).
 
 [settings.layout.gaps.outer]
-top = 0
-left = 0
-bottom = 0
-right = 0
+top = 8
+left = 16
+bottom = 16
+right = 16
 
 [settings.layout.gaps.inner]
-horizontal = 0
-vertical = 0
+horizontal = 16
+vertical = 16
 
 # Example per-display overrides:
 # Replace the quoted key with your display's UUID. Only specify values you want to override.
@@ -138,7 +138,7 @@ vertical = 0
 # vertical = 8
 [settings.ui.menu_bar]
 # enable menu bar workspace indicators
-enabled = false
+enabled = true
 # if enabled, it will show all workspaces including empty ones. disabled because this
 # tends to take up too much room in the menubar and then is auto hidden by macos
 show_empty = false
@@ -208,7 +208,7 @@ drag_swap_fraction = 0.3
 #   that's already active, it will switch to the last workspace instead
 # - reapply_app_rules_on_title_change: if true, app rules are re-evaluated when a window's title changes
 enabled = true
-default_workspace_count = 4
+default_workspace_count = 5
 auto_assign_windows = true
 preserve_focus_per_workspace = true
 workspace_auto_back_and_forth = false
@@ -223,10 +223,7 @@ reapply_app_rules_on_title_change = false
 # Workspace names (indexed order). If fewer than default_workspace_count are provided,
 # remaining workspaces are named "Workspace X".
 # Do not provide more names than default_workspace_count.
-workspace_names = [
-	"first",
-	"second"
-]
+workspace_names = ["first", "second"]
 
 # App rules (automatic assignment)
 # Define rules that match new windows and set properties (workspace, floating, etc).
@@ -291,14 +288,44 @@ workspace_names = [
 #       ]
 #
 # By default there are no app rules; add or uncomment rules below as needed.
-app_rules = []
+app_rules = [
+  { app_name = "Safari", workspace = 1, floating = false },
+  { app_name = "Warp", workspace = 1, floating = false },
+  { app_name = "Ghostty", workspace = 2, floating = false },
+  { app_name = "Cursor", workspace = 2, floating = false },
+  { app_name = "IntelliJ", workspace = 2, floating = false },
+  { app_name = "Xcode", workspace = 3, floating = false },
+  { app_name = "Messages", workspace = 4, floating = false },
+  { app_name = "WhatsApp", workspace = 4, floating = false },
+  { app_name = "Mail", title_substring = "messages)", workspace = 4, floating = false },
+  { app_name = "Mail", floating = true },
+  { app_name = "Contacts", floating = true },
+  { app_name = "Phone", floating = true },
+  { app_name = "FaceTime", floating = true },
+  { app_name = "QuickTime", floating = true },
+  { app_name = "Finder", floating = true },
+  { app_name = "Ollama", floating = true },
+  { app_name = "Calendar", floating = true },
+  { app_name = "Activity", floating = true },
+  { app_name = "GPT", floating = true },
+  { app_name = "Preview", floating = true },
+  { app_name = "Photos", floating = true },
+  { app_name = "Perplexity", floating = true },
+  { app_name = "Store", floating = true },
+  { app_name = "Passwords", floating = true },
+  { app_name = "Pearcleaner", floating = true },
+  { app_name = "Reminders", floating = true },
+  { app_name = "SF Symbols", floating = true },
+  { app_name = "Beeper", floating = true },
+]
 
 # Modifier combinations that can be reused in key bindings
 # Define common modifier combinations to avoid repetition.
 # Example usage: with `comb1 = "Alt + Shift"`, you can write:
 #   "comb1 + H" = { move_node = "left" }
 [modifier_combinations]
-comb1 = "Alt + Shift"
+move_comb = "Ctrl + Shift"
+join_comb = "Ctrl + Alt + Shift"
 
 [keys]
 # Key binding syntax
@@ -330,40 +357,41 @@ comb1 = "Alt + Shift"
 
 "Alt + Z" = "toggle_space_activated"
 
-"Alt + H" = { move_focus = "left" }
-"Alt + J" = { move_focus = "down" }
-"Alt + K" = { move_focus = "up" }
-"Alt + L" = { move_focus = "right" }
+"Ctrl + Left" = { move_focus = "left" }
+"Ctrl + Down" = { move_focus = "down" }
+"Ctrl + Uo" = { move_focus = "up" }
+"Ctrl + Right" = { move_focus = "right" }
 
-"comb1 + H" = { move_node = "left" }
-"comb1 + J" = { move_node = "down" }
-"comb1 + K" = { move_node = "up" }
-"comb1 + L" = { move_node = "right" }
+"move_comb + Left" = { move_node = "left" }
+"move_comb + Down" = { move_node = "down" }
+"move_comb + Up" = { move_node = "up" }
+"move_comb + Right" = { move_node = "right" }
 
-"Alt + 0" = { switch_to_workspace = 0 }
 "Alt + 1" = { switch_to_workspace = 1 }
 "Alt + 2" = { switch_to_workspace = 2 }
 "Alt + 3" = { switch_to_workspace = 3 }
+"Alt + 4" = { switch_to_workspace = 4 }
+"Alt + 5" = { switch_to_workspace = 5 }
 
-"comb1 + 0" = { move_window_to_workspace = 0 }
-"comb1 + 1" = { move_window_to_workspace = 1 }
-"comb1 + 2" = { move_window_to_workspace = 2 }
-"comb1 + 3" = { move_window_to_workspace = 3 }
+"move_comb + 1" = { move_window_to_workspace = 1 }
+"move_comb + 2" = { move_window_to_workspace = 2 }
+"move_comb + 3" = { move_window_to_workspace = 3 }
+"move_comb + 4" = { move_window_to_workspace = 4 }
+"move_comb + 5" = { move_window_to_workspace = 5 }
 
-"Alt + Tab" = "switch_to_last_workspace"
+#"Alt + Tab" = "switch_to_last_workspace"
 
-"Alt + Shift + Left" = { join_window = "left" }
-"Alt + Shift + Right" = { join_window = "right" }
-"Alt + Shift + Up" = { join_window = "up" }
-"Alt + Shift + Down" = { join_window = "down" }
-"Alt + Comma" = "toggle_stack"
-"Alt + Slash" = "toggle_orientation"
+"join_comb + Left" = { join_window = "left" }
+"join_comb + Right" = { join_window = "right" }
+"join_comb + Up" = { join_window = "up" }
+"join_comb + Down" = { join_window = "down" }
+#"Alt + Comma" = "stack_windows"
+#"Alt + Slash" = "unstack_windows"
 "Alt + Ctrl + E" = "unjoin_windows"
 
-"Alt + Shift + Space" = "toggle_window_floating"
+"Alt + Slash" = "toggle_window_floating"
 "Alt + F" = "toggle_fullscreen"
-"Alt + Shift + F" = "toggle_fullscreen_within_gaps"
-"comb1 + Ctrl + Space" = "toggle_focus_floating" # briefly bring focus to floating window
+#"comb1 + Ctrl + Space" = "toggle_focus_floating" # briefly bring focus to floating window
 
 # smartly resize windows
 "Alt + Shift + Equal" = "resize_window_grow"
@@ -389,8 +417,6 @@ comb1 = "Alt + Shift"
 # "Alt + Ctrl + Shift + M" = "show_mission_control_current"
 # this will show the mission control view shown in the readme
 # "Alt + Ctrl + M" = "show_mission_control_all"
-
-"Alt + Enter" = { "exec" = ["/bin/bash", "-c", "open -a \"/System/Applications/Utilities/Terminal.app\""] }
 
 "Alt + Shift + D" = "debug" # prints layout tree
 

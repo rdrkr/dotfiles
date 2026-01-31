@@ -1,0 +1,1 @@
+- All functions, properties, objects must be documented in the language standard in-code documentation.

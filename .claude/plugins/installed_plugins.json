@@ -1,0 +1,104 @@
+{
+  "version": 2,
+  "plugins": {
+    "prompt-improver@claude-code-marketplace": [
+      {
+        "scope": "user",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-code-marketplace/prompt-improver/0.5.0",
+        "version": "0.5.0",
+        "installedAt": "2025-12-12T05:54:40.951Z",
+        "lastUpdated": "2025-12-17T06:10:16.134Z",
+        "gitCommitSha": "e58ee5a5ada0275cf39398e1e37ce484ac96af08"
+      }
+    ],
+    "frontend-design@claude-code-plugins": [
+      {
+        "scope": "user",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-code-plugins/frontend-design/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2025-12-12T05:54:41.000Z",
+        "lastUpdated": "2025-12-12T05:54:41.000Z"
+      }
+    ],
+    "frontend-design@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/frontend-design/27d2b86d72da",
+        "version": "27d2b86d72da",
+        "installedAt": "2026-01-31T09:18:47.057Z",
+        "lastUpdated": "2026-01-31T09:18:47.057Z",
+        "gitCommitSha": "27d2b86d72da27c64585150857cee8472ad47abb"
+      }
+    ],
+    "typescript-lsp@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/typescript-lsp/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-01-31T09:18:47.093Z",
+        "lastUpdated": "2026-01-31T09:18:47.093Z",
+        "gitCommitSha": "27d2b86d72da27c64585150857cee8472ad47abb"
+      }
+    ],
+    "commit-commands@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/commit-commands/27d2b86d72da",
+        "version": "27d2b86d72da",
+        "installedAt": "2026-01-31T09:18:47.110Z",
+        "lastUpdated": "2026-01-31T09:18:47.110Z",
+        "gitCommitSha": "27d2b86d72da27c64585150857cee8472ad47abb"
+      }
+    ],
+    "claude-md-management@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/claude-md-management/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-01-31T09:18:47.145Z",
+        "lastUpdated": "2026-01-31T09:18:47.145Z",
+        "gitCommitSha": "27d2b86d72da27c64585150857cee8472ad47abb"
+      }
+    ],
+    "pyright-lsp@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/pyright-lsp/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-01-31T09:20:13.172Z",
+        "lastUpdated": "2026-01-31T09:20:13.172Z",
+        "gitCommitSha": "27d2b86d72da27c64585150857cee8472ad47abb"
+      }
+    ],
+    "swift-lsp@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/swift-lsp/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-01-31T09:20:13.197Z",
+        "lastUpdated": "2026-01-31T09:20:13.197Z",
+        "gitCommitSha": "27d2b86d72da27c64585150857cee8472ad47abb"
+      }
+    ],
+    "lua-lsp@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/lua-lsp/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-01-31T09:20:13.223Z",
+        "lastUpdated": "2026-01-31T09:20:13.223Z",
+        "gitCommitSha": "27d2b86d72da27c64585150857cee8472ad47abb"
+      }
+    ],
+    "kotlin-lsp@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/kotlin-lsp/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-01-31T09:20:13.240Z",
+        "lastUpdated": "2026-01-31T09:20:13.240Z",
+        "gitCommitSha": "27d2b86d72da27c64585150857cee8472ad47abb"
+      }
+    ]
+  }
+}
