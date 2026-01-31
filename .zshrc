@@ -158,7 +158,7 @@ bindkey '^[^?'    backward-kill-word  # delete previous word
 #bindkey '^S'     history-incremental-search-forward
 
 # aliases
-l() { nu -c "ls $@" }
+l() { nu -c "ls -a $@" }
 which() { nu -c "which $@" }
 
 alias ls='ls --color=always'
