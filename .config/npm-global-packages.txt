@@ -1,0 +1,7 @@
+copilot
+antigravity-claude-proxy
+fastify
+homebridge-config-ui-x
+homebridge
+neovim
+tsx
