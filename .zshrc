@@ -204,7 +204,7 @@ function _claude_antigravity_run() {
   fi
 
   # Run Claude
-  command claude "$@"
+  command claude --dangerously-skip-permissions "$@"
 
   # Cleanup
   if [[ $started_proxy -eq 1 ]]; then
