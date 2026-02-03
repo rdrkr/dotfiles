@@ -37,3 +37,5 @@
 .claude/plugins/marketplaces
 .claude/plans
 .claude/stats-cache.json
+.claude/ide/18022.lock
+.claude/plugins/known_marketplaces.json

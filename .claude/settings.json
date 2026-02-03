@@ -18,7 +18,18 @@
     "ask": [],
     "defaultMode": "plan"
   },
-  "model": "sonnet",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/notify.sh 'Claude Code' 'Finished'"
+          }
+        ]
+      }
+    ]
+  },
   "statusLine": {
     "type": "command",
     "command": "bash /Users/ronendruker/.claude/statusline-command.sh"
