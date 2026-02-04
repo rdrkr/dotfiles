@@ -1,4 +1,5 @@
 tap "acsandmann/tap"
+tap "alexstrnik/browserino"
 tap "barutsrb/tap"
 tap "blacktop/tap"
 tap "felixkratz/formulae"
@@ -84,8 +85,12 @@ brew "jq"
 brew "lazydocker"
 # Simple terminal UI for git commands
 brew "lazygit"
+# Cross-platform TUI database management tool
+brew "lazysql"
 # Graphical front-end for GCC's coverage testing tool (gcov)
 brew "lcov"
+# Postgres C API library
+brew "libpq"
 # Powerful, lightweight programming language
 brew "lua"
 # Package manager for the Lua programming language
@@ -228,6 +233,8 @@ cask "beeper"
 cask "betterdisplay"
 # Compare files and folders
 cask "beyond-compare@4"
+# Browserino is a tiny browser selector for MacOS written in SwiftUI
+cask "alexstrnik/browserino/browserino"
 # OpenAI's official ChatGPT desktop app
 cask "chatgpt"
 # Anthropic's official Claude AI desktop app

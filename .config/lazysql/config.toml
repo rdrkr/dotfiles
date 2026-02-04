@@ -1,0 +1,10 @@
+[[database]]
+Name = 'affilibuster_db'
+Provider = 'postgres'
+DBName = 'affilibuster_db'
+URL = 'postgresql://affilibuster:affilibuster@localhost:5432/affilibuster_db'
+
+[application]
+DefaultPageSize = 300
+DisableSidebar = false
+SidebarOverlay = false

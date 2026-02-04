@@ -164,7 +164,7 @@ which() { nu -c "which $@" }
 alias ls='ls --color=always'
 alias vim='nvim'
 alias c='clear'
-alias update-all='brew update && brew upgrade && brew cleanup --prune=all && mas upgrade && npm -g upgrade && zinit self-update && zinit update && zinit cclear'
+alias update-all='brew update && brew upgrade && brew cleanup --prune=all && mas upgrade && npm -g upgrade && pipx upgrade-all && zinit self-update && zinit update && zinit cclear'
 alias ua='update-all'
 
 alias cc='claude --dangerously-skip-permissions'
@@ -254,6 +254,7 @@ if [[ -f "/opt/homebrew/bin/brew" ]] then
   export PATH="/opt/homebrew/opt/python@3.13/bin:$PATH"
   export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH"
   export PATH="/opt/homebrew/opt/node@22/bin:$PATH"
+  export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
   export DYLD_LIBRARY_PATH="/opt/homebrew/lib:/opt/homebrew/lib/pam:$DYLD_LIBRARY_PATH"
 fi
 

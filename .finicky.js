@@ -34,6 +34,14 @@ export default {
     },
     {
       match: [
+        "*google.com*",
+      ],
+      browser: {
+        name: "Browserino",
+      }
+    },
+    {
+      match: [
         "localhost*",
       ],
       // url, options

@@ -16,6 +16,7 @@ DRY_RUN=false
 MACOS_CONFIG_DIR="${SCRIPT_DIR}/.config/macos"
 MACOS_PREFS_DIR="${HOME}/Library/Preferences"
 NPM_GLOBAL_FILE="${SCRIPT_DIR}/.config/npm-global-packages.txt"
+PIPX_PACKAGES_FILE="${SCRIPT_DIR}/.config/pipx-packages.txt"
 PLIST_FILES=() #("com.apple.Terminal.plist" "com.apple.dock.plist" "com.apple.finder.plist")
 APP_NAMES=()   #("Terminal" "Dock" "Finder")
 
@@ -169,6 +170,27 @@ restore() {
 		print_warning "$NPM_GLOBAL_FILE not found. Skipping."
 	fi
 
+	# 4. Install Pipx Packages
+	print_header "Installing Pipx Packages..."
+	if [ -f "$PIPX_PACKAGES_FILE" ]; then
+		if command -v pipx &>/dev/null; then
+			if [ "$DRY_RUN" = false ]; then
+				while read -r package; do
+					if [ -n "$package" ]; then
+						run_command "pipx install $package"
+					fi
+				done < "$PIPX_PACKAGES_FILE"
+			else
+				print_warning "[DRY RUN] Would install packages from $PIPX_PACKAGES_FILE"
+			fi
+			print_success "Pipx packages installed."
+		else
+			print_warning "pipx not found. Skipping pipx package installation."
+		fi
+	else
+		print_warning "$PIPX_PACKAGES_FILE not found. Skipping."
+	fi
+
 	run_stow
 
 	echo -e "
@@ -217,6 +239,18 @@ backup() {
 		fi
 	else
 		print_warning "npm not found. Skipping npm backup."
+	fi
+
+	print_header "Backing up Pipx Packages..."
+	if command -v pipx &>/dev/null; then
+		if [ "$DRY_RUN" = false ]; then
+			pipx list --short | awk '{print $1}' > "$PIPX_PACKAGES_FILE"
+			print_success "Pipx packages backed up to $PIPX_PACKAGES_FILE."
+		else
+			print_warning "[DRY RUN] Would backup pipx packages to $PIPX_PACKAGES_FILE"
+		fi
+	else
+		print_warning "pipx not found. Skipping pipx backup."
 	fi
 
 	run_stow

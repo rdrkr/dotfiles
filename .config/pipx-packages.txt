@@ -1,0 +1,7 @@
+coverage
+datamodel-code-generator
+fastapi
+httpx
+mypy
+pytest
+sqlit-tui
