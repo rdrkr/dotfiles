@@ -24,7 +24,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/notify.sh 'Claude Code' 'Finished'"
+            "command": "~/.claude/hooks/notify.sh 'Claude Code' 'Finished'"
           }
         ]
       }
