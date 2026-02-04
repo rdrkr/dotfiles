@@ -39,3 +39,5 @@
 .claude/stats-cache.json
 .claude/ide/18022.lock
 .claude/plugins/known_marketplaces.json
+.claude/ide/41119.lock
+.colima/ssh_config
