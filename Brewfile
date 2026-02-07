@@ -147,6 +147,8 @@ brew "prettier"
 brew "python-tk@3.13"
 # Interpreted, interactive, object-oriented programming language
 brew "python@3.11"
+# Database management TUI for PostgreSQL/MySQL/SQLite
+brew "rainfrog"
 # Your all-in-one OpenAPI utility
 brew "redocly-cli"
 # Command-line interface for Render
