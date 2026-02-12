@@ -259,8 +259,6 @@ if [[ -f "/opt/homebrew/bin/brew" ]] then
 fi
 
 export PATH="$PATH:$HOME/.local/bin:$HOME/local/bin"
-
-# added by antigravity
 export PATH="/Users/ronendruker/.antigravity/antigravity/bin:$PATH"
 
 # Auto-start tmux with persistent PWD
@@ -307,3 +305,5 @@ if [[ "${TERM_PROGRAM}" == "ghostty" && -z "$TMUX" && -o interactive ]]; then
   fi
 fi
 
+# OpenClaw Completion
+source "/Users/ronendruker/.openclaw/completions/openclaw.zsh"
