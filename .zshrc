@@ -104,9 +104,15 @@ function notify() {
     printf "\e]777;notify;%s;%s\a" "${title}" "${body}"
   fi
 
-  # Notify OpenClaw if available (non-blocking)
-  if command -v openclaw >/dev/null 2>&1; then
-    (openclaw system event --text "🖥️ ${title}: ${body}" --mode now >/dev/null 2>&1 &)
+  # Notify OpenClaw via agent command (direct session injection)
+  # Only if system has been idle for > 5 minutes (300 seconds)
+  local idle_seconds
+  idle_seconds=$(~/scripts/keyboard-idle)
+
+  if [[ -n "$idle_seconds" && "$idle_seconds" -gt 300 ]]; then
+    if command -v openclaw >/dev/null 2>&1; then
+      (openclaw agent --session-id "277612b6-062c-472b-b798-16236eac1477" --message "🖥️ Notification: ${title} - ${body}" --deliver --reply-channel telegram --reply-to "telegram:837214518" >/dev/null 2>&1 &)
+    fi
   fi
 }
 
