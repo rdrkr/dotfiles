@@ -269,6 +269,10 @@ if.app-name-regex-substring = 'photos'
 run = 'layout floating'
 
 [[on-window-detected]]
+if.app-name-regex-substring = 'podcasts'
+run = 'layout floating'
+
+[[on-window-detected]]
 if.app-name-regex-substring = 'perplexity'
 run = 'layout floating'
 
