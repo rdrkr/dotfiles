@@ -9,6 +9,7 @@ tap "koekeishiya/formulae"
 tap "mocki-toki/formulae"
 tap "nikitabobko/tap"
 tap "rdrkr/tap"
+tap "steipete/tap"
 # Code searching, linting, rewriting
 brew "ast-grep"
 # Bourne-Again SHell, a UNIX command interpreter
@@ -215,6 +216,8 @@ brew "gentleman-programming/tap/gentleman-dots"
 brew "koekeishiya/formulae/skhd"
 # A tiling window manager for macOS based on binary space partitioning.
 brew "koekeishiya/formulae/yabai"
+# Grep the GIF. Stick the landing
+brew "steipete/tap/gifgrep"
 # AeroSpace is an i3-like tiling window manager for macOS
 cask "nikitabobko/tap/aerospace"
 # Image editing and design software
@@ -353,8 +356,8 @@ mas "Developer", id: 640199958
 mas "Equinox", id: 1591510203
 mas "iMovie", id: 408981434
 mas "Infuse", id: 1136220934
-mas "Keynote", id: 361285480
 mas "Keynote", id: 409183694
+mas "Keynote", id: 361285480
 mas "Mail Signature", id: 1595342317
 mas "Mic Drop", id: 1489816366
 mas "Numbers", id: 361304891
