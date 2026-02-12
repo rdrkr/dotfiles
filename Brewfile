@@ -219,6 +219,10 @@ brew "koekeishiya/formulae/skhd"
 brew "koekeishiya/formulae/yabai"
 # Grep the GIF. Stick the landing
 brew "steipete/tap/gifgrep"
+# Fast CLI for Apple Reminders
+brew "steipete/tap/remindctl"
+# Command-line ElevenLabs TTS with mac-style flags
+brew "steipete/tap/sag"
 # AeroSpace is an i3-like tiling window manager for macOS
 cask "nikitabobko/tap/aerospace"
 # Image editing and design software
@@ -313,6 +317,8 @@ cask "microsoft-teams"
 cask "omnidisksweeper"
 # Tiling window manager for macOS with Niri-inspired column-based layout
 cask "barutsrb/tap/omniwm"
+# Personal AI assistant
+cask "openclaw"
 # Utility to uninstall apps and remove leftover files from old/uninstalled apps
 cask "pearcleaner"
 # Home media server
