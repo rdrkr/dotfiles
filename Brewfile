@@ -10,6 +10,7 @@ tap "mocki-toki/formulae"
 tap "nikitabobko/tap"
 tap "rdrkr/tap"
 tap "steipete/tap"
+tap "touch-tap/tap"
 # Code searching, linting, rewriting
 brew "ast-grep"
 # Bourne-Again SHell, a UNIX command interpreter
