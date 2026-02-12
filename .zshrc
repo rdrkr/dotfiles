@@ -103,6 +103,11 @@ function notify() {
   else
     printf "\e]777;notify;%s;%s\a" "${title}" "${body}"
   fi
+
+  # Notify OpenClaw if available (non-blocking)
+  if command -v openclaw >/dev/null 2>&1; then
+    (openclaw system event --text "🖥️ ${title}: ${body}" --mode now >/dev/null 2>&1 &)
+  fi
 }
 
 # notify hooks
