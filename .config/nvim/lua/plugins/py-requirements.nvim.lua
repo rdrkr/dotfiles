@@ -22,7 +22,7 @@ return {
             filter = {
                 -- Pull only final release versions, this will ignore alpha, beta,
                 -- release candidate, post release, and developmental release versions
-                final_release = false,
+                final_release = true,
                 -- Ignore yanked package versions
                 yanked = true,
             },
@@ -42,6 +42,13 @@ return {
                         require("py-requirements").upgrade_all()
                     end,
                     desc = "Upgrade all deps",
+                },
+                {
+                    "<leader>rK",
+                    function()
+                        require("py-requirements").show_description()
+                    end,
+                    desc = "Show despcription",
                 },
             },
         })
