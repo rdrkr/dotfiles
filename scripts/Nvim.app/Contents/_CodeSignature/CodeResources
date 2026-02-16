@@ -10,7 +10,7 @@
 		</data>
 		<key>Resources/Assets.car</key>
 		<data>
-		tm7f6896EoSQ50oW8QF6eb5GyTY=
+		dyjBMVjNa7EuNDG1MLieiJPy1Cc=
 		</data>
 		<key>Resources/InfoPlist.loctable</key>
 		<data>
@@ -34,11 +34,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			tm7f6896EoSQ50oW8QF6eb5GyTY=
+			dyjBMVjNa7EuNDG1MLieiJPy1Cc=
 			</data>
 			<key>hash2</key>
 			<data>
-			7QYtzhKdopi/7UYQJUDyMxkaq42RfookinUz2u83EV0=
+			t5BR4div8Bip0TO1nFtZl3qH3LE8LkP2GX0KsvJZfDQ=
 			</data>
 		</dict>
 		<key>Resources/InfoPlist.loctable</key>
@@ -56,10 +56,10 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			apWzcPqo7dlZlLl9LcIvFT9rUa4=
+			AXCBcxoKmtiAcV/v/1FvWLfSW8c=
 			</data>
 			<key>requirement</key>
-			<string>cdhash H"6a95b370faa8edd95994b97d2dc22f153f6b51ae"</string>
+			<string>identifier document and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: ronendruker@me.com (T3E45QM8LK)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
 		</dict>
 	</dict>
 	<key>rules</key>

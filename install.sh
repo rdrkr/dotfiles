@@ -193,6 +193,14 @@ restore() {
 
 	run_stow
 
+	print_header "Installing custom scripts..."
+	if [ -d "scripts/Nvim.app" ]; then
+		run_command "cp -R scripts/Nvim.app /Applications/"
+		print_success "Nvim.app copied to /Applications."
+	else
+		print_warning "scripts/Nvim.app not found. Skipping."
+	fi
+
 	echo -e "
 ${C_GREEN}All done! Your dotfiles are set up.${NC}
 "
