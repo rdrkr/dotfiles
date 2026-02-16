@@ -51,7 +51,7 @@ window-padding-x = 16
 window-padding-y = 16
 quit-after-last-window-closed = true
 auto-update-channel = tip
-
+bell-features = attention,title
 keybind = shift+enter=text:\x1b\r
 keybind = alt+shift+j=write_scrollback_file:open
 keybind = ctrl+tab=esc:[27;5;9~
