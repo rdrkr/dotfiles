@@ -1,10 +1,6 @@
 copilot
 antigravity-claude-proxy
-clawhub
 fastify
-homebridge-config-ui-x
-homebridge
 mcporter
 neovim
-openclaw
 tsx
