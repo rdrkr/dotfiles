@@ -164,7 +164,18 @@ which() { nu -c "which $@" }
 alias ls='ls --color=always'
 alias vim='nvim'
 alias c='clear'
-alias update-all='brew update && brew upgrade && brew cleanup --prune=all && mas upgrade && npm -g upgrade && pipx upgrade-all && zinit self-update && zinit update && zinit cclear'
+alias update-all='\
+  brew update && \
+  brew upgrade && \
+  brew cleanup --prune=all && \
+  mas upgrade && \
+  npm -g upgrade && \
+  pipx upgrade-all && \
+  zinit self-update && \
+  zinit update && \
+  zinit cclear && \
+  source ~/.zshrc \
+'
 alias ua='update-all'
 
 alias cc='claude --dangerously-skip-permissions'

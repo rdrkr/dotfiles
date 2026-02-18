@@ -1,0 +1,35 @@
+# https://github.com/philocalyst/infat
+
+[extensions]
+pdf = "Preview"
+
+[schemes]
+mailto = "Mail"
+web = "Finicky"
+
+[types]
+#app-bundle = ""
+#archive = ""
+#audio = ""
+#data = ""
+#directory = ""
+#executable = ""
+#folder = ""
+#image = ""
+#movie = ""
+#mp4-audio = ""
+#mp4-movie = ""
+#quicktime = ""
+#raw-image = ""
+#shell = ""
+#sourcecode = ""
+#symlink = ""
+#unix-executable = ""
+#video = ""
+c-source = "Nvim"
+cpp-source = "Nvim"
+csv = "Nvim"
+makefile = "Nvim"
+objc-source = "Nvim"
+plain-text = "Nvim"
+text = "Nvim"

@@ -79,6 +79,8 @@ brew "gradle-completion"
 brew "grpcurl"
 # Tools and libraries to manipulate images in select formats
 brew "imagemagick"
+# Tool to set default openers for file formats and url schemes on macOS
+brew "infat"
 # Install and debug iPhone apps from the command-line
 brew "ios-deploy"
 # Update of iperf: measures TCP, UDP, and SCTP bandwidth

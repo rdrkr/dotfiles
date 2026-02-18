@@ -149,7 +149,21 @@ restore() {
 		print_warning "Brewfile not found. Skipping brew bundle."
 	fi
 
-	# 3. Install Global NPM Packages
+	# 3. Setup default macOS applications with infat
+	print_header "Setting up default macOS applications..."
+	run_command "source \"${HOME}/.zshrc\""
+	if command -v infat &>/dev/null; then
+		run_command "infat --config ~/.config/infat/config.toml"
+		if [ $? -ne 0 ] && [ "$DRY_RUN" = false ]; then
+			print_error "infat command failed."
+			exit 1
+		fi
+		print_success "Default macOS applications configured."
+	else
+		print_warning "infat not found. Skipping default application setup."
+	fi
+
+	# 4. Install Global NPM Packages
 	print_header "Installing Global NPM Packages..."
 	if [ -f "$NPM_GLOBAL_FILE" ]; then
 		if command -v npm &>/dev/null; then
@@ -170,7 +184,7 @@ restore() {
 		print_warning "$NPM_GLOBAL_FILE not found. Skipping."
 	fi
 
-	# 4. Install Pipx Packages
+	# 5. Install Pipx Packages
 	print_header "Installing Pipx Packages..."
 	if [ -f "$PIPX_PACKAGES_FILE" ]; then
 		if command -v pipx &>/dev/null; then

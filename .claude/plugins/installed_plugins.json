@@ -23,10 +23,10 @@
     "frontend-design@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/frontend-design/2cd88e7947b7",
-        "version": "2cd88e7947b7",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/frontend-design/261ce4fba4f2",
+        "version": "261ce4fba4f2",
         "installedAt": "2026-01-31T09:18:47.057Z",
-        "lastUpdated": "2026-02-09T07:15:51.572Z",
+        "lastUpdated": "2026-02-18T17:59:54.058Z",
         "gitCommitSha": "27d2b86d72da27c64585150857cee8472ad47abb"
       }
     ],
@@ -43,10 +43,10 @@
     "commit-commands@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/commit-commands/2cd88e7947b7",
-        "version": "2cd88e7947b7",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/commit-commands/261ce4fba4f2",
+        "version": "261ce4fba4f2",
         "installedAt": "2026-01-31T09:18:47.110Z",
-        "lastUpdated": "2026-02-09T07:15:51.570Z",
+        "lastUpdated": "2026-02-18T17:59:54.062Z",
         "gitCommitSha": "27d2b86d72da27c64585150857cee8472ad47abb"
       }
     ],
