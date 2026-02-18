@@ -40,4 +40,7 @@ require("lazy").setup({
             disabled_plugins = {},
         },
     },
+    rocks = {
+        hererocks = true,
+    },
 })
