@@ -327,8 +327,6 @@ cask "microsoft-teams"
 cask "omnidisksweeper"
 # Tiling window manager for macOS with Niri-inspired column-based layout
 cask "barutsrb/tap/omniwm"
-# Personal AI assistant
-cask "openclaw"
 # Utility to uninstall apps and remove leftover files from old/uninstalled apps
 cask "pearcleaner"
 # Home media server
