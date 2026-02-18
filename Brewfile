@@ -35,6 +35,10 @@ brew "cmatrix"
 brew "cocoapods"
 # Container runtimes on MacOS (and Linux) with minimal setup
 brew "colima"
+# Postgres C API library
+brew "libpq"
+# Dependency Manager for PHP
+brew "composer"
 # Pack, ship and run any application as a lightweight container
 brew "docker"
 # Docker CLI plugin for extended build capabilities with BuildKit
@@ -83,6 +87,8 @@ brew "iperf3"
 brew "isort"
 # Lightweight and flexible command-line JSON processor
 brew "jq"
+# Fast, Dynamic Programming Language
+brew "julia"
 # Lazier way to manage everything docker
 brew "lazydocker"
 # Simple terminal UI for git commands
@@ -91,8 +97,6 @@ brew "lazygit"
 brew "lazysql"
 # Graphical front-end for GCC's coverage testing tool (gcov)
 brew "lcov"
-# Postgres C API library
-brew "libpq"
 # Powerful, lightweight programming language
 brew "lua"
 # Package manager for the Lua programming language
@@ -105,6 +109,8 @@ brew "markdownlint-cli2"
 brew "mas"
 # Java-based project management
 brew "maven"
+# CLI for Mermaid library
+brew "mermaid-cli"
 # Simple tool to make locally trusted development certificates
 brew "mkcert"
 # Deep clean and optimize your Mac
@@ -367,12 +373,12 @@ mas "Developer", id: 640199958
 mas "Equinox", id: 1591510203
 mas "iMovie", id: 408981434
 mas "Infuse", id: 1136220934
-mas "Keynote", id: 409183694
 mas "Keynote", id: 361285480
+mas "Keynote", id: 409183694
 mas "Mail Signature", id: 1595342317
 mas "Mic Drop", id: 1489816366
-mas "Numbers", id: 409203825
 mas "Numbers", id: 361304891
+mas "Numbers", id: 409203825
 mas "Pages", id: 409201541
 mas "Pages", id: 361309726
 mas "Perplexity", id: 6714467650
