@@ -168,6 +168,8 @@ alias c='clear'
 ## updat all tools with a single command, showing a spinner if gum is available
 function update-all() {
   local update_cmd='\
+    echo ""; \
+    sleep 1; \
     brew update && \
     brew upgrade && \
     brew cleanup --prune=all && \
