@@ -1,7 +1,10 @@
 # https://github.com/philocalyst/infat
 
 [extensions]
+kt = "Nvim"
+kts = "Nvim"
 pdf = "Preview"
+swift = "Nvim"
 
 [schemes]
 mailto = "Mail"
