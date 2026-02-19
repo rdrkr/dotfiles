@@ -184,6 +184,7 @@ function update-all() {
     "Updating LazyVim..."
     "Updating Mason..."
     "Updating Treesitter..."
+    "Updating Dotfiles pre-commit hooks..."
   )
 
   # zinit commands
@@ -206,6 +207,7 @@ function update-all() {
     'nvim --headless "+Lazy! update" +qa'
     'nvim --headless "+MasonUpdate" +qa'
     'nvim --headless "+TSUpdate" +qa'
+    "cd ~/dotfiles && pre-commit autoupdate"
   )
 
   outputs=(
@@ -222,6 +224,7 @@ function update-all() {
     "--show-error"
     "--show-error"
     "--show-error"
+    "--show-output"
   )
 
   if command -v gum >/dev/null 2>&1; then
