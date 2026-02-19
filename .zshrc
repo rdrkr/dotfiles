@@ -164,22 +164,37 @@ which() { nu -c "which $@" }
 alias ls='ls --color=always'
 alias vim='nvim'
 alias c='clear'
-alias update-all='\
-  brew update && \
-  brew upgrade && \
-  brew cleanup --prune=all && \
-  mas upgrade && \
-  npm -g upgrade && \
-  pipx upgrade-all && \
-  zinit self-update && \
-  zinit update && \
-  zinit cclear && \
-  nvim --headless "+Lazy! sync" +qa && \
-  nvim --headless "+Lazy! update" +qa && \
-  nvim --headless "+MasonUpdate" +qa && \
-  nvim --headless "+TSUpdate" +qa && \
-  source ~/.zshrc \
-'
+
+## updat all tools with a single command, showing a spinner if gum is available
+function update-all() {
+  local update_cmd='\
+    brew update && \
+    brew upgrade && \
+    brew cleanup --prune=all && \
+    mas upgrade && \
+    npm -g upgrade && \
+    pipx upgrade-all && \
+    zinit self-update && \
+    zinit update && \
+    zinit cclear && \
+    nvim --headless "+Lazy! sync" +qa && \
+    nvim --headless "+Lazy! update" +qa && \
+    nvim --headless "+MasonUpdate" +qa && \
+    nvim --headless "+TSUpdate" +qa \
+  '
+
+  if command -v gum >/dev/null 2>&1; then
+    gum spin \
+      --spinner="dot" \
+      --title="Updating..." \
+      --show-output \
+      -- sh -c "$update_cmd"
+  else
+    eval "$update_cmd"
+  fi
+
+  source ~/.zshrc
+}
 alias ua='update-all'
 
 alias cc='claude --dangerously-skip-permissions'
@@ -284,10 +299,13 @@ function _tmux_random_name() {
   echo "${adjectives[$RANDOM % ${#adjectives[@]} + 1]}-${animals[$RANDOM % ${#animals[@]} + 1]}"
 }
 
-## fzf picker with option to create new session
+## gum/fzf picker with option to create new session
 function _tmux_pick_session() {
   local selection
-  if command -v fzf >/dev/null 2>&1; then
+  if command -v gum >/dev/null 2>&1; then
+    selection=$( (echo "+ new session"; tmux list-sessions -F "#{session_name}" 2>/dev/null) | \
+      gum filter --placeholder "Pick session...")
+  elif command -v fzf >/dev/null 2>&1; then
     selection=$( (echo "+ new session"; tmux ls -F "#{session_name}: #{session_windows} windows" 2>/dev/null) | \
       fzf --height 40% --reverse --prompt="tmux session> ")
   else

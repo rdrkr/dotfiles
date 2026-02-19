@@ -77,6 +77,8 @@ brew "gowall"
 brew "gradle-completion"
 # Like cURL, but for gRPC
 brew "grpcurl"
+# Tool for glamorous shell scripts
+brew "gum"
 # Tools and libraries to manipulate images in select formats
 brew "imagemagick"
 # Tool to set default openers for file formats and url schemes on macOS
