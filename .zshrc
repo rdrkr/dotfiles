@@ -277,14 +277,14 @@ export PATH="$PATH:$HOME/.local/bin:$HOME/local/bin"
 export PATH="/Users/ronendruker/.antigravity/antigravity/bin:$PATH"
 
 # tmux
-# generate fun docker-style names
+## generate fun docker-style names
 function _tmux_random_name() {
-  local adjectives=(brave calm clever cool daring eager fancy gentle happy jolly...)
-  local animals=(otter fox panda koala falcon badger lynx wolf raven hawk...)
+  local adjectives=(brave calm clever cool daring eager fancy gentle happy jolly angry)
+  local animals=(otter fox panda koala falcon badger lynx wolf raven hawk hamster)
   echo "${adjectives[$RANDOM % ${#adjectives[@]} + 1]}-${animals[$RANDOM % ${#animals[@]} + 1]}"
 }
 
-# fzf picker with option to create new session
+## fzf picker with option to create new session
 function _tmux_pick_session() {
   local selection
   if command -v fzf >/dev/null 2>&1; then
@@ -296,44 +296,54 @@ function _tmux_pick_session() {
   echo "$selection"
 }
 
-## auto-start tmux when opening a new terminal, but only if we're in Ghostty and not already inside tmux
-if [[ "${TERM_PROGRAM}" == "ghostty" && -z "$TMUX" && -o interactive ]]; then
+## auto-start tmux when opening a new terminal, but only if we're in Ghostty or SSH and not already inside tmux
+if [[ ("${TERM_PROGRAM}" == "ghostty" || -n "${SSH_CONNECTION}") && -z "$TMUX" && -o interactive ]]; then
   # avoid nested/double tmux if the shell command line already invokes tmux
   # (e.g. zsh -c 'tmux ...')
   if ! ps -p $$ -o args= | grep -q "tmux"; then
-    # Define a temp file for PWD persistence
-    export TMUX_PWD_FILE="$(mktemp -t tmux-pwd.XXXXXX)"
-    
-    # check for detached sessions
-    # get list of detached session names (split by newline)
-    local -a _detached_sessions
-    _detached_sessions=("${(@f)$(tmux list-sessions -f "#{==:#{session_attached},0}" -F "#{session_name}" 2>/dev/null)}")
-    # filter out empty elements (important when no sessions exist)
-    _detached_sessions=("${_detached_sessions[@]:#}")
-
-    if [[ ${#_detached_sessions[@]} -gt 0 ]]; then
-      local _target_session="${_detached_sessions[1]}"
-
-      # if there are more detached sessions, open another terminal window to handle them
-      if [[ ${#_detached_sessions[@]} -gt 1 ]]; then
-        nohup open -n -a Ghostty >/dev/null 2>&1 &
+    if [[ -n "${SSH_CONNECTION}" ]]; then
+      selection=$(_tmux_pick_session)
+      if [[ "$selection" == "+ new session" ]]; then
+        exec tmux new-session -s "$(_tmux_random_name)"
+      elif [[ -n "$selection" ]]; then
+        session=$(echo "$selection" | cut -d: -f1)
+        exec tmux attach -t "$session"
       fi
-
-      tmux attach-session -t "$_target_session"
     else
-      tmux new-session -s "$(_tmux_random_name)" -e TMUX_PWD_FILE="$TMUX_PWD_FILE"
-    fi
-    unset _detached_sessions
+      # define a temp file for PWD persistence
+      export TMUX_PWD_FILE="$(mktemp -t tmux-pwd.XXXXXX)"
     
-    # upon exit, read the PWD and switch to it
-    if [[ -f "$TMUX_PWD_FILE" ]]; then
-       local last_pwd="$(cat "$TMUX_PWD_FILE")"
-       if [[ -n "$last_pwd" && -d "$last_pwd" ]]; then
-          builtin cd -- "$last_pwd"
-       fi
-       rm -f "$TMUX_PWD_FILE"
+      # check for detached sessions
+      # get list of detached session names (split by newline)
+      local -a _detached_sessions
+      _detached_sessions=("${(@f)$(tmux list-sessions -f "#{==:#{session_attached},0}" -F "#{session_name}" 2>/dev/null)}")
+      # filter out empty elements (important when no sessions exist)
+      _detached_sessions=("${_detached_sessions[@]:#}")
+
+      if [[ ${#_detached_sessions[@]} -gt 0 ]]; then
+        local _target_session="${_detached_sessions[1]}"
+
+        # if there are more detached sessions, open another terminal window to handle them
+        if [[ ${#_detached_sessions[@]} -gt 1 ]]; then
+          nohup open -n -a Ghostty >/dev/null 2>&1 &
+        fi
+
+        tmux attach-session -t "$_target_session"
+      else
+        tmux new-session -s "$(_tmux_random_name)" -e TMUX_PWD_FILE="$TMUX_PWD_FILE"
+      fi
+      unset _detached_sessions
+    
+      # upon exit, read the PWD and switch to it
+      if [[ -f "$TMUX_PWD_FILE" ]]; then
+         local last_pwd="$(cat "$TMUX_PWD_FILE")"
+         if [[ -n "$last_pwd" && -d "$last_pwd" ]]; then
+            builtin cd -- "$last_pwd"
+         fi
+         rm -f "$TMUX_PWD_FILE"
+      fi
+      unset TMUX_PWD_FILE
     fi
-    unset TMUX_PWD_FILE
   fi
 fi
 
