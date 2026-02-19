@@ -165,34 +165,77 @@ alias ls='ls --color=always'
 alias vim='nvim'
 alias c='clear'
 
-## updat all tools with a single command, showing a spinner if gum is available
+## update all tools with a single command, showing a spinner for each task if gum is available
 function update-all() {
-  local update_cmd='\
-    echo ""; \
-    sleep 1; \
-    brew update && \
-    brew upgrade && \
-    brew cleanup --prune=all && \
-    mas upgrade && \
-    npm -g upgrade && \
-    pipx upgrade-all && \
-    zinit self-update && \
-    zinit update && \
-    zinit cclear && \
-    nvim --headless "+Lazy! sync" +qa && \
-    nvim --headless "+Lazy! update" +qa && \
-    nvim --headless "+MasonUpdate" +qa && \
-    nvim --headless "+TSUpdate" +qa \
-  '
+  local zinit_home="${ZINIT_HOME:-${HOME}/.local/share/zinit/zinit.git}"
+  
+  local -a titles cmds
+  titles=(
+    "Updating Homebrew..."
+    "Upgrading Homebrew packages..."
+    "Cleaning up Homebrew..."
+    "Upgrading App Store apps..."
+    "Upgrading Global NPM packages..."
+    "Upgrading Pipx packages..."
+    "Updating Zinit..."
+    "Updating Zinit plugins..."
+    "Clearing Zinit cache..."
+    "Syncing LazyVim..."
+    "Updating LazyVim..."
+    "Updating Mason..."
+    "Updating Treesitter..."
+  )
+
+  # zinit commands
+  # We construct the source command explicitly to avoid quoting issues
+  local z_update="source \"$zinit_home/zinit.zsh\" && zinit self-update"
+  local z_plugins="source \"$zinit_home/zinit.zsh\" && zinit update"
+  local z_clean="source \"$zinit_home/zinit.zsh\" && zinit cclear"
+
+  cmds=(
+    "brew update"
+    "brew upgrade"
+    "brew cleanup --prune=all"
+    "mas upgrade"
+    "npm -g upgrade"
+    "pipx upgrade-all"
+    "zsh -c '$z_update'"
+    "zsh -c '$z_plugins'"
+    "zsh -c '$z_clean'"
+    'nvim --headless "+Lazy! sync" +qa'
+    'nvim --headless "+Lazy! update" +qa'
+    'nvim --headless "+MasonUpdate" +qa'
+    'nvim --headless "+TSUpdate" +qa'
+  )
 
   if command -v gum >/dev/null 2>&1; then
-    gum spin \
-      --spinner="dot" \
-      --title="Updating..." \
-      --show-output \
-      -- sh -c "$update_cmd"
+    for i in {1..${#cmds}}; do
+      local title="${titles[i]}"
+      local cmd="${cmds[i]}"
+      
+      # Run command with spinner
+      gum spin --spinner="dot" --title="$title" --show-output -- zsh -c "$cmd"
+      
+      # Check exit status
+      local exit_status=$?
+      local icon
+      local result
+
+      if [ "${exit_status}" -eq 0 ]; then
+        icon=$(gum style --foreground 2 "")
+        result=$(gum style --foreground 2 "done")
+      else
+        icon=$(gum style --foreground 1 "")
+        result=$(gum style --foreground 1 "failed!")
+      fi
+
+      printf "%s %-40s ... %s\n" "${icon}" "${title%...}" "${result}"
+    done
   else
-    eval "$update_cmd"
+    for cmd in "${cmds[@]}"; do
+      echo "Running: $cmd"
+      eval "$cmd"
+    done
   fi
 
   source ~/.zshrc
