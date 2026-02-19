@@ -197,16 +197,16 @@ function _claude_antigravity_run() {
   local proxy_cmd="/opt/homebrew/bin/antigravity-claude-proxy"
   local started_proxy=0
 
-  # Check if the proxy is already running (check process AND port)
-  # We start it if process is missing OR port 8080 is closed
+  # check if the proxy is already running (check process AND port)
+  # we start it if process is missing OR port 8080 is closed
   if ! pgrep -f "$proxy_name" >/dev/null 2>&1 || ! nc -z 127.0.0.1 8080 >/dev/null 2>&1; then
     echo "Starting antigravity proxy..."
-    # Start proxy in background
+    # start proxy in background
     "$proxy_cmd" start >/dev/null 2>&1 &
     local proxy_pid=$!
     started_proxy=1
 
-    # Wait for the proxy to be ready on port 8080
+    # wait for the proxy to be ready on port 8080
     local timeout=50 # 5 seconds
     while ! nc -z 127.0.0.1 8080 >/dev/null 2>&1 && [[ $timeout -gt 0 ]]; do
       sleep 0.1
@@ -218,13 +218,13 @@ function _claude_antigravity_run() {
     fi
   fi
 
-  # Run Claude
+  # run Claude
   command claude --dangerously-skip-permissions "$@"
 
-  # Cleanup
+  # cleanup
   if [[ $started_proxy -eq 1 ]]; then
     echo "Stopping antigravity proxy..."
-    # Kill the specific PID we started
+    # kill the specific PID we started
     kill "$proxy_pid" 2>/dev/null || true
   fi
 }
