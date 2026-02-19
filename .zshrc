@@ -169,7 +169,7 @@ alias c='clear'
 function update-all() {
   local zinit_home="${ZINIT_HOME:-${HOME}/.local/share/zinit/zinit.git}"
   
-  local -a titles cmds
+  local -a titles cmds outputs
   titles=(
     "Updating Homebrew..."
     "Upgrading Homebrew packages..."
@@ -189,7 +189,7 @@ function update-all() {
   # zinit commands
   # We construct the source command explicitly to avoid quoting issues
   local z_update="source \"$zinit_home/zinit.zsh\" && zinit self-update"
-  local z_plugins="source \"$zinit_home/zinit.zsh\" && zinit update"
+  local z_plugins="source \"$zinit_home/zinit.zsh\" && zinit update --quiet --all"
   local z_clean="source \"$zinit_home/zinit.zsh\" && zinit cclear"
 
   cmds=(
@@ -197,7 +197,7 @@ function update-all() {
     "brew upgrade"
     "brew cleanup --prune=all"
     "mas upgrade"
-    "npm -g upgrade"
+    "npm upgrade --global"
     "pipx upgrade-all"
     "zsh -c '$z_update'"
     "zsh -c '$z_plugins'"
@@ -208,28 +208,38 @@ function update-all() {
     'nvim --headless "+TSUpdate" +qa'
   )
 
+  outputs=(
+    "--show-error"
+    "--show-output"
+    "--show-error"
+    "--show-output"
+    "--show-error"
+    "--show-output"
+    "--show-error"
+    "--show-output"
+    "--show-output"
+    "--show-error"
+    "--show-error"
+    "--show-error"
+    "--show-error"
+  )
+
   if command -v gum >/dev/null 2>&1; then
     for i in {1..${#cmds}}; do
       local title="${titles[i]}"
       local cmd="${cmds[i]}"
+      local output="${outputs[i]}"
       
       # Run command with spinner
-      gum spin --spinner="dot" --title="$title" --show-output -- zsh -c "$cmd"
+      # We use zsh -l -c to ensure the environment (PATHs) is fully loaded
+      gum spin --spinner="dot" --title="$title" "${output}" -- zsh -l -c "$cmd"
       
       # Check exit status
-      local exit_status=$?
-      local icon
-      local result
-
-      if [ "${exit_status}" -eq 0 ]; then
-        icon=$(gum style --foreground 2 "")
-        result=$(gum style --foreground 2 "done")
+      if [ $? -eq 0 ]; then
+        printf "%s  %-34s %s\n" "$(gum style --foreground 2 "")" "${title%...}..." "$(gum style --foreground 2 "done")"
       else
-        icon=$(gum style --foreground 1 "")
-        result=$(gum style --foreground 1 "failed!")
+        printf "%s  %-34s %s\n" "$(gum style --foreground 1 "")" "${title%...}..." "$(gum style --foreground 1 "failed!")"
       fi
-
-      printf "%s %-40s ... %s\n" "${icon}" "${title%...}" "${result}"
     done
   else
     for cmd in "${cmds[@]}"; do
