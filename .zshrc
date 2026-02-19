@@ -77,7 +77,7 @@ export CLAUDE_POWERLINE_CONFIG=~/.config/claude/powerline/config.json
 export CLAUDE_POWERLINE_DEBUG=0
 export DEBUG=false
 
-# tmux
+# persistent CWD handling for tmux and OSC-7-aware terminals like Ghostty
 function chpwd() {
   # update tmux status line
   [[ -n "$TMUX" ]] && tmux refresh-client -S
@@ -174,6 +174,10 @@ alias update-all='\
   zinit self-update && \
   zinit update && \
   zinit cclear && \
+  nvim --headless "+Lazy! sync" +qa && \
+  nvim --headless "+Lazy! update" +qa && \
+  nvim --headless "+MasonUpdate" +qa && \
+  nvim --headless "+TSUpdate" +qa && \
   source ~/.zshrc \
 '
 alias ua='update-all'
@@ -272,39 +276,56 @@ fi
 export PATH="$PATH:$HOME/.local/bin:$HOME/local/bin"
 export PATH="/Users/ronendruker/.antigravity/antigravity/bin:$PATH"
 
-# Auto-start tmux with persistent PWD
+# tmux
+# generate fun docker-style names
+function _tmux_random_name() {
+  local adjectives=(brave calm clever cool daring eager fancy gentle happy jolly...)
+  local animals=(otter fox panda koala falcon badger lynx wolf raven hawk...)
+  echo "${adjectives[$RANDOM % ${#adjectives[@]} + 1]}-${animals[$RANDOM % ${#animals[@]} + 1]}"
+}
+
+# fzf picker with option to create new session
+function _tmux_pick_session() {
+  local selection
+  if command -v fzf >/dev/null 2>&1; then
+    selection=$( (echo "+ new session"; tmux ls -F "#{session_name}: #{session_windows} windows" 2>/dev/null) | \
+      fzf --height 40% --reverse --prompt="tmux session> ")
+  else
+    selection="+ new session"
+  fi
+  echo "$selection"
+}
+
+## auto-start tmux when opening a new terminal, but only if we're in Ghostty and not already inside tmux
 if [[ "${TERM_PROGRAM}" == "ghostty" && -z "$TMUX" && -o interactive ]]; then
-  # Avoid nested/double tmux if the shell command line already invokes tmux
+  # avoid nested/double tmux if the shell command line already invokes tmux
   # (e.g. zsh -c 'tmux ...')
   if ! ps -p $$ -o args= | grep -q "tmux"; then
     # Define a temp file for PWD persistence
     export TMUX_PWD_FILE="$(mktemp -t tmux-pwd.XXXXXX)"
     
-    # Check for detached sessions
-    # Get list of detached session names (split by newline)
+    # check for detached sessions
+    # get list of detached session names (split by newline)
     local -a _detached_sessions
     _detached_sessions=("${(@f)$(tmux list-sessions -f "#{==:#{session_attached},0}" -F "#{session_name}" 2>/dev/null)}")
-    # Filter out empty elements (important when no sessions exist)
+    # filter out empty elements (important when no sessions exist)
     _detached_sessions=("${_detached_sessions[@]:#}")
 
     if [[ ${#_detached_sessions[@]} -gt 0 ]]; then
       local _target_session="${_detached_sessions[1]}"
 
-      # If there are more detached sessions, open another terminal window to handle them
+      # if there are more detached sessions, open another terminal window to handle them
       if [[ ${#_detached_sessions[@]} -gt 1 ]]; then
         nohup open -n -a Ghostty >/dev/null 2>&1 &
       fi
 
       tmux attach-session -t "$_target_session"
     else
-      # Start new tmux session
-      # We use 'exec' to replace the shell if we didn't want to return, 
-      # but here we want to return to the parent shell with the new PWD.
-      tmux new-session -e TMUX_PWD_FILE="$TMUX_PWD_FILE"
+      tmux new-session -s "$(_tmux_random_name)" -e TMUX_PWD_FILE="$TMUX_PWD_FILE"
     fi
     unset _detached_sessions
     
-    # Upon exit, read the PWD and switch to it
+    # upon exit, read the PWD and switch to it
     if [[ -f "$TMUX_PWD_FILE" ]]; then
        local last_pwd="$(cat "$TMUX_PWD_FILE")"
        if [[ -n "$last_pwd" && -d "$last_pwd" ]]; then

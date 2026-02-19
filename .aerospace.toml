@@ -221,7 +221,7 @@ if.window-title-regex-substring = 'messages'
 run = ['layout tiling', 'move-node-to-workspace 5']
 
 [[on-window-detected]]
-if.app-id = 'com.automattic.beeper.desktop'
+if.app-name-regex-substring = 'beeper'
 run = 'move-node-to-workspace 5'
 
 [[on-window-detected]]
