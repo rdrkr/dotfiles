@@ -211,7 +211,7 @@ function update-all() {
   )
 
   outputs=(
-    "--show-error"
+    "--show-output"
     "--show-output"
     "--show-error"
     "--show-output"

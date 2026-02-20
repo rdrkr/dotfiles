@@ -79,6 +79,8 @@ brew "gradle-completion"
 brew "grpcurl"
 # Tool for glamorous shell scripts
 brew "gum"
+# Easy, fast, and beautiful database client for the terminal
+brew "harlequin"
 # Tools and libraries to manipulate images in select formats
 brew "imagemagick"
 # Tool to set default openers for file formats and url schemes on macOS
@@ -379,8 +381,8 @@ mas "Keynote", id: 361285480
 mas "Keynote", id: 409183694
 mas "Mail Signature", id: 1595342317
 mas "Mic Drop", id: 1489816366
-mas "Numbers", id: 409203825
 mas "Numbers", id: 361304891
+mas "Numbers", id: 409203825
 mas "Pages", id: 409201541
 mas "Pages", id: 361309726
 mas "Perplexity", id: 6714467650
