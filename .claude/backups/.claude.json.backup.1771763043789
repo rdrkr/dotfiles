@@ -49,7 +49,7 @@
     "agent-flag": 522
   },
   "memoryUsageCount": 7,
-  "promptQueueUseCount": 773,
+  "promptQueueUseCount": 776,
   "autoConnectIde": true,
   "cachedStatsigGates": {
     "tengu_disable_bypass_permissions_mode": false,
@@ -714,7 +714,7 @@
   "hasCompletedClaudeInChromeOnboarding": true,
   "clientDataCache": {
     "data": {},
-    "timestamp": 1771759320089
+    "timestamp": 1771762209764
   },
   "hasShownOpus46Notice": {
     "48aa74bd-6d95-4a77-92ac-92b8e91cc397": true
