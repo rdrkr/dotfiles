@@ -1,0 +1,708 @@
+{
+  "numStartups": 531,
+  "installMethod": "native",
+  "autoUpdates": false,
+  "hasSeenTasksHint": true,
+  "customApiKeyResponses": {
+    "approved": [
+      "ZYHjfxSWpPw-7qdGmgAA"
+    ],
+    "rejected": []
+  },
+  "tipsHistory": {
+    "new-user-warmup": 1,
+    "memory-command": 26,
+    "theme-command": 515,
+    "status-line": 491,
+    "prompt-queue": 54,
+    "shift-enter": 526,
+    "enter-to-steer-in-relatime": 520,
+    "todo-list": 515,
+    "# for memory": 447,
+    "install-github-app": 524,
+    "drag-and-drop-images": 524,
+    "paste-images-mac": 524,
+    "double-esc": 70,
+    "continue": 525,
+    "shift-tab": 525,
+    "image-paste": 520,
+    "custom-agents": 522,
+    "permissions": 524,
+    "custom-commands": 521,
+    "plan-mode-for-complex-tasks": 470,
+    "git-worktrees": 526,
+    "double-esc-code-restore": 529,
+    "tab-toggle-thinking": 438,
+    "ultrathink-keyword": 469,
+    "ide-hotkey": 111,
+    "stickers-command": 472,
+    "ide-upsell-external-terminal": 475,
+    "default-permission-mode-config": 475,
+    "frontend-design-plugin": 415,
+    "rename-conversation": 524,
+    "config-thinking-mode": 461,
+    "desktop-app": 531,
+    "web-app": 531,
+    "mobile-app": 516,
+    "install-slack-app": 529,
+    "btw-side-question": 461,
+    "agent-flag": 522
+  },
+  "memoryUsageCount": 7,
+  "promptQueueUseCount": 768,
+  "autoConnectIde": true,
+  "cachedStatsigGates": {
+    "tengu_disable_bypass_permissions_mode": false,
+    "tengu_use_file_checkpoints": true,
+    "tengu_tool_pear": false,
+    "tengu_migrate_ignore_patterns": false,
+    "tengu_halloween": false,
+    "tengu_glob_with_rg": false,
+    "tengu_web_tasks": true,
+    "tengu_log_1p_events": true,
+    "tengu_enable_versioned_plugins": false,
+    "tengu_backstage_only": false,
+    "code_slack_app_install_banner": false,
+    "tengu_sumi": true,
+    "tengu_react_vulnerability_warning": false,
+    "tengu_c4w_usage_limit_notifications_enabled": true,
+    "tengu_thinkback": false,
+    "tengu_ant_attribution_header_new": true,
+    "tengu_clawd_openfire": false,
+    "tengu_prompt_suggestion": true,
+    "tengu_year_end_2025_campaign_promo": false
+  },
+  "cachedDynamicConfigs": {
+    "tengu_1p_event_batch_config": {
+      "scheduledDelayMillis": 5000,
+      "maxExportBatchSize": 200,
+      "maxQueueSize": 8192
+    },
+    "tengu-top-of-feed-tip": {
+      "tip": "",
+      "color": ""
+    }
+  },
+  "cachedGrowthBookFeatures": {
+    "strawberry_granite_flag": "OFF",
+    "persimmon_marble_flag": "OFF",
+    "tengu_pid_based_version_locking": true,
+    "tengu_mcp_tool_search": true,
+    "tengu_disable_bypass_permissions_mode": false,
+    "tengu_tool_pear": false,
+    "tengu_c4w_usage_limit_notifications_enabled": true,
+    "tengu_thinkback": false,
+    "tengu_ant_attribution_header_new": true,
+    "tengu_sumi": true,
+    "tengu_react_vulnerability_warning": false,
+    "tengu_1p_event_batch_config": {
+      "scheduledDelayMillis": 5000,
+      "maxExportBatchSize": 200,
+      "maxQueueSize": 8192
+    },
+    "tengu_scratch": false,
+    "tengu_log_segment_events": false,
+    "tengu_log_datadog_events": true,
+    "tengu_event_sampling_config": {},
+    "tengu-top-of-feed-tip": {
+      "tip": "",
+      "color": ""
+    },
+    "tengu_post_compact_survey": false,
+    "tengu_streaming_tool_execution2": true,
+    "tengu_tool_search_unsupported_models": [
+      "haiku"
+    ],
+    "tengu_accept_with_feedback": true,
+    "tengu_code_diff_cli": true,
+    "tengu_bash_haiku_prefetch": true,
+    "enhanced_telemetry_beta": false,
+    "tengu_plan_mode_interview_phase": false,
+    "tengu_session_memory": false,
+    "tengu_chrome_auto_enable": false,
+    "tengu_prompt_suggestion": true,
+    "tengu_brass_pebble": false,
+    "tengu_keybinding_customization": false,
+    "tengu_claudeai_mcp_connectors": true,
+    "tengu_attribution_header": true,
+    "tengu_cache_plum_violet": true,
+    "tengu_plank_river_frost": "user_intent",
+    "tengu_sm_compact": false,
+    "tengu_compact_streaming_retry": false,
+    "tengu_file_write_optimization": true,
+    "tengu_scarf_coffee": false,
+    "tengu_keybinding_customization_release": true,
+    "tengu_pr_status_cli": true,
+    "tengu_marble_kite": false,
+    "tengu_kv7_prompt_sort": true,
+    "tengu_compact_cache_prefix": true,
+    "tengu_marble_anvil": true,
+    "tengu_coral_fern": false,
+    "tengu_system_prompt_global_cache": true,
+    "tengu_workout": false,
+    "tengu_cork_m4q": true,
+    "tengu_tst_kx7": false,
+    "tengu_vscode_review_upsell": false,
+    "tengu_vscode_onboarding": false,
+    "tengu_plum_vx3": true,
+    "tengu_oboe": true,
+    "tengu_tst_names_in_messages": false,
+    "tengu_vinteuil_phrase": true,
+    "tengu_chomp_inflection": true,
+    "tengu_silver_lantern": false,
+    "tengu_copper_lantern": false,
+    "tengu_workout2": true,
+    "tengu_marble_lantern_disabled": false,
+    "tengu_penguins_enabled": true,
+    "tengu_mcp_elicitation": false,
+    "tengu_penguins_off": null,
+    "tengu_copper_bridge": true,
+    "tengu_snippet_save": false,
+    "tengu_bergotte_lantern": false,
+    "tengu_fgts": false,
+    "tengu_mulberry_fog": false,
+    "tengu_prompt_cache_1h_config": {
+      "allowlist": [
+        "repl_main_thread*",
+        "sdk"
+      ]
+    },
+    "tengu_amber_prism": false,
+    "tengu_immediate_model_command": false,
+    "tengu_birthday_hat": true,
+    "tengu_moth_copse": false,
+    "tengu_slate_nexus": true,
+    "tengu_marble_sandcastle": true,
+    "tengu_birch_mist": false
+  },
+  "respectGitignore": false,
+  "hasSeenStashHint": true,
+  "userID": "7fecbfdcf7f6404dd782d50970a054dddbce9de69bc87181c0bee4cdf4f1cfbd",
+  "firstStartTime": "2025-07-24T06:07:02.103Z",
+  "projects": {
+    "/Users/ronendruker": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": false,
+      "projectOnboardingSeenCount": 1,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "lastTotalWebSearchRequests": 0,
+      "lastCost": 0.001853,
+      "lastAPIDuration": 3195,
+      "lastToolDuration": 0,
+      "lastDuration": 5023,
+      "lastLinesAdded": 0,
+      "lastLinesRemoved": 0,
+      "lastTotalInputTokens": 1023,
+      "lastTotalOutputTokens": 166,
+      "lastTotalCacheCreationInputTokens": 0,
+      "lastTotalCacheReadInputTokens": 0,
+      "lastSessionId": "17220850-be5e-4076-ad49-f814bb890267",
+      "reactVulnerabilityCache": {
+        "detected": false,
+        "package": null,
+        "packageName": null,
+        "version": null,
+        "packageManager": null
+      },
+      "lastAPIDurationWithoutRetries": 3195,
+      "lastModelUsage": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 1023,
+          "outputTokens": 166,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.001853
+        }
+      }
+    },
+    "/Users/ronendruker/Development/repos/AeroSpaceBar": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {
+        "playwright": {
+          "type": "stdio",
+          "command": "npx",
+          "args": [
+            "@playwright/mcp@latest"
+          ],
+          "env": {}
+        }
+      },
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": true,
+      "projectOnboardingSeenCount": 4,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": true,
+      "exampleFiles": [
+        "SettingsViewModel.swift",
+        "ConfigurationGateway.swift",
+        "GroupsViewModel.swift",
+        "SpacesView.swift",
+        "GroupsView.swift"
+      ],
+      "exampleFilesGeneratedAt": 1771321899759,
+      "lastTotalWebSearchRequests": 0,
+      "hasCompletedProjectOnboarding": true,
+      "disabledMcpServers": [
+        "playwright"
+      ],
+      "lastCost": 3.6286543499999984,
+      "lastAPIDuration": 547100,
+      "lastToolDuration": 177754,
+      "lastDuration": 22261101,
+      "lastLinesAdded": 246,
+      "lastLinesRemoved": 0,
+      "lastTotalInputTokens": 33802,
+      "lastTotalOutputTokens": 28387,
+      "lastTotalCacheCreationInputTokens": 292157,
+      "lastTotalCacheReadInputTokens": 3607329,
+      "lastSessionId": "2c709dc1-7a40-4224-976b-adc2544035fe",
+      "lastAPIDurationWithoutRetries": 547004,
+      "lastFpsAverage": 0.6,
+      "lastFpsLow1Pct": 29.03,
+      "lastModelUsage": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 33733,
+          "outputTokens": 10122,
+          "cacheReadInputTokens": 432661,
+          "cacheCreationInputTokens": 73848,
+          "webSearchRequests": 0,
+          "costUSD": 0.21991910000000006
+        },
+        "claude-opus-4-6": {
+          "inputTokens": 69,
+          "outputTokens": 18265,
+          "cacheReadInputTokens": 3174668,
+          "cacheCreationInputTokens": 218309,
+          "webSearchRequests": 0,
+          "costUSD": 3.408735249999999
+        }
+      },
+      "lastSessionMetrics": {
+        "frame_duration_ms_count": 11369,
+        "frame_duration_ms_min": 0.07741699999314733,
+        "frame_duration_ms_max": 1029.2108340002596,
+        "frame_duration_ms_avg": 2.7683125469313783,
+        "frame_duration_ms_p50": 0.9840834999340586,
+        "frame_duration_ms_p95": 7.170673199876901,
+        "frame_duration_ms_p99": 34.64905334015376
+      }
+    },
+    "/Users/ronendruker/Development/repos/test": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": true,
+      "projectOnboardingSeenCount": 5,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "lastTotalWebSearchRequests": 0,
+      "lastCost": 0.00122,
+      "lastAPIDuration": 1236,
+      "lastToolDuration": 0,
+      "lastDuration": 88033,
+      "lastLinesAdded": 0,
+      "lastLinesRemoved": 0,
+      "lastTotalInputTokens": 1455,
+      "lastTotalOutputTokens": 14,
+      "lastTotalCacheCreationInputTokens": 0,
+      "lastTotalCacheReadInputTokens": 0,
+      "lastSessionId": "89f936ef-3448-43e7-b190-a6d4a0b7388a"
+    },
+    "/Users/ronendruker/Development/repos/calculator-app": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": true,
+      "projectOnboardingSeenCount": 2,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "lastTotalWebSearchRequests": 0,
+      "lastCost": 3.032312950000002,
+      "lastAPIDuration": 671907,
+      "lastToolDuration": 234679,
+      "lastDuration": 3720100,
+      "lastLinesAdded": 1031,
+      "lastLinesRemoved": 369,
+      "lastTotalInputTokens": 10057,
+      "lastTotalOutputTokens": 34997,
+      "lastTotalCacheCreationInputTokens": 187435,
+      "lastTotalCacheReadInputTokens": 6004369,
+      "lastSessionId": "20d0c332-cae0-472c-b790-415ac22598bf"
+    },
+    "/Users/ronendruker/Development/repos/test/calculator-app": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": false,
+      "projectOnboardingSeenCount": 1,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "lastCost": 0,
+      "lastAPIDuration": 0,
+      "lastToolDuration": 0,
+      "lastDuration": 8014,
+      "lastLinesAdded": 0,
+      "lastLinesRemoved": 0,
+      "lastTotalInputTokens": 0,
+      "lastTotalOutputTokens": 0,
+      "lastTotalCacheCreationInputTokens": 0,
+      "lastTotalCacheReadInputTokens": 0,
+      "lastTotalWebSearchRequests": 0,
+      "lastSessionId": "e327f4c4-9d1e-42e1-8d57-624aac21b9c4"
+    },
+    "/Users/ronendruker/Development/repos/affilibuster": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {
+        "playwright": {
+          "type": "stdio",
+          "command": "npx",
+          "args": [
+            "@playwright/mcp@latest"
+          ],
+          "env": {}
+        },
+        "render": {
+          "type": "http",
+          "url": "https://mcp.render.com/mcp",
+          "headers": {
+            "Authorization": "Bearer rnd_gjfCuz3vy2Bp1dswUIu6IT9HD2ek"
+          }
+        }
+      },
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": true,
+      "projectOnboardingSeenCount": 5,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "lastTotalWebSearchRequests": 0,
+      "exampleFiles": [
+        "pyproject.toml",
+        "package.json",
+        "models.py",
+        "merge-openapi.ts",
+        "docker-entrypoint.sh"
+      ],
+      "exampleFilesGeneratedAt": 1771322299005,
+      "hasCompletedProjectOnboarding": true,
+      "disabledMcpServers": [
+        "playwright",
+        "render"
+      ],
+      "lastCost": 9.561759250000003,
+      "lastAPIDuration": 1280433,
+      "lastToolDuration": 757945,
+      "lastDuration": 23208852,
+      "lastLinesAdded": 340,
+      "lastLinesRemoved": 303,
+      "lastTotalInputTokens": 51355,
+      "lastTotalOutputTokens": 64263,
+      "lastTotalCacheCreationInputTokens": 714765,
+      "lastTotalCacheReadInputTokens": 9976760,
+      "lastSessionId": "6cdd50f3-acb2-41b9-ae4f-fdd9d8b2a9f8",
+      "reactVulnerabilityCache": {
+        "detected": false,
+        "package": null,
+        "packageName": null,
+        "version": null,
+        "packageManager": null
+      },
+      "lastAPIDurationWithoutRetries": 1280193,
+      "lastModelUsage": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 48213,
+          "outputTokens": 17016,
+          "cacheReadInputTokens": 1474225,
+          "cacheCreationInputTokens": 126878,
+          "webSearchRequests": 0,
+          "costUSD": 0.43931299999999995
+        },
+        "claude-sonnet-4-5-20250929": {
+          "inputTokens": 3002,
+          "outputTokens": 7135,
+          "cacheReadInputTokens": 1424941,
+          "cacheCreationInputTokens": 194819,
+          "webSearchRequests": 0,
+          "costUSD": 2.1234742499999997
+        },
+        "claude-opus-4-6": {
+          "inputTokens": 140,
+          "outputTokens": 40112,
+          "cacheReadInputTokens": 7077594,
+          "cacheCreationInputTokens": 393068,
+          "webSearchRequests": 0,
+          "costUSD": 6.998971999999997
+        }
+      },
+      "lastFpsAverage": 1.57,
+      "lastFpsLow1Pct": 11,
+      "lastSessionMetrics": {
+        "frame_duration_ms_count": 58,
+        "frame_duration_ms_min": 0.38212499999963256,
+        "frame_duration_ms_max": 90.92166600000019,
+        "frame_duration_ms_avg": 25.474388620690025,
+        "frame_duration_ms_p50": 4.250979499998721,
+        "frame_duration_ms_p95": 73.31198120000057,
+        "frame_duration_ms_p99": 87.84490119000019
+      }
+    },
+    "/Users/ronendruker/Development/repos/aerospacebar-app": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": true,
+      "ignorePatterns": [],
+      "projectOnboardingSeenCount": 1,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "exampleFiles": [],
+      "lastCost": 0.00032720000000000004,
+      "lastAPIDuration": 1936,
+      "lastToolDuration": 0,
+      "lastDuration": 10594528,
+      "lastLinesAdded": 0,
+      "lastLinesRemoved": 0,
+      "lastTotalInputTokens": 109,
+      "lastTotalOutputTokens": 60,
+      "lastTotalCacheCreationInputTokens": 0,
+      "lastTotalCacheReadInputTokens": 0,
+      "lastTotalWebSearchRequests": 0,
+      "lastSessionId": "65239fed-bf1b-4ce6-8da4-e95521729f92"
+    },
+    "/Users/ronendruker/dotfiles": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": true,
+      "ignorePatterns": [],
+      "projectOnboardingSeenCount": 3,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "exampleFiles": [
+        "aerospacebar.toml",
+        "tmux.conf",
+        "zshrc",
+        "Brewfile",
+        "ghostty"
+      ],
+      "exampleFilesGeneratedAt": 1763565092838,
+      "lastTotalWebSearchRequests": 0,
+      "reactVulnerabilityCache": {
+        "detected": false,
+        "package": null,
+        "packageName": null,
+        "version": null,
+        "packageManager": null
+      },
+      "lastCost": 0.2943995,
+      "lastAPIDuration": 30271,
+      "lastAPIDurationWithoutRetries": 26853,
+      "lastToolDuration": 15,
+      "lastDuration": 228673,
+      "lastLinesAdded": 16,
+      "lastLinesRemoved": 2,
+      "lastTotalInputTokens": 1020,
+      "lastTotalOutputTokens": 938,
+      "lastTotalCacheCreationInputTokens": 29778,
+      "lastTotalCacheReadInputTokens": 167066,
+      "lastModelUsage": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 719,
+          "outputTokens": 46,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.000949
+        },
+        "claude-sonnet-4-6": {
+          "inputTokens": 301,
+          "outputTokens": 892,
+          "cacheReadInputTokens": 167066,
+          "cacheCreationInputTokens": 29778,
+          "webSearchRequests": 0,
+          "costUSD": 0.2934505
+        }
+      },
+      "lastSessionId": "dbd6ccc8-bb4b-4e4a-a6e6-17e846ee0627",
+      "lastFpsAverage": 3,
+      "lastFpsLow1Pct": 61.87,
+      "lastSessionMetrics": {
+        "frame_duration_ms_count": 675,
+        "frame_duration_ms_min": 0.15762499999982538,
+        "frame_duration_ms_max": 27.113832999995793,
+        "frame_duration_ms_avg": 2.1416131288889124,
+        "frame_duration_ms_p50": 1.5192499999975553,
+        "frame_duration_ms_p95": 5.940296199986184,
+        "frame_duration_ms_p99": 15.495686000000852
+      }
+    },
+    "/Users/ronendruker/.local/bin": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": false,
+      "projectOnboardingSeenCount": 0,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "exampleFiles": [],
+      "lastTotalWebSearchRequests": 0,
+      "lastCost": 0.13181359999999998,
+      "lastAPIDuration": 88540,
+      "lastToolDuration": 499,
+      "lastDuration": 302932,
+      "lastLinesAdded": 0,
+      "lastLinesRemoved": 0,
+      "lastTotalInputTokens": 4092,
+      "lastTotalOutputTokens": 3379,
+      "lastTotalCacheCreationInputTokens": 13190,
+      "lastTotalCacheReadInputTokens": 97867,
+      "lastSessionId": "bff1d377-9f76-42e6-ae67-ab5d905b8e5a"
+    },
+    "/Users/ronendruker/Development/repos/affilibuster-2": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": false,
+      "projectOnboardingSeenCount": 0,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "exampleFiles": [
+        "CurrencySelector.tsx",
+        "Navigation.tsx",
+        "pyproject.toml",
+        "package.json",
+        "Footer.tsx"
+      ],
+      "exampleFilesGeneratedAt": 1764221162691,
+      "hasCompletedProjectOnboarding": true,
+      "lastTotalWebSearchRequests": 0,
+      "lastCost": 7.518593150000004,
+      "lastAPIDuration": 1424426,
+      "lastToolDuration": 1469822,
+      "lastDuration": 16678849,
+      "lastLinesAdded": 386,
+      "lastLinesRemoved": 137,
+      "lastTotalInputTokens": 133782,
+      "lastTotalOutputTokens": 56491,
+      "lastTotalCacheCreationInputTokens": 828995,
+      "lastTotalCacheReadInputTokens": 11565863,
+      "lastSessionId": "1fbb3b65-0ad1-4e3c-a561-79c98d76c903"
+    }
+  },
+  "claudeCodeFirstTokenDate": "2025-09-03T09:00:57.482430Z",
+  "shiftEnterKeyBindingInstalled": true,
+  "hasCompletedOnboarding": true,
+  "lastOnboardingVersion": "1.0.102",
+  "hasOpusPlanDefault": false,
+  "subscriptionNoticeCount": 0,
+  "hasAvailableSubscription": false,
+  "hasIdeOnboardingBeenShown": {
+    "ghostty": true
+  },
+  "s1mAccessCache": {
+    "48aa74bd-6d95-4a77-92ac-92b8e91cc397": {
+      "hasAccess": false,
+      "hasAccessNotAsDefault": false,
+      "timestamp": 1771352942036
+    },
+    "64724d37-7b30-4763-a2e8-7958c4d4b705": {
+      "hasAccess": false,
+      "hasAccessNotAsDefault": false,
+      "timestamp": 1768228430524
+    }
+  },
+  "fallbackAvailableWarningThreshold": 0.5,
+  "isQualifiedForDataSharing": false,
+  "changelogLastFetched": 1771496965514,
+  "lastReleaseNotesSeen": "2.1.47",
+  "autoUpdatesProtectedForNative": true,
+  "feedbackSurveyState": {
+    "lastShownTime": 1765817541374
+  },
+  "lastPlanModeUse": 1771352945178,
+  "sonnet45MigrationComplete": true,
+  "anonymousId": "claudecode.v1.b0e783e5-e684-4ecd-b5c2-fa2271d1c34a",
+  "oauthAccount": {
+    "accountUuid": "e2bb38b1-a70e-4170-a21b-3cb047f495be",
+    "emailAddress": "ronendruker@me.com",
+    "organizationUuid": "48aa74bd-6d95-4a77-92ac-92b8e91cc397",
+    "displayName": "Ronen",
+    "organizationBillingType": "stripe_subscription",
+    "organizationRole": "admin",
+    "workspaceRole": null,
+    "organizationName": "ronendruker@me.com's Organization",
+    "hasExtraUsageEnabled": false,
+    "billingType": "stripe_subscription",
+    "accountCreatedAt": "2024-05-14T07:28:42.105191Z",
+    "subscriptionCreatedAt": "2025-09-03T08:58:43.907193Z"
+  },
+  "githubRepoPaths": {
+    "rdrkr/affilibuster": [
+      "/Users/ronendruker/Development/repos/affilibuster/ecopicks",
+      "/Users/ronendruker/Development/repos/affilibuster-2",
+      "/Users/ronendruker/Development/repos/affilibuster"
+    ],
+    "rdrkr/dotfiles": [
+      "/Users/ronendruker/dotfiles"
+    ],
+    "rdrkr/aerospacebar": [
+      "/Users/ronendruker/Development/repos/AeroSpaceBar"
+    ]
+  },
+  "opus45MigrationComplete": true,
+  "hasShownOpus45Notice": {
+    "48aa74bd-6d95-4a77-92ac-92b8e91cc397": true,
+    "64724d37-7b30-4763-a2e8-7958c4d4b705": true
+  },
+  "officialMarketplaceAutoInstallAttempted": true,
+  "officialMarketplaceAutoInstalled": true,
+  "thinkingMigrationComplete": true,
+  "opusProMigrationComplete": true,
+  "cachedChromeExtensionInstalled": true,
+  "groveConfigCache": {
+    "e2bb38b1-a70e-4170-a21b-3cb047f495be": {
+      "grove_enabled": true,
+      "timestamp": 1771496964453
+    }
+  },
+  "claudeInChromeDefaultEnabled": true,
+  "hasCompletedClaudeInChromeOnboarding": true,
+  "clientDataCache": {
+    "data": {},
+    "timestamp": 1771496964143
+  },
+  "hasShownOpus46Notice": {
+    "48aa74bd-6d95-4a77-92ac-92b8e91cc397": true
+  },
+  "hasVisitedExtraUsage": true,
+  "opus46FeedSeenCount": 3,
+  "penguinModeOrgEnabled": false,
+  "showSpinnerTree": false,
+  "effortCalloutDismissed": true,
+  "sonnet1m45MigrationComplete": true,
+  "birthdayHatAnimationCount": 3,
+  "cachedExtraUsageDisabledReason": "org_level_disabled"
+}
