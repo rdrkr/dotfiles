@@ -1,0 +1,16 @@
+{
+  "name": "update-all",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx update-all.ts"
+  },
+  "dependencies": {
+    "tasuku": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.0",
+    "tsx": "^4.0.0"
+  }
+}

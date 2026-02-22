@@ -1,6 +1,7 @@
 .DS_Store
 *.keystore
 *.log
+node_modules/
 
 .colima/_*
 .colima/default/daemon/*

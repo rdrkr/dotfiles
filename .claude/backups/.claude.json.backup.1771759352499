@@ -1,5 +1,5 @@
 {
-  "numStartups": 531,
+  "numStartups": 533,
   "installMethod": "native",
   "autoUpdates": false,
   "hasSeenTasksHint": true,
@@ -43,13 +43,13 @@
     "config-thinking-mode": 461,
     "desktop-app": 531,
     "web-app": 531,
-    "mobile-app": 516,
+    "mobile-app": 533,
     "install-slack-app": 529,
     "btw-side-question": 461,
     "agent-flag": 522
   },
   "memoryUsageCount": 7,
-  "promptQueueUseCount": 768,
+  "promptQueueUseCount": 773,
   "autoConnectIde": true,
   "cachedStatsigGates": {
     "tengu_disable_bypass_permissions_mode": false,
@@ -171,9 +171,19 @@
     "tengu_immediate_model_command": false,
     "tengu_birthday_hat": true,
     "tengu_moth_copse": false,
-    "tengu_slate_nexus": true,
+    "tengu_slate_nexus": false,
     "tengu_marble_sandcastle": true,
-    "tengu_birch_mist": false
+    "tengu_birch_mist": false,
+    "tengu_streaming_text": false,
+    "tengu_pebble_leaf_prune": false,
+    "tengu_swann_brevity": "control",
+    "tengu_disable_streaming_to_non_streaming_fallback": false,
+    "tengu_crystal_beam": {
+      "budgetTokens": 0
+    },
+    "tengu_auto_background_agents": false,
+    "tengu_oak_drum": false,
+    "tengu_tool_input_aliasing": false
   },
   "respectGitignore": false,
   "hasSeenStashHint": true,
@@ -610,6 +620,18 @@
       "lastTotalCacheCreationInputTokens": 828995,
       "lastTotalCacheReadInputTokens": 11565863,
       "lastSessionId": "1fbb3b65-0ad1-4e3c-a561-79c98d76c903"
+    },
+    "/Users/ronendruker/Development/repos/lazybeeper": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": false,
+      "projectOnboardingSeenCount": 1,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "exampleFiles": []
     }
   },
   "claudeCodeFirstTokenDate": "2025-09-03T09:00:57.482430Z",
@@ -636,8 +658,8 @@
   },
   "fallbackAvailableWarningThreshold": 0.5,
   "isQualifiedForDataSharing": false,
-  "changelogLastFetched": 1771496965514,
-  "lastReleaseNotesSeen": "2.1.47",
+  "changelogLastFetched": 1771757625435,
+  "lastReleaseNotesSeen": "2.1.50",
   "autoUpdatesProtectedForNative": true,
   "feedbackSurveyState": {
     "lastShownTime": 1765817541374
@@ -685,14 +707,14 @@
   "groveConfigCache": {
     "e2bb38b1-a70e-4170-a21b-3cb047f495be": {
       "grove_enabled": true,
-      "timestamp": 1771496964453
+      "timestamp": 1771757616223
     }
   },
   "claudeInChromeDefaultEnabled": true,
   "hasCompletedClaudeInChromeOnboarding": true,
   "clientDataCache": {
     "data": {},
-    "timestamp": 1771496964143
+    "timestamp": 1771759320089
   },
   "hasShownOpus46Notice": {
     "48aa74bd-6d95-4a77-92ac-92b8e91cc397": true

@@ -1,5 +1,5 @@
 {
-  "numStartups": 530,
+  "numStartups": 533,
   "installMethod": "native",
   "autoUpdates": false,
   "hasSeenTasksHint": true,
@@ -41,15 +41,15 @@
     "frontend-design-plugin": 415,
     "rename-conversation": 524,
     "config-thinking-mode": 461,
-    "desktop-app": 516,
-    "web-app": 516,
-    "mobile-app": 516,
+    "desktop-app": 531,
+    "web-app": 531,
+    "mobile-app": 533,
     "install-slack-app": 529,
     "btw-side-question": 461,
     "agent-flag": 522
   },
   "memoryUsageCount": 7,
-  "promptQueueUseCount": 768,
+  "promptQueueUseCount": 773,
   "autoConnectIde": true,
   "cachedStatsigGates": {
     "tengu_disable_bypass_permissions_mode": false,
@@ -170,7 +170,20 @@
     "tengu_amber_prism": false,
     "tengu_immediate_model_command": false,
     "tengu_birthday_hat": true,
-    "tengu_moth_copse": false
+    "tengu_moth_copse": false,
+    "tengu_slate_nexus": false,
+    "tengu_marble_sandcastle": true,
+    "tengu_birch_mist": false,
+    "tengu_streaming_text": false,
+    "tengu_pebble_leaf_prune": false,
+    "tengu_swann_brevity": "control",
+    "tengu_disable_streaming_to_non_streaming_fallback": false,
+    "tengu_crystal_beam": {
+      "budgetTokens": 0
+    },
+    "tengu_auto_background_agents": false,
+    "tengu_oak_drum": false,
+    "tengu_tool_input_aliasing": false
   },
   "respectGitignore": false,
   "hasSeenStashHint": true,
@@ -404,7 +417,7 @@
       "lastCost": 9.561759250000003,
       "lastAPIDuration": 1280433,
       "lastToolDuration": 757945,
-      "lastDuration": 23174345,
+      "lastDuration": 23208852,
       "lastLinesAdded": 340,
       "lastLinesRemoved": 303,
       "lastTotalInputTokens": 51355,
@@ -446,16 +459,16 @@
           "costUSD": 6.998971999999997
         }
       },
-      "lastFpsAverage": 3.51,
-      "lastFpsLow1Pct": 15.8,
+      "lastFpsAverage": 1.57,
+      "lastFpsLow1Pct": 11,
       "lastSessionMetrics": {
-        "frame_duration_ms_count": 3968,
-        "frame_duration_ms_min": 0.5378330000003189,
-        "frame_duration_ms_max": 365.32466700003715,
-        "frame_duration_ms_avg": 4.589127589213965,
-        "frame_duration_ms_p50": 1.220771499996772,
-        "frame_duration_ms_p95": 8.712914299953987,
-        "frame_duration_ms_p99": 62.164563590000036
+        "frame_duration_ms_count": 58,
+        "frame_duration_ms_min": 0.38212499999963256,
+        "frame_duration_ms_max": 90.92166600000019,
+        "frame_duration_ms_avg": 25.474388620690025,
+        "frame_duration_ms_p50": 4.250979499998721,
+        "frame_duration_ms_p95": 73.31198120000057,
+        "frame_duration_ms_p99": 87.84490119000019
       }
     },
     "/Users/ronendruker/Development/repos/aerospacebar-app": {
@@ -607,6 +620,18 @@
       "lastTotalCacheCreationInputTokens": 828995,
       "lastTotalCacheReadInputTokens": 11565863,
       "lastSessionId": "1fbb3b65-0ad1-4e3c-a561-79c98d76c903"
+    },
+    "/Users/ronendruker/Development/repos/lazybeeper": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": false,
+      "projectOnboardingSeenCount": 1,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "exampleFiles": []
     }
   },
   "claudeCodeFirstTokenDate": "2025-09-03T09:00:57.482430Z",
@@ -633,8 +658,8 @@
   },
   "fallbackAvailableWarningThreshold": 0.5,
   "isQualifiedForDataSharing": false,
-  "changelogLastFetched": 1771437545998,
-  "lastReleaseNotesSeen": "2.1.45",
+  "changelogLastFetched": 1771757625435,
+  "lastReleaseNotesSeen": "2.1.50",
   "autoUpdatesProtectedForNative": true,
   "feedbackSurveyState": {
     "lastShownTime": 1765817541374
@@ -682,14 +707,14 @@
   "groveConfigCache": {
     "e2bb38b1-a70e-4170-a21b-3cb047f495be": {
       "grove_enabled": true,
-      "timestamp": 1771321897555
+      "timestamp": 1771757616223
     }
   },
   "claudeInChromeDefaultEnabled": true,
   "hasCompletedClaudeInChromeOnboarding": true,
   "clientDataCache": {
     "data": {},
-    "timestamp": 1771437608614
+    "timestamp": 1771759384681
   },
   "hasShownOpus46Notice": {
     "48aa74bd-6d95-4a77-92ac-92b8e91cc397": true
@@ -700,6 +725,6 @@
   "showSpinnerTree": false,
   "effortCalloutDismissed": true,
   "sonnet1m45MigrationComplete": true,
-  "birthdayHatAnimationCount": 1,
+  "birthdayHatAnimationCount": 3,
   "cachedExtraUsageDisabledReason": "org_level_disabled"
 }

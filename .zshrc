@@ -253,7 +253,7 @@ function update-all() {
 
   source ~/.zshrc
 }
-alias ua='update-all'
+alias ua='npm start --prefix ~/dotfiles/scripts/update-all'
 
 alias cc='claude --dangerously-skip-permissions'
 alias ccg='claude-glm'
