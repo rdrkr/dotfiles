@@ -1,13 +1,14 @@
 {
-  "name": "update-all",
+  "name": "task-runner",
   "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "tsx update-all.ts"
+    "start": "tsx run-tasks.ts update-all.yaml"
   },
   "dependencies": {
-    "tasuku": "^2.0.0"
+    "tasuku": "^2.0.0",
+    "yaml": "^2.0.0"
   },
   "devDependencies": {
     "@types/node": "^25.3.0",

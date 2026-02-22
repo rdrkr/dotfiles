@@ -1,3 +1,18 @@
 {
-  "cSpell.words": ["cclear", "ccswitch", "nvim", "Pipx", "tasuku", "ZINIT"]
+  "cSpell.words": [
+    "appendhistory",
+    "cclear",
+    "ccswitch",
+    "dups",
+    "Ghostty",
+    "HISTDUP",
+    "nvim",
+    "Pipx",
+    "POWERLINE",
+    "Ptmux",
+    "SAVEHIST",
+    "sharehistory",
+    "tasuku",
+    "ZINIT"
+  ]
 }
