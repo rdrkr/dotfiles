@@ -265,7 +265,14 @@ export PATH="/Users/ronendruker/.antigravity/antigravity/bin:$PATH"
 function _tmux_random_name() {
   local adjectives=(brave calm clever cool daring eager fancy gentle happy jolly angry)
   local animals=(otter fox panda koala falcon badger lynx wolf raven hawk hamster)
-  echo "${adjectives[$RANDOM % ${#adjectives[@]} + 1]}-${animals[$RANDOM % ${#animals[@]} + 1]}"
+  local name
+  while true; do
+    name="${adjectives[$RANDOM % ${#adjectives[@]} + 1]}-${animals[$RANDOM % ${#animals[@]} + 1]}"
+    if ! tmux has-session -t "$name" 2>/dev/null; then
+      echo "$name"
+      return
+    fi
+  done
 }
 
 ## gum/fzf picker with option to create new session
