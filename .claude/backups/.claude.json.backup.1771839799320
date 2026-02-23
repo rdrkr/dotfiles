@@ -12,19 +12,19 @@
   "tipsHistory": {
     "new-user-warmup": 1,
     "memory-command": 26,
-    "theme-command": 515,
+    "theme-command": 535,
     "status-line": 491,
     "prompt-queue": 54,
     "shift-enter": 526,
     "enter-to-steer-in-relatime": 520,
-    "todo-list": 515,
+    "todo-list": 535,
     "# for memory": 447,
     "install-github-app": 534,
     "drag-and-drop-images": 534,
     "paste-images-mac": 534,
     "double-esc": 70,
-    "continue": 525,
-    "shift-tab": 525,
+    "continue": 535,
+    "shift-tab": 535,
     "image-paste": 520,
     "custom-agents": 522,
     "permissions": 534,
@@ -49,8 +49,7 @@
     "agent-flag": 522
   },
   "memoryUsageCount": 7,
-  "promptQueueUseCount": 783,
-  "showExpandedTodos": true,
+  "promptQueueUseCount": 784,
   "autoConnectIde": true,
   "cachedStatsigGates": {
     "tengu_disable_bypass_permissions_mode": false,
@@ -774,7 +773,7 @@
   "hasCompletedClaudeInChromeOnboarding": true,
   "clientDataCache": {
     "data": {},
-    "timestamp": 1771833929102
+    "timestamp": 1771836505381
   },
   "hasShownOpus46Notice": {
     "48aa74bd-6d95-4a77-92ac-92b8e91cc397": true
@@ -786,5 +785,11 @@
   "effortCalloutDismissed": true,
   "sonnet1m45MigrationComplete": true,
   "birthdayHatAnimationCount": 3,
-  "cachedExtraUsageDisabledReason": "org_level_disabled"
+  "cachedExtraUsageDisabledReason": "org_level_disabled",
+  "skillUsage": {
+    "init": {
+      "usageCount": 1,
+      "lastUsedAt": 1771836474684
+    }
+  }
 }
