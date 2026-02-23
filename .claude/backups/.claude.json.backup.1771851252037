@@ -49,7 +49,8 @@
     "agent-flag": 537
   },
   "memoryUsageCount": 7,
-  "promptQueueUseCount": 795,
+  "promptQueueUseCount": 809,
+  "showExpandedTodos": true,
   "autoConnectIde": true,
   "cachedStatsigGates": {
     "tengu_disable_bypass_permissions_mode": false,
@@ -735,7 +736,7 @@
   "feedbackSurveyState": {
     "lastShownTime": 1765817541374
   },
-  "lastPlanModeUse": 1771844041280,
+  "lastPlanModeUse": 1771847671776,
   "sonnet45MigrationComplete": true,
   "anonymousId": "claudecode.v1.b0e783e5-e684-4ecd-b5c2-fa2271d1c34a",
   "oauthAccount": {
@@ -788,7 +789,7 @@
   "hasCompletedClaudeInChromeOnboarding": true,
   "clientDataCache": {
     "data": {},
-    "timestamp": 1771844487865
+    "timestamp": 1771850992690
   },
   "hasShownOpus46Notice": {
     "48aa74bd-6d95-4a77-92ac-92b8e91cc397": true
