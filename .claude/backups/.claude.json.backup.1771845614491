@@ -26,7 +26,7 @@
     "continue": 535,
     "shift-tab": 535,
     "image-paste": 520,
-    "custom-agents": 522,
+    "custom-agents": 537,
     "permissions": 534,
     "custom-commands": 536,
     "plan-mode-for-complex-tasks": 470,
@@ -46,10 +46,10 @@
     "mobile-app": 533,
     "install-slack-app": 529,
     "btw-side-question": 461,
-    "agent-flag": 522
+    "agent-flag": 537
   },
   "memoryUsageCount": 7,
-  "promptQueueUseCount": 788,
+  "promptQueueUseCount": 795,
   "autoConnectIde": true,
   "cachedStatsigGates": {
     "tengu_disable_bypass_permissions_mode": false,
@@ -782,7 +782,7 @@
   "hasCompletedClaudeInChromeOnboarding": true,
   "clientDataCache": {
     "data": {},
-    "timestamp": 1771844118476
+    "timestamp": 1771844487865
   },
   "hasShownOpus46Notice": {
     "48aa74bd-6d95-4a77-92ac-92b8e91cc397": true
