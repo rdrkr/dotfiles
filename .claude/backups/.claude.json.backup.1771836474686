@@ -12,12 +12,12 @@
   "tipsHistory": {
     "new-user-warmup": 1,
     "memory-command": 26,
-    "theme-command": 515,
+    "theme-command": 535,
     "status-line": 491,
     "prompt-queue": 54,
     "shift-enter": 526,
     "enter-to-steer-in-relatime": 520,
-    "todo-list": 515,
+    "todo-list": 535,
     "# for memory": 447,
     "install-github-app": 534,
     "drag-and-drop-images": 534,
@@ -49,8 +49,7 @@
     "agent-flag": 522
   },
   "memoryUsageCount": 7,
-  "promptQueueUseCount": 781,
-  "showExpandedTodos": true,
+  "promptQueueUseCount": 784,
   "autoConnectIde": true,
   "cachedStatsigGates": {
     "tengu_disable_bypass_permissions_mode": false,
@@ -774,7 +773,7 @@
   "hasCompletedClaudeInChromeOnboarding": true,
   "clientDataCache": {
     "data": {},
-    "timestamp": 1771833559975
+    "timestamp": 1771834057439
   },
   "hasShownOpus46Notice": {
     "48aa74bd-6d95-4a77-92ac-92b8e91cc397": true

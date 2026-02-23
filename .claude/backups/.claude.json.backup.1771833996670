@@ -1,5 +1,5 @@
 {
-  "numStartups": 534,
+  "numStartups": 535,
   "installMethod": "native",
   "autoUpdates": false,
   "hasSeenTasksHint": true,
@@ -49,7 +49,7 @@
     "agent-flag": 522
   },
   "memoryUsageCount": 7,
-  "promptQueueUseCount": 781,
+  "promptQueueUseCount": 783,
   "showExpandedTodos": true,
   "autoConnectIde": true,
   "cachedStatsigGates": {
@@ -749,6 +749,9 @@
     ],
     "rdrkr/aerospacebar": [
       "/Users/ronendruker/Development/repos/AeroSpaceBar"
+    ],
+    "rdrkr/lazybeeper": [
+      "/Users/ronendruker/Development/repos/lazybeeper"
     ]
   },
   "opus45MigrationComplete": true,
@@ -771,7 +774,7 @@
   "hasCompletedClaudeInChromeOnboarding": true,
   "clientDataCache": {
     "data": {},
-    "timestamp": 1771776412302
+    "timestamp": 1771833990953
   },
   "hasShownOpus46Notice": {
     "48aa74bd-6d95-4a77-92ac-92b8e91cc397": true
