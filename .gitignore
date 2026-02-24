@@ -30,6 +30,7 @@ node_modules/
 .claude/statsig
 .claude/tasks
 .claude/todos
+.claude/backups
 .claude/.claude.json
 .claude/.claude.json.backup*
 .claude/fetch-claude-usage.swift
