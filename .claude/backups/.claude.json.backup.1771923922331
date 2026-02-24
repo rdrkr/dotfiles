@@ -49,7 +49,7 @@
     "agent-flag": 537
   },
   "memoryUsageCount": 7,
-  "promptQueueUseCount": 823,
+  "promptQueueUseCount": 824,
   "showExpandedTodos": true,
   "autoConnectIde": true,
   "cachedStatsigGates": {
@@ -791,7 +791,7 @@
   "hasCompletedClaudeInChromeOnboarding": true,
   "clientDataCache": {
     "data": {},
-    "timestamp": 1771919633697
+    "timestamp": 1771923902563
   },
   "hasShownOpus46Notice": {
     "48aa74bd-6d95-4a77-92ac-92b8e91cc397": true
@@ -820,28 +820,32 @@
       "lastUsedAt": 1771918907034
     },
     "Read": {
-      "usageCount": 4,
-      "lastUsedAt": 1771919124162
+      "usageCount": 10,
+      "lastUsedAt": 1771923894300
     },
     "Edit": {
-      "usageCount": 6,
-      "lastUsedAt": 1771919128189
+      "usageCount": 13,
+      "lastUsedAt": 1771923870288
     },
     "Write": {
       "usageCount": 5,
       "lastUsedAt": 1771918903146
     },
     "Grep": {
-      "usageCount": 2,
-      "lastUsedAt": 1771918912701
+      "usageCount": 9,
+      "lastUsedAt": 1771923848766
     },
     "Bash": {
-      "usageCount": 11,
-      "lastUsedAt": 1771919633569
+      "usageCount": 16,
+      "lastUsedAt": 1771923902469
     },
     "TaskOutput": {
       "usageCount": 2,
       "lastUsedAt": 1771919612807
+    },
+    "Glob": {
+      "usageCount": 2,
+      "lastUsedAt": 1771923875096
     }
   }
 }

@@ -16,7 +16,7 @@
     "status-line": 491,
     "prompt-queue": 54,
     "shift-enter": 536,
-    "enter-to-steer-in-relatime": 520,
+    "enter-to-steer-in-relatime": 540,
     "todo-list": 535,
     "# for memory": 447,
     "install-github-app": 534,
@@ -25,7 +25,7 @@
     "double-esc": 70,
     "continue": 535,
     "shift-tab": 535,
-    "image-paste": 520,
+    "image-paste": 540,
     "custom-agents": 537,
     "permissions": 534,
     "custom-commands": 536,
@@ -49,7 +49,7 @@
     "agent-flag": 537
   },
   "memoryUsageCount": 7,
-  "promptQueueUseCount": 823,
+  "promptQueueUseCount": 824,
   "showExpandedTodos": true,
   "autoConnectIde": true,
   "cachedStatsigGates": {
@@ -791,7 +791,7 @@
   "hasCompletedClaudeInChromeOnboarding": true,
   "clientDataCache": {
     "data": {},
-    "timestamp": 1771919305833
+    "timestamp": 1771923855707
   },
   "hasShownOpus46Notice": {
     "48aa74bd-6d95-4a77-92ac-92b8e91cc397": true
@@ -820,24 +820,32 @@
       "lastUsedAt": 1771918907034
     },
     "Read": {
-      "usageCount": 4,
-      "lastUsedAt": 1771919124162
+      "usageCount": 8,
+      "lastUsedAt": 1771923836888
     },
     "Edit": {
-      "usageCount": 6,
-      "lastUsedAt": 1771919128189
+      "usageCount": 11,
+      "lastUsedAt": 1771923855619
     },
     "Write": {
       "usageCount": 5,
       "lastUsedAt": 1771918903146
     },
     "Grep": {
-      "usageCount": 2,
-      "lastUsedAt": 1771918912701
+      "usageCount": 9,
+      "lastUsedAt": 1771923848766
     },
     "Bash": {
-      "usageCount": 9,
-      "lastUsedAt": 1771919305703
+      "usageCount": 14,
+      "lastUsedAt": 1771919881845
+    },
+    "TaskOutput": {
+      "usageCount": 2,
+      "lastUsedAt": 1771919612807
+    },
+    "Glob": {
+      "usageCount": 1,
+      "lastUsedAt": 1771923829284
     }
   }
 }
