@@ -790,7 +790,7 @@
   "hasCompletedClaudeInChromeOnboarding": true,
   "clientDataCache": {
     "data": {},
-    "timestamp": 1771941131915
+    "timestamp": 1771945022735
   },
   "hasShownOpus46Notice": {
     "48aa74bd-6d95-4a77-92ac-92b8e91cc397": true
@@ -811,44 +811,44 @@
   },
   "toolUsage": {
     "TaskCreate": {
-      "usageCount": 4,
-      "lastUsedAt": 1771918770525
+      "usageCount": 9,
+      "lastUsedAt": 1771941982742
     },
     "TaskUpdate": {
-      "usageCount": 8,
-      "lastUsedAt": 1771923934528
+      "usageCount": 18,
+      "lastUsedAt": 1771942492224
     },
     "Read": {
-      "usageCount": 33,
-      "lastUsedAt": 1771941131889
+      "usageCount": 61,
+      "lastUsedAt": 1771944839995
     },
     "Edit": {
-      "usageCount": 16,
-      "lastUsedAt": 1771940119298
+      "usageCount": 29,
+      "lastUsedAt": 1771944845357
     },
     "Write": {
-      "usageCount": 6,
-      "lastUsedAt": 1771940098459
+      "usageCount": 9,
+      "lastUsedAt": 1771942089068
     },
     "Grep": {
-      "usageCount": 10,
-      "lastUsedAt": 1771935723951
+      "usageCount": 25,
+      "lastUsedAt": 1771944851406
     },
     "Bash": {
-      "usageCount": 25,
-      "lastUsedAt": 1771935690794
+      "usageCount": 39,
+      "lastUsedAt": 1771945022650
     },
     "TaskOutput": {
       "usageCount": 2,
       "lastUsedAt": 1771919612807
     },
     "Glob": {
-      "usageCount": 9,
-      "lastUsedAt": 1771935634196
+      "usageCount": 10,
+      "lastUsedAt": 1771944852784
     },
     "Task": {
-      "usageCount": 1,
-      "lastUsedAt": 1771935712084
+      "usageCount": 2,
+      "lastUsedAt": 1771942132004
     }
   }
 }
