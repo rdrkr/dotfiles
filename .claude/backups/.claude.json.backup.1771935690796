@@ -50,7 +50,6 @@
   },
   "memoryUsageCount": 7,
   "promptQueueUseCount": 824,
-  "showExpandedTodos": true,
   "autoConnectIde": true,
   "cachedStatsigGates": {
     "tengu_disable_bypass_permissions_mode": false,
@@ -791,7 +790,7 @@
   "hasCompletedClaudeInChromeOnboarding": true,
   "clientDataCache": {
     "data": {},
-    "timestamp": 1771923855707
+    "timestamp": 1771935598612
   },
   "hasShownOpus46Notice": {
     "48aa74bd-6d95-4a77-92ac-92b8e91cc397": true
@@ -816,16 +815,16 @@
       "lastUsedAt": 1771918770525
     },
     "TaskUpdate": {
-      "usageCount": 7,
-      "lastUsedAt": 1771918907034
+      "usageCount": 8,
+      "lastUsedAt": 1771923934528
     },
     "Read": {
-      "usageCount": 8,
-      "lastUsedAt": 1771923836888
+      "usageCount": 22,
+      "lastUsedAt": 1771935668171
     },
     "Edit": {
-      "usageCount": 11,
-      "lastUsedAt": 1771923855619
+      "usageCount": 13,
+      "lastUsedAt": 1771923870288
     },
     "Write": {
       "usageCount": 5,
@@ -836,16 +835,16 @@
       "lastUsedAt": 1771923848766
     },
     "Bash": {
-      "usageCount": 14,
-      "lastUsedAt": 1771919881845
+      "usageCount": 24,
+      "lastUsedAt": 1771935665371
     },
     "TaskOutput": {
       "usageCount": 2,
       "lastUsedAt": 1771919612807
     },
     "Glob": {
-      "usageCount": 1,
-      "lastUsedAt": 1771923829284
+      "usageCount": 9,
+      "lastUsedAt": 1771935634196
     }
   }
 }
