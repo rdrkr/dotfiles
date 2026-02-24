@@ -31,7 +31,7 @@ node_modules/
 .claude/tasks
 .claude/todos
 .claude/.claude.json
-.claude/.claude.json.backup
+.claude/.claude.json.backup*
 .claude/fetch-claude-usage.swift
 .claude/history.jsonl
 .claude/powerline/usage/today.json
