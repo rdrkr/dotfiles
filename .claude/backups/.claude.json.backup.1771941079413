@@ -1,5 +1,5 @@
 {
-  "numStartups": 540,
+  "numStartups": 541,
   "installMethod": "native",
   "autoUpdates": false,
   "hasSeenTasksHint": true,
@@ -407,10 +407,10 @@
         "pyproject.toml",
         "package.json",
         "models.py",
-        "merge-openapi.ts",
-        "docker-entrypoint.sh"
+        "affilibuster.openapi.yaml",
+        "merge-openapi.ts"
       ],
-      "exampleFilesGeneratedAt": 1771322299005,
+      "exampleFilesGeneratedAt": 1771939915929,
       "hasCompletedProjectOnboarding": true,
       "disabledMcpServers": [
         "playwright",
@@ -783,14 +783,14 @@
   "groveConfigCache": {
     "e2bb38b1-a70e-4170-a21b-3cb047f495be": {
       "grove_enabled": true,
-      "timestamp": 1771844038132
+      "timestamp": 1771939912094
     }
   },
   "claudeInChromeDefaultEnabled": true,
   "hasCompletedClaudeInChromeOnboarding": true,
   "clientDataCache": {
     "data": {},
-    "timestamp": 1771935547002
+    "timestamp": 1771940127532
   },
   "hasShownOpus46Notice": {
     "48aa74bd-6d95-4a77-92ac-92b8e91cc397": true
@@ -819,32 +819,36 @@
       "lastUsedAt": 1771923934528
     },
     "Read": {
-      "usageCount": 10,
-      "lastUsedAt": 1771923894300
+      "usageCount": 32,
+      "lastUsedAt": 1771940112820
     },
     "Edit": {
-      "usageCount": 13,
-      "lastUsedAt": 1771923870288
+      "usageCount": 16,
+      "lastUsedAt": 1771940119298
     },
     "Write": {
-      "usageCount": 5,
-      "lastUsedAt": 1771918903146
+      "usageCount": 6,
+      "lastUsedAt": 1771940098459
     },
     "Grep": {
-      "usageCount": 9,
-      "lastUsedAt": 1771923848766
+      "usageCount": 10,
+      "lastUsedAt": 1771935723951
     },
     "Bash": {
-      "usageCount": 18,
-      "lastUsedAt": 1771923931131
+      "usageCount": 25,
+      "lastUsedAt": 1771935690794
     },
     "TaskOutput": {
       "usageCount": 2,
       "lastUsedAt": 1771919612807
     },
     "Glob": {
-      "usageCount": 2,
-      "lastUsedAt": 1771923875096
+      "usageCount": 9,
+      "lastUsedAt": 1771935634196
+    },
+    "Task": {
+      "usageCount": 1,
+      "lastUsedAt": 1771935712084
     }
   }
 }
