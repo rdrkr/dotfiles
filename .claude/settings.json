@@ -18,6 +18,7 @@
     "ask": [],
     "defaultMode": "plan"
   },
+  "model": "opus",
   "hooks": {
     "Stop": [
       {
@@ -47,6 +48,5 @@
     "kotlin-lsp@claude-plugins-official": true
   },
   "alwaysThinkingEnabled": true,
-  "skipDangerousModePermissionPrompt": true,
-  "model": "opus"
+  "skipDangerousModePermissionPrompt": true
 }
