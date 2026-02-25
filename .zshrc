@@ -72,11 +72,6 @@ function y() {
 export EDITOR=nvim
 export VISUAL="$EDITOR"
 
-# claude code
-export CLAUDE_POWERLINE_CONFIG=~/.config/claude/powerline/config.json
-export CLAUDE_POWERLINE_DEBUG=0
-export DEBUG=false
-
 # persistent CWD handling for tmux and OSC-7-aware terminals like Ghostty
 function chpwd() {
   # update tmux status line
@@ -168,9 +163,6 @@ alias ua='npm start --prefix ~/dotfiles/scripts/run-tasks --silent -- ~/dotfiles
 
 ## claude code aliases
 alias cc='claude --dangerously-skip-permissions'
-alias ccg='claude-glm'
-alias ccg45='claude-glm-4.5'
-alias ccf='claude-glm-fast'
 alias ccs="~/scripts/ccswitch.sh"
 alias ccl="ccs --list"
 alias cc1="ccs --switch-to 1 && cc"

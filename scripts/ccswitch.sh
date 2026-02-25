@@ -145,9 +145,36 @@ check_dependencies() {
 
 # Setup backup directories
 setup_directories() {
-    mkdir -p "$BACKUP_DIR"/{configs,credentials}
+    mkdir -p "$BACKUP_DIR"/{configs,credentials,scripts}
     chmod 700 "$BACKUP_DIR"
-    chmod 700 "$BACKUP_DIR"/{configs,credentials}
+    chmod 700 "$BACKUP_DIR"/{configs,credentials,scripts}
+}
+
+# Backup fetch-claude-usage.swift
+backup_account_script() {
+    local account_num="$1"
+    local email="$2"
+    local script_file="$HOME/.claude/fetch-claude-usage.swift"
+    local backup_file="$BACKUP_DIR/scripts/.fetch-claude-usage-${account_num}-${email}.swift"
+    
+    if [[ -f "$script_file" ]]; then
+        mkdir -p "$BACKUP_DIR/scripts"
+        cp "$script_file" "$backup_file"
+    fi
+}
+
+# Restore fetch-claude-usage.swift
+restore_account_script() {
+    local account_num="$1"
+    local email="$2"
+    local script_file="$HOME/.claude/fetch-claude-usage.swift"
+    local backup_file="$BACKUP_DIR/scripts/.fetch-claude-usage-${account_num}-${email}.swift"
+    
+    rm -f "$script_file"
+    if [[ -f "$backup_file" ]]; then
+        cp "$backup_file" "$script_file"
+        chmod 755 "$script_file"
+    fi
 }
 
 # Claude Code process detection (Node.js app)
@@ -364,6 +391,7 @@ cmd_add_account() {
     # Store backups
     write_account_credentials "$account_num" "$current_email" "$current_creds"
     write_account_config "$account_num" "$current_email" "$current_config"
+    backup_account_script "$account_num" "$current_email"
     
     # Update sequence.json
     local updated_sequence
@@ -454,6 +482,7 @@ cmd_remove_account() {
             ;;
     esac
     rm -f "$BACKUP_DIR/configs/.claude-config-${account_num}-${email}.json"
+    rm -f "$BACKUP_DIR/scripts/.fetch-claude-usage-${account_num}-${email}.swift"
     
     # Update sequence.json
     local updated_sequence
@@ -628,6 +657,7 @@ perform_switch() {
     
     write_account_credentials "$current_account" "$current_email" "$current_creds"
     write_account_config "$current_account" "$current_email" "$current_config"
+    backup_account_script "$current_account" "$current_email"
     
     # Step 2: Retrieve target account
     local target_creds target_config
@@ -641,6 +671,7 @@ perform_switch() {
     
     # Step 3: Activate target account
     write_credentials "$target_creds"
+    restore_account_script "$target_account" "$target_email"
     
     # Extract oauthAccount from backup and validate
     local oauth_section
