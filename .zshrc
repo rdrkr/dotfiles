@@ -166,6 +166,7 @@ alias vim='nvim'
 alias c='clear'
 alias ua='npm start --prefix ~/dotfiles/scripts/run-tasks --silent -- ~/dotfiles/scripts/update-all/update-all.yaml'
 
+## claude code aliases
 alias cc='claude --dangerously-skip-permissions'
 alias ccg='claude-glm'
 alias ccg45='claude-glm-4.5'
@@ -174,74 +175,6 @@ alias ccs="~/scripts/ccswitch.sh"
 alias ccl="ccs --list"
 alias cc1="ccs --switch-to 1 && cc"
 alias cc2="ccs --switch-to 2 && cc"
-
-# claude antigravity proxy handling
-function _claude_antigravity_run() {
-  local proxy_name="antigravity-claude-proxy"
-  local proxy_cmd="/opt/homebrew/bin/antigravity-claude-proxy"
-  local started_proxy=0
-
-  # check if the proxy is already running (check process AND port)
-  # we start it if process is missing OR port 8080 is closed
-  if ! pgrep -f "$proxy_name" >/dev/null 2>&1 || ! nc -z 127.0.0.1 8080 >/dev/null 2>&1; then
-    echo "Starting antigravity proxy..."
-    # start proxy in background
-    "$proxy_cmd" start >/dev/null 2>&1 &
-    local proxy_pid=$!
-    started_proxy=1
-
-    # wait for the proxy to be ready on port 8080
-    local timeout=50 # 5 seconds
-    while ! nc -z 127.0.0.1 8080 >/dev/null 2>&1 && [[ $timeout -gt 0 ]]; do
-      sleep 0.1
-      ((timeout--))
-    done
-
-    if [[ $timeout -eq 0 ]]; then
-      echo "Warning: antigravity proxy failed to start or port 8080 is not responsive."
-    fi
-  fi
-
-  # run Claude
-  command claude --dangerously-skip-permissions "$@"
-
-  # cleanup
-  if [[ $started_proxy -eq 1 ]]; then
-    echo "Stopping antigravity proxy..."
-    # kill the specific PID we started
-    kill "$proxy_pid" 2>/dev/null || true
-  fi
-}
-
-function claude-antigravity-opus() {
-  local -x CLAUDE_CONFIG_DIR=~/.claude-account-antigravity
-  local -x ANTHROPIC_AUTH_TOKEN="antigravity"
-  local -x ANTHROPIC_BASE_URL="http://localhost:8080"
-  local -x ANTHROPIC_MODEL="claude-opus-4-5-thinking"
-  local -x ANTHROPIC_DEFAULT_OPUS_MODEL="claude-opus-4-5-thinking"
-  local -x ANTHROPIC_DEFAULT_SONNET_MODEL="claude-sonnet-4-5-thinking"
-  local -x ANTHROPIC_DEFAULT_HAIKU_MODEL="gemini-2.5-flash-lite[1m]"
-  local -x CLAUDE_CODE_SUBAGENT_MODEL="claude-sonnet-4-5-thinking"
-  local -x ENABLE_EXPERIMENTAL_MCP_CLI="true"
-
-  _claude_antigravity_run "$@"
-}
-alias cco='claude-antigravity-opus'
-
-function claude-antigravity-gemini() {
-  local -x CLAUDE_CONFIG_DIR=~/.claude-account-antigravity
-  local -x ANTHROPIC_AUTH_TOKEN="antigravity"
-  local -x ANTHROPIC_BASE_URL="http://localhost:8080"
-  local -x ANTHROPIC_MODEL="gemini-3-pro-high[1m]"
-  local -x ANTHROPIC_DEFAULT_OPUS_MODEL="gemini-3-pro-high[1m]"
-  local -x ANTHROPIC_DEFAULT_SONNET_MODEL="gemini-3-flash[1m]"
-  local -x ANTHROPIC_DEFAULT_HAIKU_MODEL="gemini-2.5-flash-lite[1m]"
-  local -x CLAUDE_CODE_SUBAGENT_MODEL="gemini-3-flash[1m]"
-  local -x ENABLE_EXPERIMENTAL_MCP_CLI="true"
-
-  _claude_antigravity_run "$@"
-}
-alias ccg='claude-antigravity-gemini'
 
 # shell integrations
 eval "$(fzf --zsh)"

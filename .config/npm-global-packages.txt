@@ -1,5 +1,4 @@
 copilot
-antigravity-claude-proxy
 fastify
 mcporter
 neovim
