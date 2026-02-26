@@ -347,6 +347,8 @@ cask "rustrover"
 cask "sf-symbols"
 # Digital design and prototyping platform
 cask "sketch"
+# Software modeller
+cask "staruml"
 # Text editor for code, markup and prose
 cask "sublime-text"
 # Remote access and connectivity software focused on security
