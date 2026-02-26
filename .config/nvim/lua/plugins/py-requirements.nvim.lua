@@ -28,29 +28,6 @@ return {
             },
             -- Enabled by default if you want to disable lsp completions set to false
             enable_lsp = true,
-            keys = {
-                {
-                    "<leader>ru",
-                    function()
-                        require("py-requirements").upgrade()
-                    end,
-                    desc = "Upgrade dep under cursor",
-                },
-                {
-                    "<leader>rU",
-                    function()
-                        require("py-requirements").upgrade_all()
-                    end,
-                    desc = "Upgrade all deps",
-                },
-                {
-                    "<leader>rK",
-                    function()
-                        require("py-requirements").show_description()
-                    end,
-                    desc = "Show despcription",
-                },
-            },
         })
     end,
 }
