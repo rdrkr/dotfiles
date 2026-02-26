@@ -17,17 +17,3 @@ vim.keymap.set({ "n", "i" }, "<M-f>", function()
         return "w"
     end
 end, { expr = true, desc = "Jump word forward" })
-
--- package-info.nvim keymaps
-vim.keymap.set({ "n" }, "<LEADER>ns", require("package-info").show, { silent = true, noremap = true })
-vim.keymap.set({ "n" }, "<LEADER>nc", require("package-info").hide, { silent = true, noremap = true })
-vim.keymap.set({ "n" }, "<LEADER>nt", require("package-info").toggle, { silent = true, noremap = true })
-vim.keymap.set({ "n" }, "<LEADER>nu", require("package-info").update, { silent = true, noremap = true })
-vim.keymap.set({ "n" }, "<LEADER>nd", require("package-info").delete, { silent = true, noremap = true })
-vim.keymap.set({ "n" }, "<LEADER>ni", require("package-info").install, { silent = true, noremap = true })
-vim.keymap.set({ "n" }, "<LEADER>np", require("package-info").change_version, { silent = true, noremap = true })
-
--- py-requirements.nvim keymaps
-vim.keymap.set("n", "<leader>ns", require("py-requirements").show_description, {})
-vim.keymap.set("n", "<leader>nu", require("py-requirements").upgrade, {})
-vim.keymap.set("n", "<leader>nU", require("py-requirements").upgrade_all, {})
