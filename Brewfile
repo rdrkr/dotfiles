@@ -381,8 +381,8 @@ mas "Keynote", id: 361285480
 mas "Keynote", id: 409183694
 mas "Mail Signature", id: 1595342317
 mas "Mic Drop", id: 1489816366
-mas "Numbers", id: 409203825
 mas "Numbers", id: 361304891
+mas "Numbers", id: 409203825
 mas "Pages", id: 409201541
 mas "Pages", id: 361309726
 mas "Perplexity", id: 6714467650
@@ -394,7 +394,6 @@ mas "Tailscale", id: 1475387142
 mas "TestFlight", id: 899247664
 mas "The Unarchiver", id: 425424353
 mas "Windows App", id: 1295203466
-mas "Xcode", id: 497799835
 mas "Xmind", id: 1327661892
 vscode "bmewburn.vscode-intelephense-client"
 vscode "davidanson.vscode-markdownlint"
