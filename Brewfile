@@ -51,8 +51,8 @@ brew "node"
 brew "eslint"
 # Simple, fast and user-friendly alternative to find
 brew "fd"
-# Play, record, convert, and stream select audio and video codecs
-brew "ffmpeg"
+# Play, record, convert, and stream many audio and video codecs
+brew "ffmpeg-full"
 # Command-line fuzzy finder written in Go
 brew "fzf"
 # Interact with Google Gemini AI models from the command-line
@@ -381,8 +381,8 @@ mas "Keynote", id: 361285480
 mas "Keynote", id: 409183694
 mas "Mail Signature", id: 1595342317
 mas "Mic Drop", id: 1489816366
-mas "Numbers", id: 409203825
 mas "Numbers", id: 361304891
+mas "Numbers", id: 409203825
 mas "Pages", id: 409201541
 mas "Pages", id: 361309726
 mas "Perplexity", id: 6714467650

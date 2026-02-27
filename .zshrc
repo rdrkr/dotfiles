@@ -179,6 +179,7 @@ if [[ -f "/opt/homebrew/bin/brew" ]] then
   export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH"
   export PATH="/opt/homebrew/opt/node@22/bin:$PATH"
   export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+  export PATH="/opt/homebrew/opt/ffmpeg-full/bin:$PATH"
   export DYLD_LIBRARY_PATH="/opt/homebrew/lib:/opt/homebrew/lib/pam:$DYLD_LIBRARY_PATH"
 fi
 
