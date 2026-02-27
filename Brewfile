@@ -383,8 +383,8 @@ mas "Mail Signature", id: 1595342317
 mas "Mic Drop", id: 1489816366
 mas "Numbers", id: 409203825
 mas "Numbers", id: 361304891
-mas "Pages", id: 409201541
 mas "Pages", id: 361309726
+mas "Pages", id: 409201541
 mas "Perplexity", id: 6714467650
 mas "RetroArch", id: 6499539433
 mas "Shazam", id: 897118787
