@@ -9,6 +9,7 @@ if [ -f "$config_file" ]; then
   show_usage=${SHOW_USAGE:-1}
   show_bar=${SHOW_PROGRESS_BAR:-1}
   show_reset=${SHOW_RESET_TIME:-1}
+  colorful_usage=${COLORFUL_USAGE:-0}
 else
   show_account=1
   show_dir=1
@@ -17,6 +18,7 @@ else
   show_usage=1
   show_bar=1
   show_reset=1
+  colorful_usage=0
 fi
 
 input=$(cat)
@@ -82,26 +84,40 @@ if [ "$show_usage" = "1" ]; then
     resets_at=$(echo "$swift_result" | cut -d'|' -f2)
 
     if [ -n "$utilization" ] && [ "$utilization" != "ERROR" ]; then
-      if [ "$utilization" -le 10 ]; then
-        usage_color="$LEVEL_1"
-      elif [ "$utilization" -le 20 ]; then
-        usage_color="$LEVEL_2"
-      elif [ "$utilization" -le 30 ]; then
-        usage_color="$LEVEL_3"
-      elif [ "$utilization" -le 40 ]; then
-        usage_color="$LEVEL_4"
-      elif [ "$utilization" -le 50 ]; then
-        usage_color="$LEVEL_5"
-      elif [ "$utilization" -le 60 ]; then
-        usage_color="$LEVEL_6"
-      elif [ "$utilization" -le 70 ]; then
-        usage_color="$LEVEL_7"
-      elif [ "$utilization" -le 80 ]; then
-        usage_color="$LEVEL_8"
-      elif [ "$utilization" -le 90 ]; then
-        usage_color="$LEVEL_9"
+      if [ "$colorful_usage" = "1" ]; then
+        if [ "$utilization" -le 10 ]; then
+          usage_color="$LEVEL_1"
+        elif [ "$utilization" -le 20 ]; then
+          usage_color="$LEVEL_2"
+        elif [ "$utilization" -le 30 ]; then
+          usage_color="$LEVEL_3"
+        elif [ "$utilization" -le 40 ]; then
+          usage_color="$LEVEL_4"
+        elif [ "$utilization" -le 50 ]; then
+          usage_color="$LEVEL_5"
+        elif [ "$utilization" -le 60 ]; then
+          usage_color="$LEVEL_6"
+        elif [ "$utilization" -le 70 ]; then
+          usage_color="$LEVEL_7"
+        elif [ "$utilization" -le 80 ]; then
+          usage_color="$LEVEL_8"
+        elif [ "$utilization" -le 90 ]; then
+          usage_color="$LEVEL_9"
+        else
+          usage_color="$LEVEL_10"
+        fi
       else
-        usage_color="$LEVEL_10"
+        if [ "$utilization" -le 60 ]; then
+          usage_color="$GRAY"
+        elif [ "$utilization" -le 70 ]; then
+          usage_color="$LEVEL_7"
+        elif [ "$utilization" -le 80 ]; then
+          usage_color="$LEVEL_8"
+        elif [ "$utilization" -le 90 ]; then
+          usage_color="$LEVEL_9"
+        else
+          usage_color="$LEVEL_10"
+        fi
       fi
 
       if [ "$show_bar" = "1" ]; then
