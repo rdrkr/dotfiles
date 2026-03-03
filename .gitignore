@@ -45,3 +45,4 @@ node_modules/
 .colima/ssh_config
 .claude/ide
 .claude/image-cache
+/.claude/telemetry
