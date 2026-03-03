@@ -13,7 +13,7 @@ func readOrganizationId() -> String? {
     let trimmedOrgId = injectedOrgId.trimmingCharacters(in: .whitespacesAndNewlines)
     return trimmedOrgId.isEmpty ? nil : trimmedOrgId
 }
-func fetchUsageData(sessionKey: String, orgId: String) async throws -> (utilization: Int, resetsAt: String?) {
+func fetchUsageData(sessionKey: String, orgId: String) async throws -> (Int, String?, Int, String?) {
     // Build URL safely - validate orgId doesn't contain path traversal
     guard !orgId.contains(".."), !orgId.contains("/") else {
         throw NSError(domain: "ClaudeAPI", code: 5, userInfo: [NSLocalizedDescriptionKey: "Invalid organization ID"])
@@ -35,11 +35,25 @@ func fetchUsageData(sessionKey: String, orgId: String) async throws -> (utilizat
         throw NSError(domain: "ClaudeAPI", code: 3, userInfo: [NSLocalizedDescriptionKey: "Failed to fetch usage"])
     }
 
-    if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-       let fiveHour = json["five_hour"] as? [String: Any],
-       let utilization = fiveHour["utilization"] as? Int {
-        let resetsAt = fiveHour["resets_at"] as? String
-        return (utilization, resetsAt)
+    if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+        var fhUtil = 0
+        var fhReset: String? = nil
+        var sdUtil = 0
+        var sdReset: String? = nil
+
+        if let fiveHour = json["five_hour"] as? [String: Any],
+           let utilization = fiveHour["utilization"] as? Int {
+            fhUtil = utilization
+            fhReset = fiveHour["resets_at"] as? String
+        }
+
+        if let sevenDay = json["seven_day"] as? [String: Any],
+           let utilization = sevenDay["utilization"] as? Int {
+            sdUtil = utilization
+            sdReset = sevenDay["resets_at"] as? String
+        }
+
+        return (fhUtil, fhReset, sdUtil, sdReset)
     }
 
     throw NSError(domain: "ClaudeAPI", code: 4, userInfo: [NSLocalizedDescriptionKey: "Invalid response format"])
@@ -59,14 +73,11 @@ Task {
     }
 
     do {
-        let (utilization, resetsAt) = try await fetchUsageData(sessionKey: sessionKey, orgId: orgId)
+        let (fhUtil, fhReset, sdUtil, sdReset) = try await fetchUsageData(sessionKey: sessionKey, orgId: orgId)
 
-        // Output format: UTILIZATION|RESETS_AT
-        if let resets = resetsAt {
-            print("\(utilization)|\(resets)")
-        } else {
-            print("\(utilization)|")
-        }
+        let fhResetStr = fhReset ?? ""
+        let sdResetStr = sdReset ?? ""
+        print("\(fhUtil)|\(fhResetStr)|\(sdUtil)|\(sdResetStr)")
         exit(0)
     } catch {
         print("ERROR:\(error.localizedDescription)")
