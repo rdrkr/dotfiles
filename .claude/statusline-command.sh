@@ -288,7 +288,11 @@ if [ -n "$weekly_usage_text" ]; then
 fi
 
 printf "%s\n" "$line1"
-printf "%s\n" "$line2"
+
+if [ -n "$line2" ]; then
+  printf "%s\n" "${line2:- }"
+fi
+
 if [ -n "$line3" ]; then
-  printf "%s\n" "$line3"
+  printf "%s\n" "${line3:- }"
 fi
