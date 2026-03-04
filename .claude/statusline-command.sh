@@ -165,9 +165,10 @@ if [ "$show_usage" = "1" ] || [ "$show_weekly_usage" = "1" ]; then
           fi
         fi
 
-        usage_text="${usage_color}Session: ${utilization}%${progress_bar}${reset_time_display}${RESET}"
+        formatted_utilization=$(printf "%-4s" "${utilization}%")
+        usage_text="${usage_color}Session: ${formatted_utilization}${progress_bar}${reset_time_display}${RESET}"
       else
-        usage_text="${YELLOW}Session: ~${RESET}"
+        usage_text="${YELLOW}Session: ~   ${RESET}"
       fi
     fi
 
@@ -244,14 +245,15 @@ if [ "$show_usage" = "1" ] || [ "$show_weekly_usage" = "1" ]; then
           fi
         fi
 
-        weekly_usage_text="${sd_usage_color}Weekly:  ${sd_utilization}%${sd_progress_bar}${sd_reset_time_display}${RESET}"
+        formatted_sd_utilization=$(printf "%-4s" "${sd_utilization}%")
+        weekly_usage_text="${sd_usage_color}Weekly:  ${formatted_sd_utilization}${sd_progress_bar}${sd_reset_time_display}${RESET}"
       else
-        weekly_usage_text="${YELLOW}Weekly:  ~${RESET}"
+        weekly_usage_text="${YELLOW}Weekly:  ~   ${RESET}"
       fi
     fi
   else
-    if [ "$show_usage" = "1" ]; then usage_text="${YELLOW}Session: ~${RESET}"; fi
-    if [ "$show_weekly_usage" = "1" ]; then weekly_usage_text="${YELLOW}Weekly:  ~${RESET}"; fi
+    if [ "$show_usage" = "1" ]; then usage_text="${YELLOW}Session: ~   ${RESET}"; fi
+    if [ "$show_weekly_usage" = "1" ]; then weekly_usage_text="${YELLOW}Weekly:  ~   ${RESET}"; fi
   fi
 fi
 
