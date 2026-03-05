@@ -158,6 +158,8 @@ which() { nu -c "which $@" }
 
 alias ls='ls --color=always'
 alias vim='nvim'
+alias lg='lazygit'
+alias ld='lazydocker'
 alias c='clear'
 alias ua='npm start --prefix ~/dotfiles/scripts/run-tasks --silent -- ~/dotfiles/scripts/update-all/update-all.yaml'
 
