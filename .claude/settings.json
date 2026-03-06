@@ -18,7 +18,7 @@
     "ask": [],
     "defaultMode": "plan"
   },
-  "model": "haiku",
+  "model": "opus",
   "hooks": {
     "Stop": [
       {
@@ -36,8 +36,6 @@
     "command": "bash /Users/ronendruker/.claude/statusline-command.sh"
   },
   "enabledPlugins": {
-    "frontend-design@claude-code-plugins": true,
-    "prompt-improver@claude-code-marketplace": true,
     "frontend-design@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
@@ -45,7 +43,11 @@
     "pyright-lsp@claude-plugins-official": true,
     "swift-lsp@claude-plugins-official": true,
     "lua-lsp@claude-plugins-official": true,
-    "kotlin-lsp@claude-plugins-official": true
+    "kotlin-lsp@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": true,
+    "clangd-lsp@claude-plugins-official": true
   },
   "alwaysThinkingEnabled": true,
   "skipDangerousModePermissionPrompt": true

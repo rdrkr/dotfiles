@@ -1,25 +1,6 @@
 {
   "version": 2,
   "plugins": {
-    "prompt-improver@claude-code-marketplace": [
-      {
-        "scope": "user",
-        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-code-marketplace/prompt-improver/0.5.1",
-        "version": "0.5.1",
-        "installedAt": "2025-12-12T05:54:40.951Z",
-        "lastUpdated": "2026-02-15T08:41:05.233Z",
-        "gitCommitSha": "e58ee5a5ada0275cf39398e1e37ce484ac96af08"
-      }
-    ],
-    "frontend-design@claude-code-plugins": [
-      {
-        "scope": "user",
-        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-code-plugins/frontend-design/1.0.0",
-        "version": "1.0.0",
-        "installedAt": "2025-12-12T05:54:41.000Z",
-        "lastUpdated": "2025-12-12T05:54:41.000Z"
-      }
-    ],
     "frontend-design@claude-plugins-official": [
       {
         "scope": "user",
@@ -98,6 +79,46 @@
         "installedAt": "2026-01-31T09:20:13.240Z",
         "lastUpdated": "2026-01-31T09:20:13.240Z",
         "gitCommitSha": "27d2b86d72da27c64585150857cee8472ad47abb"
+      }
+    ],
+    "skill-creator@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/skill-creator/205b6e0b3036",
+        "version": "205b6e0b3036",
+        "installedAt": "2026-03-06T10:02:33.773Z",
+        "lastUpdated": "2026-03-06T10:02:33.773Z",
+        "gitCommitSha": "205b6e0b30366a969412d9aab7b99bea99d58db1"
+      }
+    ],
+    "code-simplifier@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/code-simplifier/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-03-06T10:08:45.352Z",
+        "lastUpdated": "2026-03-06T10:08:45.352Z",
+        "gitCommitSha": "205b6e0b30366a969412d9aab7b99bea99d58db1"
+      }
+    ],
+    "claude-code-setup@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/claude-code-setup/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-03-06T10:08:45.379Z",
+        "lastUpdated": "2026-03-06T10:08:45.379Z",
+        "gitCommitSha": "205b6e0b30366a969412d9aab7b99bea99d58db1"
+      }
+    ],
+    "clangd-lsp@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/clangd-lsp/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-03-06T10:08:45.387Z",
+        "lastUpdated": "2026-03-06T10:08:45.387Z",
+        "gitCommitSha": "205b6e0b30366a969412d9aab7b99bea99d58db1"
       }
     ]
   }

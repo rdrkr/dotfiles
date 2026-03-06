@@ -199,6 +199,8 @@ brew "tree"
 brew "tree-sitter-cli"
 # Find and verify credentials
 brew "trufflehog"
+# Language Server Protocol implementation for TypeScript wrapping tsserver
+brew "typescript-language-server"
 # Extremely fast Python package installer and resolver, written in Rust
 brew "uv"
 # Internet file retriever
