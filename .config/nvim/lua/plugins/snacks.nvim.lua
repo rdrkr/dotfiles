@@ -11,7 +11,7 @@ return {
             function()
                 Snacks.lazygit()
             end,
-            desc = "LazyGit",
+            desc = "Open Lazygit floating window",
         },
     },
 }

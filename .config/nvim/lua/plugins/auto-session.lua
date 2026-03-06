@@ -12,8 +12,10 @@ return {
             "~/",
             "~/Projects",
             "~/Downloads",
-            "/"
-        }
+            "/",
+        },
+        bypass_session_save_file_types = { "neo-tree" },
         -- log_level = 'debug',
-    }
+    },
 }
+
