@@ -46,3 +46,4 @@ node_modules/
 .claude/ide
 .claude/image-cache
 /.claude/telemetry
+/.claude/mcp-needs-auth-cache.json

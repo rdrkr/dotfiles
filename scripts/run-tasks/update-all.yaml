@@ -13,12 +13,12 @@ groups:
       - title: Upgrading Homebrew packages
         command: brew
         args: [upgrade]
-      - title: Cleaning up Homebrew
-        command: brew
-        args: [cleanup, "--prune=all"]
       - title: Upgrading App Store apps
         command: mas
         args: [upgrade]
+      - title: Cleaning up Homebrew
+        command: brew
+        args: [cleanup, "--prune=all"]
 
   - title: Updating global npm packages
     tasks:
@@ -36,13 +36,28 @@ groups:
     tasks:
       - title: Updating zinit
         command: zsh
-        args: [-l, -c, 'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh" && zinit self-update']
+        args:
+          [
+            -l,
+            -c,
+            'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh" && zinit self-update',
+          ]
       - title: Updating zinit plugins
         command: zsh
-        args: [-l, -c, 'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh" && zinit update --quiet --all']
+        args:
+          [
+            -l,
+            -c,
+            'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh" && zinit update --quiet --all',
+          ]
       - title: Clearing zinit cache
         command: zsh
-        args: [-l, -c, 'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh" && zinit cclear']
+        args:
+          [
+            -l,
+            -c,
+            'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh" && zinit cclear',
+          ]
 
   - title: Updating LazyVim
     tasks:
