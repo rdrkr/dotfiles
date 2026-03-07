@@ -120,6 +120,16 @@
         "lastUpdated": "2026-03-06T10:08:45.387Z",
         "gitCommitSha": "205b6e0b30366a969412d9aab7b99bea99d58db1"
       }
+    ],
+    "chrome-devtools-mcp@chrome-devtools-plugins": [
+      {
+        "scope": "user",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/chrome-devtools-plugins/chrome-devtools-mcp/latest",
+        "version": "latest",
+        "installedAt": "2026-03-07T16:38:54.108Z",
+        "lastUpdated": "2026-03-07T16:38:54.108Z",
+        "gitCommitSha": "06c295278d26233fbf53105b58994b43bc3e27d0"
+      }
     ]
   }
 }

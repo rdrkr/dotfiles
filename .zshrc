@@ -176,17 +176,30 @@ eval "$(zoxide init zsh)"
 source <(carapace _carapace)
 
 # paths
+path_dirs=()
+
 if [[ -f "/opt/homebrew/bin/brew" ]] then
-  export PATH="/opt/homebrew/opt/python@3.13/bin:$PATH"
-  export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH"
-  export PATH="/opt/homebrew/opt/node@22/bin:$PATH"
-  export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
-  export PATH="/opt/homebrew/opt/ffmpeg-full/bin:$PATH"
+  path_dirs+=(
+    "/opt/homebrew/opt/python@3.13/bin"
+    "/opt/homebrew/opt/openjdk@21/bin"
+    "/opt/homebrew/opt/node@22/bin"
+    "/opt/homebrew/opt/libpq/bin"
+    "/opt/homebrew/opt/ffmpeg-full/bin"
+  )
+
   export DYLD_LIBRARY_PATH="/opt/homebrew/lib:/opt/homebrew/lib/pam:$DYLD_LIBRARY_PATH"
 fi
 
-export PATH="$PATH:$HOME/.local/bin:$HOME/local/bin"
-export PATH="/Users/ronendruker/.antigravity/antigravity/bin:$PATH"
+path_dirs+=(
+  "$HOME/.local/bin"
+  "$HOME/local/bin"
+  "$HOME/.antigravity/antigravity/bin"
+  "$HOME/.bun/bin"
+)
+
+for p in "${path_dirs[@]}"; do
+  export PATH="$p:$PATH"
+done
 
 # tmux
 ## generate fun docker-style names

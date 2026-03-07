@@ -17,6 +17,7 @@ MACOS_CONFIG_DIR="${SCRIPT_DIR}/.config/macos"
 MACOS_PREFS_DIR="${HOME}/Library/Preferences"
 NPM_GLOBAL_FILE="${SCRIPT_DIR}/.config/npm-global-packages.txt"
 PIPX_PACKAGES_FILE="${SCRIPT_DIR}/.config/pipx-packages.txt"
+BUN_PACKAGES_FILE="${SCRIPT_DIR}/.config/bun-packages.txt"
 PLIST_FILES=() #("com.apple.Terminal.plist" "com.apple.dock.plist" "com.apple.finder.plist")
 APP_NAMES=()   #("Terminal" "Dock" "Finder")
 
@@ -205,6 +206,27 @@ restore() {
 		print_warning "$PIPX_PACKAGES_FILE not found. Skipping."
 	fi
 
+	# 6. Install Bun Packages
+	print_header "Installing Bun Packages..."
+	if [ -f "$BUN_PACKAGES_FILE" ]; then
+		if command -v bun &>/dev/null; then
+			if [ "$DRY_RUN" = false ]; then
+				while read -r package; do
+					if [ -n "$package" ]; then
+						run_command "bun add -g $package"
+					fi
+				done < "$BUN_PACKAGES_FILE"
+			else
+				print_warning "[DRY RUN] Would install packages from $BUN_PACKAGES_FILE"
+			fi
+			print_success "Bun packages installed."
+		else
+			print_warning "bun not found. Skipping bun package installation."
+		fi
+	else
+		print_warning "$BUN_PACKAGES_FILE not found. Skipping."
+	fi
+
 	run_stow
 
 	print_header "Installing custom scripts..."
@@ -273,6 +295,18 @@ backup() {
 		fi
 	else
 		print_warning "pipx not found. Skipping pipx backup."
+	fi
+
+	print_header "Backing up Bun Packages..."
+	if command -v bun &>/dev/null; then
+		if [ "$DRY_RUN" = false ]; then
+			bun pm ls -g | grep -v node_modules | awk '{print $2}' | sed 's/@[^@]*$//' > "$BUN_PACKAGES_FILE"
+			print_success "Bun packages backed up to $BUN_PACKAGES_FILE."
+		else
+			print_warning "[DRY RUN] Would backup bun packages to $BUN_PACKAGES_FILE"
+		fi
+	else
+		print_warning "bun not found. Skipping bun backup."
 	fi
 
 	run_stow

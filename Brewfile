@@ -6,8 +6,10 @@ tap "felixkratz/formulae"
 tap "gentleman-programming/tap"
 tap "hamed-elfayome/claude-usage"
 tap "koekeishiya/formulae"
+tap "mediosz/tap"
 tap "mocki-toki/formulae"
 tap "nikitabobko/tap"
+tap "oven-sh/bun"
 tap "rdrkr/tap"
 tap "steipete/tap"
 tap "touch-tap/tap"
@@ -223,6 +225,8 @@ brew "gentleman-programming/tap/gentleman-dots"
 brew "koekeishiya/formulae/skhd"
 # A tiling window manager for macOS based on binary space partitioning.
 brew "koekeishiya/formulae/yabai"
+# Incredibly fast JavaScript runtime, bundler, transpiler and package manager - all in one.
+brew "oven-sh/bun/bun"
 # Grep the GIF. Stick the landing
 brew "steipete/tap/gifgrep"
 # Fast CLI for Apple Reminders
@@ -345,6 +349,8 @@ cask "sf-symbols"
 cask "staruml"
 # Text editor for code, markup and prose
 cask "sublime-text"
+# SwipeAeroSpace is a tool to switch AeroSpace worksapces by swiping.
+cask "mediosz/tap/swipeaerospace"
 # Remote access and connectivity software focused on security
 cask "teamviewer"
 # Macro remote control
