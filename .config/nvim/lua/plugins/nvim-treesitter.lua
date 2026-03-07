@@ -9,6 +9,9 @@ return {
         ensure_installed = {
             "requirements", -- for py-requirements.nvim
             "toml", -- already installed, keep it
+            "markdown",
+            "markdown_inline",
+            "vimdoc",
         },
     },
 }

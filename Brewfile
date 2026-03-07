@@ -17,8 +17,6 @@ brew "ast-grep"
 brew "bash"
 # Programmable completion for Bash 3.2
 brew "bash-completion"
-# Python code formatter
-brew "black"
 # Resource monitor. C++ version and continuation of bashtop and bpytop
 brew "btop"
 # Real-time data compression library
@@ -163,8 +161,6 @@ brew "python@3.11"
 brew "rainfrog"
 # Your all-in-one OpenAPI utility
 brew "redocly-cli"
-# Command-line interface for Render
-brew "render"
 # SVG rendering tool and library
 brew "resvg"
 # Extremely fast Python linter, written in Rust
@@ -376,13 +372,10 @@ mas "Equinox", id: 1591510203
 mas "iMovie", id: 408981434
 mas "Infuse", id: 1136220934
 mas "Keynote", id: 361285480
-mas "Keynote", id: 409183694
 mas "Mail Signature", id: 1595342317
 mas "Mic Drop", id: 1489816366
 mas "Numbers", id: 361304891
-mas "Numbers", id: 409203825
 mas "Pages", id: 361309726
-mas "Pages", id: 409201541
 mas "Perplexity", id: 6714467650
 mas "RetroArch", id: 6499539433
 mas "Shazam", id: 897118787
