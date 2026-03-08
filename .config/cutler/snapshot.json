@@ -1,0 +1,72 @@
+{
+  "settings": [
+    {
+      "domain": "com.apple.finder",
+      "key": "AppleShowAllFiles",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.screencapture",
+      "key": "type",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.menuextra.clock",
+      "key": "Show24Hour",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.dock",
+      "key": "autohide-time-modifier",
+      "original_value": null
+    },
+    {
+      "domain": "NSGlobalDomain",
+      "key": "NSAutomaticInlinePredictionEnabled",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.screencapture",
+      "key": "show-thumbnail",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.finder",
+      "key": "CreateDesktop",
+      "original_value": null
+    },
+    {
+      "domain": "NSGlobalDomain",
+      "key": "NSAutomaticSpellingCorrectionEnabled",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.menuextra.clock",
+      "key": "ShowSeconds",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.menuextra.clock",
+      "key": "ShowAMPM",
+      "original_value": true
+    },
+    {
+      "domain": "NSGlobalDomain",
+      "key": "NSDocumentSaveNewDocumentsToCloud",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.dock",
+      "key": "autohide-delay",
+      "original_value": 0.0
+    },
+    {
+      "domain": "com.apple.dock",
+      "key": "tilesize",
+      "original_value": 47.0
+    }
+  ],
+  "exec_run_count": 1,
+  "version": "0.19.7",
+  "digest": "396b452c503e2ec7fba8b4c87e82956b425e03364778fea7b9fde39d59103390"
+}

@@ -1,0 +1,62 @@
+# If you want to explore what each section of the configuration does in detail,
+# visit: https://machlit.github.io/cutler
+
+[set.menuextra.clock] # The preference is put without the com.apple. prefix (here it is com.apple.menuextra.clock)
+Show24Hour = true
+ShowAMPM = false
+ShowDate = 0
+ShowDayOfWeek = true
+ShowSeconds = false
+
+[set.finder]
+AppleShowAllFiles = true
+CreateDesktop = false
+ShowPathbar = true
+ShowExternalHardDrivesOnDesktop = true
+FXRemoveOldTrashItems = true
+FXEnableExtensionChangeWarning = false
+FXDefaultSearchScope = "SCcf"
+
+[set.AppleMultitouchTrackpad]
+FirstClickThreshold = 1
+TrackpadThreeFingerDrag = false
+
+[set.dock]
+tilesize = 47
+autohide = true
+show-recents = false
+magnification = false
+mineffect = "genie"
+autohide-delay = 0
+autohide-time-modifier = 0.6
+expose-group-apps = true
+
+[set.screencapture]
+show-thumbnail = true
+target = "file"
+type = "png"
+
+[set.NSGlobalDomain] # For global domains, use the NSGlobalDomain key.
+NSDocumentSaveNewDocumentsToCloud = true
+NSAutomaticInlinePredictionEnabled = true
+NSAutomaticSpellingCorrectionEnabled = true
+"com.apple.keyboard.fnState" = true
+
+# cutler can also help you run shell commands every now and then.
+# Store them inside their own [commands] table instance and run them by name using the command:
+#
+# `cutler exec <cmd_name>`
+
+[vars]
+hostname = "rdrkr-mbp-m1"
+
+[command.hostname]
+run = """
+scutil --set ComputerName "Ronen's MacBook Pro M1 Pro"
+scutil --set HostName $hostname
+scutil --set LocalHostName $hostname
+"""
+ensure_first = true # ensure_first = true; Runs before all other commands.
+sudo = true # sudo = true; When you want your command to run with sudo privileges.
+# Please note that this is just a minor convenience feature;
+# regular sudo inside your actual command still works.

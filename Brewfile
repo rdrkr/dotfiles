@@ -6,6 +6,7 @@ tap "felixkratz/formulae"
 tap "gentleman-programming/tap"
 tap "hamed-elfayome/claude-usage"
 tap "koekeishiya/formulae"
+tap "machlit/tap"
 tap "mediosz/tap"
 tap "mocki-toki/formulae"
 tap "nikitabobko/tap"
@@ -227,6 +228,8 @@ brew "gentleman-programming/tap/gentleman-dots"
 brew "koekeishiya/formulae/skhd"
 # A tiling window manager for macOS based on binary space partitioning.
 brew "koekeishiya/formulae/yabai"
+# Powerful, declarative settings management for your Mac, with speed.
+brew "machlit/tap/cutler"
 # Incredibly fast JavaScript runtime, bundler, transpiler and package manager - all in one.
 brew "oven-sh/bun/bun"
 # Grep the GIF. Stick the landing

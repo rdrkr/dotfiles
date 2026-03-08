@@ -12,14 +12,9 @@ trap 'cd "$ORIGINAL_DIR"' EXIT
 # --- Configuration ---
 DRY_RUN=false
 
-# --- macOS Plist Configuration ---
-MACOS_CONFIG_DIR="${SCRIPT_DIR}/.config/macos"
-MACOS_PREFS_DIR="${HOME}/Library/Preferences"
 NPM_GLOBAL_FILE="${SCRIPT_DIR}/.config/npm-global-packages.txt"
 PIPX_PACKAGES_FILE="${SCRIPT_DIR}/.config/pipx-packages.txt"
 BUN_PACKAGES_FILE="${SCRIPT_DIR}/.config/bun-packages.txt"
-PLIST_FILES=() #("com.apple.Terminal.plist" "com.apple.dock.plist" "com.apple.finder.plist")
-APP_NAMES=()   #("Terminal" "Dock" "Finder")
 
 # --- Colors ---
 NC="\033[0m" # No Color
@@ -229,6 +224,18 @@ restore() {
 
   run_stow
 
+  print_header "Applying cutler configuration..."
+  if command -v cutler &>/dev/null; then
+    run_command "cutler apply"
+    if [ $? -ne 0 ] && [ "$DRY_RUN" = false ]; then
+      print_error "cutler apply command failed."
+      exit 1
+    fi
+    print_success "cutler configuration applied."
+  else
+    print_warning "cutler not found. Skipping."
+  fi
+
   print_header "Installing custom scripts..."
   if [ -d "scripts/Nvim.app" ]; then
     run_command "cp -R scripts/Nvim.app /Applications/"
@@ -240,28 +247,6 @@ restore() {
   echo -e "
 ${C_GREEN}All done! Your dotfiles are set up.${NC}
 "
-
-  print_header "Restoring macOS configurations..."
-  for i in "${!PLIST_FILES[@]}"; do
-    local plist_file="${PLIST_FILES[$i]}"
-    local source_path="${MACOS_CONFIG_DIR}/${plist_file}"
-    local dest_path="${MACOS_PREFS_DIR}/${plist_file}"
-    local app_name="${APP_NAMES[$i]}"
-
-    # First, copy the current plist to the dotfiles to check for changes
-    run_command "cp \"${dest_path}\" \"${source_path}\""
-
-    if [ -z "$(git status --porcelain \""${source_path}"\")" ]; then
-      print_success "${plist_file} is already up to date. No changes needed."
-    else
-      run_command "git restore \"${source_path}\""
-      run_command "cp \"${source_path}\" \"${dest_path}\""
-      print_success "${plist_file} restored."
-      print_warning "Restarting ${app_name} for changes to take effect..."
-      run_command "killall ${app_name}"
-      print_success "${app_name} restarted."
-    fi
-  done
 }
 
 backup() {
@@ -310,13 +295,6 @@ backup() {
   fi
 
   run_stow
-
-  print_header "Backing up macOS configurations..."
-  for i in "${!PLIST_FILES[@]}"; do
-    local plist_file="${PLIST_FILES[$i]}"
-    run_command "cp ${MACOS_PREFS_DIR}/${plist_file} ${MACOS_CONFIG_DIR}/${plist_file}"
-    print_success "${plist_file} backed up."
-  done
 
   if [ "$DRY_RUN" = false ]; then
     if [ -n "$(git status --porcelain)" ]; then
