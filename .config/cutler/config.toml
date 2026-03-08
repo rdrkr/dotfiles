@@ -12,16 +12,16 @@ ShowSeconds = false
 [set.finder]
 AppleShowAllFiles = true
 CreateDesktop = true                   # show all icons on the desktop, including external drives, connected servers, and removable media.
-ShowHardDrivesOnDesktop = false
 FXDefaultSearchScope = "SCcf"          # "SCcf" = Search the current folder, "SCev" = Search the entire Mac, "SCsp" = Search the previous search scope.
 FXEnableExtensionChangeWarning = false
 FXPreferredViewStyle = "Nlsv"
 FXRemoveOldTrashItems = true
 FinderSpawnTab = false
 ShowExternalHardDrivesOnDesktop = true
-ShowRemovableMediaOnDesktop = true
+ShowHardDrivesOnDesktop = false
 ShowMountedServersOnDesktop = true
 ShowPathbar = true
+ShowRemovableMediaOnDesktop = true
 ShowStatusBar = true
 _FXSortFoldersFirst = true
 
@@ -30,32 +30,39 @@ FirstClickThreshold = 1
 TrackpadThreeFingerDrag = false
 
 [set.dock]
-tilesize = 48
 autohide = true
-show-recents = false
-magnification = false
-mineffect = "genie"
 autohide-delay = 0
 autohide-time-modifier = 0.5
 expose-group-apps = true
-orientation = "bottom"
-static-only = false
+magnification = false
+mineffect = "genie"
 mru-spaces = false           # keep the Spaces arrangement
+orientation = "bottom"
+show-recents = false
+static-only = false
+tilesize = 48
+
+[set.HIToolbox]
+AppleFnUsageType = 1 # wwitches between keyboard layouts for writing in other languages (known as input sources).
+
+[set.spaces]
+spans-displays = false # displays have separate Spaces
 
 [set.screencapture]
+location = "~/Downloads"
 show-thumbnail = true
 target = "file"
-location = "~/Downloads"
 type = "png"
 
 [set.NSGlobalDomain] # For global domains, use the NSGlobalDomain key.
-AppleShowAllExtensions = true
 AppleKeyboardUIMode = 2                      # 0 = disabled, 2 = enabled
-NSAutomaticPeriodSubstitutionEnabled = false
-NSDocumentSaveNewDocumentsToCloud = true
+AppleShowAllExtensions = true
 NSAutomaticInlinePredictionEnabled = true
+NSAutomaticPeriodSubstitutionEnabled = false
 NSAutomaticSpellingCorrectionEnabled = true
+NSDocumentSaveNewDocumentsToCloud = true
 "com.apple.keyboard.fnState" = true
+"com.apple.mouse.scaling" = 3
 
 # cutler can also help you run shell commands every now and then.
 # Store them inside their own [commands] table instance and run them by name using the command:
