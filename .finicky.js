@@ -34,6 +34,7 @@ export default {
     },
     {
       match: [
+        "*claude.ai*",
         "*google.com*",
       ],
       browser: {
@@ -48,7 +49,7 @@ export default {
       browser: (url, _) => ({
         name: "Google Chrome",
         profile: "Personal",
-        // args: ["--incognito", url.href]
+        args: ["--incognito", url.href]
       })
     }
   ]
