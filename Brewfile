@@ -189,6 +189,8 @@ brew "swiftformat"
 brew "swiftlint"
 # Modernized, complete, self-contained TeX/LaTeX engine
 brew "tectonic"
+# Send macOS User Notifications from the command-line
+brew "terminal-notifier"
 # Terminal multiplexer
 brew "tmux"
 # Display directories as trees (with optional color/HTML output)
