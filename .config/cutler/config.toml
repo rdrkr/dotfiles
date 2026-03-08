@@ -2,6 +2,7 @@
 # visit: https://machlit.github.io/cutler
 
 [set.menuextra.clock] # The preference is put without the com.apple. prefix (here it is com.apple.menuextra.clock)
+FlashDateSeparators = false
 Show24Hour = true
 ShowAMPM = false
 ShowDate = 0
@@ -10,33 +11,47 @@ ShowSeconds = false
 
 [set.finder]
 AppleShowAllFiles = true
-CreateDesktop = false
-ShowPathbar = true
-ShowExternalHardDrivesOnDesktop = true
-FXRemoveOldTrashItems = true
+CreateDesktop = true                   # show all icons on the desktop, including external drives, connected servers, and removable media.
+ShowHardDrivesOnDesktop = false
+FXDefaultSearchScope = "SCcf"          # "SCcf" = Search the current folder, "SCev" = Search the entire Mac, "SCsp" = Search the previous search scope.
 FXEnableExtensionChangeWarning = false
-FXDefaultSearchScope = "SCcf"
+FXPreferredViewStyle = "Nlsv"
+FXRemoveOldTrashItems = true
+FinderSpawnTab = false
+ShowExternalHardDrivesOnDesktop = true
+ShowRemovableMediaOnDesktop = true
+ShowMountedServersOnDesktop = true
+ShowPathbar = true
+ShowStatusBar = true
+_FXSortFoldersFirst = true
 
 [set.AppleMultitouchTrackpad]
 FirstClickThreshold = 1
 TrackpadThreeFingerDrag = false
 
 [set.dock]
-tilesize = 47
+tilesize = 48
 autohide = true
 show-recents = false
 magnification = false
 mineffect = "genie"
 autohide-delay = 0
-autohide-time-modifier = 0.6
+autohide-time-modifier = 0.5
 expose-group-apps = true
+orientation = "bottom"
+static-only = false
+mru-spaces = false           # keep the Spaces arrangement
 
 [set.screencapture]
 show-thumbnail = true
 target = "file"
+location = "~/Downloads"
 type = "png"
 
 [set.NSGlobalDomain] # For global domains, use the NSGlobalDomain key.
+AppleShowAllExtensions = true
+AppleKeyboardUIMode = 2                      # 0 = disabled, 2 = enabled
+NSAutomaticPeriodSubstitutionEnabled = false
 NSDocumentSaveNewDocumentsToCloud = true
 NSAutomaticInlinePredictionEnabled = true
 NSAutomaticSpellingCorrectionEnabled = true
