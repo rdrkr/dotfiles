@@ -82,3 +82,17 @@ lazybeeper
 env
 backoff
 dialogs
+Raycast
+ViewModels
+DependencyContainer
+TOMLKit
+AsyncFileMonitor
+LemonSqueezy
+ModifiedCopyMacro
+EdDSA
+github
+plist
+Keychain
+appcast
+xml
+VibeMeter
