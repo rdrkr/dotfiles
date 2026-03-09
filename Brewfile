@@ -226,8 +226,6 @@ brew "felixkratz/formulae/sketchybar"
 brew "gentleman-programming/tap/gentleman-dots"
 # Simple hotkey-daemon for macOS.
 brew "koekeishiya/formulae/skhd"
-# A tiling window manager for macOS based on binary space partitioning.
-brew "koekeishiya/formulae/yabai"
 # Powerful, declarative settings management for your Mac, with speed.
 brew "machlit/tap/cutler"
 # Incredibly fast JavaScript runtime, bundler, transpiler and package manager - all in one.
