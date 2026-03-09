@@ -116,6 +116,8 @@ brew "mas"
 brew "maven"
 # CLI for Mermaid library
 brew "mermaid-cli"
+# Polyglot runtime manager (asdf rust clone)
+brew "mise"
 # Simple tool to make locally trusted development certificates
 brew "mkcert"
 # Deep clean and optimize your Mac
