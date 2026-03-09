@@ -18,7 +18,7 @@
     "ask": [],
     "defaultMode": "plan"
   },
-  "model": "haiku",
+  "model": "opus",
   "hooks": {
     "Stop": [
       {
