@@ -160,6 +160,7 @@ await task.group(
                 })
               })
             },
+            { previewLines: 10 },
           )
 
           return registeredTask
@@ -167,10 +168,10 @@ await task.group(
         ),
         {
           concurrency: 1,
-          maxVisible: (height: number) => height,
           stopOnError: true,
         },
       ),
+      { showTime: true },
     ),
   ),
   {
