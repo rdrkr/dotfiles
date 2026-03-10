@@ -6,8 +6,12 @@ import { spawn } from "node:child_process"
 import { readFileSync } from "node:fs"
 import { homedir } from "node:os"
 import { resolve } from "node:path"
-import task from "tasuku"
 import { parse } from "yaml"
+import task from "tasuku"
+// import task from 'tasuku/inline'          // inline renderer
+// import task from 'tasuku/theme/claude'    // Claude Code theme
+// import task from 'tasuku/theme/blink'     // reduced-motion theme
+// import task from 'tasuku/theme/codex'     // OpenAI Codex theme
 
 /**
  * Task definition
@@ -115,12 +119,12 @@ const taskGroups = taskFile.groups.map((g) => ({
 
 // Run all groups in parallel, where each group runs its tasks sequentially with live output streaming
 await task.group(
-  (group) => taskGroups.map(({ title, tasks }) =>
-    group(
+  (rootCreator) => taskGroups.map(({ title, tasks }) =>
+    rootCreator(
       title,
-      async ({ task }) => await task.group(
-        (task) => tasks.map(({ title, command, args, cwd }) => {
-          const registeredTask = task(
+      async () => await task.group(
+        (childCreator) => tasks.map(({ title, command, args, cwd }) => {
+          const registeredTask = childCreator(
             "Waiting...",
             async ({ setTitle, setError, streamPreview }) => {
               setTitle(title)
@@ -141,11 +145,7 @@ await task.group(
                     resolve()
 
                     if (!verbose) {
-                      // clear step task output if successful
-                      registeredTask.task.streamOutput = undefined
-
-                      // clear step task and collapse it to parent
-                      // registeredTask.clear()
+                      streamPreview.clear()
                     }
                   } else {
                     const msg = `exited with code ${code}`
