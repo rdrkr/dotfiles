@@ -1,0 +1,31 @@
+name: test-tasks
+description: Dummy tasks for testing run-tasks
+usage: run-tasks test-tasks.yaml [options]
+
+groups:
+  - title: Quick checks
+    tasks:
+      - title: Echo hello
+        command: echo
+        args: [hello, world]
+      - title: List current directory
+        command: ls
+        args: [-la]
+      - title: Print date
+        command: date
+        args: []
+
+  - title: Slow tasks
+    tasks:
+      - title: Sleep 2 seconds
+        command: sleep
+        args: ["2"]
+      - title: Count lines in /etc/hosts
+        command: wc
+        args: [-l, /etc/hosts]
+
+  - title: Multi-line output
+    tasks:
+      - title: Print numbers 1-20
+        command: bash
+        args: [-c, "for i in $(seq 1 20); do echo \"Line $i of output\"; sleep 0.1; done"]

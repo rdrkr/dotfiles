@@ -48,3 +48,4 @@ node_modules/
 /.claude/telemetry
 /.claude/mcp-needs-auth-cache.json
 /.claude/plugins/blocklist.json
+/.claude/chrome/chrome-native-host

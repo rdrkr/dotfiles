@@ -161,7 +161,7 @@ alias vim='nvim'
 alias lg='lazygit'
 alias ld='lazydocker'
 alias c='clear'
-alias ua='npm start --prefix ~/dotfiles/scripts/run-tasks --silent -- ~/dotfiles/scripts/update-all/update-all.yaml'
+alias ua='cd ~/dotfiles/scripts/run-tasks && npm update --save --silent && npx tsx run-tasks.ts ./update-all.yaml && cd -'
 
 ## claude code aliases
 alias cc='claude --dangerously-skip-permissions'
