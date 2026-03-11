@@ -13,7 +13,7 @@ log-level = 'debug'
 [general]
 aerospace-path = '/opt/homebrew/bin/aerospace'
 quick-hide-enabled = true
-quick-hide-trigger-key = 'shift'
+quick-hide-trigger-key = 'control'
 show-window-titles = true
 theme-mode = 'preset'
 theme-preset = 'gruvbox-dark'
@@ -115,11 +115,11 @@ corner-radius = 14.0
 alpha = 1.0
 blue = -0.15089532732963562
 green = -0.22236216068267822
-red = 1.0929248332977295
+red = 1.0929250717163086
 
 [spaces.apple-button-visual-config.border-tint-color]
 alpha = 1.0
-blue = -0.28639864921569824
+blue = -0.28639853000640869
 green = 1.0181982517242432
 red = -0.5113527774810791
 
