@@ -10,6 +10,7 @@ groups:
       - title: Updating Homebrew
         command: brew
         args: [update]
+        verbose: true
       - title: Upgrading Homebrew packages
         command: brew
         args: [upgrade]

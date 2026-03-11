@@ -11,6 +11,7 @@ groups:
       - title: List current directory
         command: ls
         args: [-la]
+        verbose: true
       - title: Print date
         command: date
         args: []

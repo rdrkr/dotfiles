@@ -21,6 +21,7 @@ interface Task {
   command: string
   args: string[]
   cwd?: string
+  verbose?: boolean
 }
 
 /**
@@ -109,6 +110,7 @@ function expandTask(t: Task): Task {
     command: expandVars(t.command),
     args: t.args.map(expandVars),
     ...(t.cwd && { cwd: expandVars(t.cwd) }),
+    ...(t.verbose !== undefined && { verbose: t.verbose }),
   }
 }
 
@@ -123,7 +125,8 @@ await task.group(
     rootCreator(
       title,
       async () => await task.group(
-        (childCreator) => tasks.map(({ title, command, args, cwd }) => {
+        (childCreator) => tasks.map(({ title, command, args, cwd, verbose: taskVerbose }) => {
+          const isVerbose = verbose || taskVerbose;
           const registeredTask = childCreator(
             "Waiting...",
             async ({ setTitle, setError, streamPreview }) => {
@@ -144,7 +147,7 @@ await task.group(
                     setTitle(title)
                     resolve()
 
-                    if (!verbose) {
+                    if (!isVerbose) {
                       streamPreview.clear()
                     }
                   } else {
@@ -160,7 +163,7 @@ await task.group(
                 })
               })
             },
-            { previewLines: 10 },
+            { previewLines: isVerbose ? 100 : 10 },
           )
 
           return registeredTask

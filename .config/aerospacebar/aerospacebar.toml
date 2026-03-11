@@ -5,15 +5,15 @@
 
 [advanced]
 enable-optimized-performance = true
-enable-performance-metrics = true
+enable-performance-metrics = false
 focus-window-on-click = true
 # Supported values: "debug", "info", "warning", "error", "fault"
-log-level = 'debug'
+log-level = 'info'
 
 [general]
 aerospace-path = '/opt/homebrew/bin/aerospace'
 quick-hide-enabled = true
-quick-hide-trigger-key = 'fn'
+quick-hide-trigger-key = 'control'
 show-window-titles = true
 theme-mode = 'preset'
 theme-preset = 'gruvbox-dark'
@@ -61,7 +61,7 @@ green = 0.0
 red = 0.0
 
 [[groups.groups]]
-end-index = -1
+end-index = 14
 id = 0
 start-index = 1
 
