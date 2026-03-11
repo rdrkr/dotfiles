@@ -16,7 +16,7 @@ quick-hide-enabled = true
 quick-hide-trigger-key = 'fn'
 show-window-titles = true
 theme-mode = 'preset'
-theme-preset = 'catppuccin-mocha'
+theme-preset = 'gruvbox-dark'
 
 [general.theme-preset-effect]
 background-blur-radius = 0.80000000000000004
@@ -61,169 +61,9 @@ green = 0.0
 red = 0.0
 
 [[groups.groups]]
-end-index = 10
+end-index = -1
 id = 0
 start-index = 1
-
-[groups.groups.effect-config]
-background-blur-radius = 0.0
-background-opacity = 0.20000000000000001
-border-opacity = 0.80000000000000004
-
-[groups.groups.geometric-config]
-border-width = 0.0
-corner-radius = 14.0
-
-[groups.groups.visual-config.background-tint-color]
-alpha = 1.0
-blue = 1.0
-green = 1.0
-red = 1.0
-
-[groups.groups.visual-config.border-tint-color]
-alpha = 1.0
-blue = 1.0
-green = 1.0
-red = 1.0
-
-[groups.groups.visual-config.foreground-color]
-alpha = 0.84705883264541626
-blue = 0.0
-green = 0.0
-red = 0.0
-
-[[groups.groups]]
-end-index = 11
-id = 1
-start-index = 11
-
-[groups.groups.effect-config]
-background-blur-radius = 0.0
-background-opacity = 0.20000000000000001
-border-opacity = 0.80000000000000004
-
-[groups.groups.geometric-config]
-border-width = 0.0
-corner-radius = 14.0
-
-[groups.groups.visual-config.background-tint-color]
-alpha = 1.0
-blue = 1.0
-green = 1.0
-red = 1.0
-
-[groups.groups.visual-config.border-tint-color]
-alpha = 1.0
-blue = 1.0
-green = 1.0
-red = 1.0
-
-[groups.groups.visual-config.foreground-color]
-alpha = 0.84705883264541626
-blue = 0.0
-green = 0.0
-red = 0.0
-
-[[groups.groups]]
-end-index = 12
-id = 2
-start-index = 12
-
-[groups.groups.effect-config]
-background-blur-radius = 0.0
-background-opacity = 0.20000000000000001
-border-opacity = 0.80000000000000004
-
-[groups.groups.geometric-config]
-border-width = 0.0
-corner-radius = 14.0
-
-[groups.groups.visual-config.background-tint-color]
-alpha = 1.0
-blue = 1.0
-green = 1.0
-red = 1.0
-
-[groups.groups.visual-config.border-tint-color]
-alpha = 1.0
-blue = 1.0
-green = 1.0
-red = 1.0
-
-[groups.groups.visual-config.foreground-color]
-alpha = 0.84705883264541626
-blue = 0.0
-green = 0.0
-red = 0.0
-
-[[groups.groups]]
-end-index = 13
-id = 3
-start-index = 13
-
-[groups.groups.effect-config]
-background-blur-radius = 0.0
-background-opacity = 0.20000000000000001
-border-opacity = 0.80000000000000004
-
-[groups.groups.geometric-config]
-border-width = 0.0
-corner-radius = 14.0
-
-[groups.groups.visual-config.background-tint-color]
-alpha = 1.0
-blue = 1.0
-green = 1.0
-red = 1.0
-
-[groups.groups.visual-config.border-tint-color]
-alpha = 1.0
-blue = 1.0
-green = 1.0
-red = 1.0
-
-[groups.groups.visual-config.foreground-color]
-alpha = 0.84705883264541626
-blue = 0.0
-green = 0.0
-red = 0.0
-
-[[groups.groups]]
-end-index = 14
-id = 4
-start-index = 14
-
-[groups.groups.effect-config]
-background-blur-radius = 0.0
-background-opacity = 0.20000000000000001
-border-opacity = 0.80000000000000004
-
-[groups.groups.geometric-config]
-border-width = 0.0
-corner-radius = 14.0
-
-[groups.groups.visual-config.background-tint-color]
-alpha = 1.0
-blue = 1.0
-green = 1.0
-red = 1.0
-
-[groups.groups.visual-config.border-tint-color]
-alpha = 1.0
-blue = 1.0
-green = 1.0
-red = 1.0
-
-[groups.groups.visual-config.foreground-color]
-alpha = 0.84705883264541626
-blue = 0.0
-green = 0.0
-red = 0.0
-
-[[groups.groups]]
-end-index = 15
-id = 5
-start-index = 15
 
 [groups.groups.effect-config]
 background-blur-radius = 0.0
@@ -258,7 +98,7 @@ red = 0.0
 appearance-mode = 'all-spaces'
 effect-config = []
 geometric-config = []
-show-apple-button-as-space = false
+show-apple-button-as-space = true
 show-empty-spaces = false
 visual-config = []
 
