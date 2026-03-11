@@ -18,6 +18,7 @@
     "ask": [],
     "defaultMode": "plan"
   },
+  "model": "opus",
   "hooks": {
     "Stop": [
       {
@@ -58,5 +59,6 @@
     }
   },
   "alwaysThinkingEnabled": true,
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "effortLevel": "high"
 }
