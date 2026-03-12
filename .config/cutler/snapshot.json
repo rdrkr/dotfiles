@@ -1,8 +1,63 @@
 {
   "settings": [
     {
+      "domain": "com.apple.menuextra.clock",
+      "key": "ShowSeconds",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.screencapture",
+      "key": "type",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.menuextra.clock",
+      "key": "ShowAMPM",
+      "original_value": true
+    },
+    {
+      "domain": "com.apple.finder",
+      "key": "CreateDesktop",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.HIToolbox",
+      "key": "AppleFnUsageType",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.finder",
+      "key": "_FXSortFoldersFirst",
+      "original_value": false
+    },
+    {
+      "domain": "com.apple.dock",
+      "key": "tilesize",
+      "original_value": 47.0
+    },
+    {
+      "domain": "com.apple.menuextra.clock",
+      "key": "FlashDateSeparators",
+      "original_value": null
+    },
+    {
+      "domain": "NSGlobalDomain",
+      "key": "NSDocumentSaveNewDocumentsToCloud",
+      "original_value": null
+    },
+    {
       "domain": "NSGlobalDomain",
       "key": "NSAutomaticInlinePredictionEnabled",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.dock",
+      "key": "autohide-time-modifier",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.dock",
+      "key": "orientation",
       "original_value": null
     },
     {
@@ -17,72 +72,7 @@
     },
     {
       "domain": "NSGlobalDomain",
-      "key": "NSDocumentSaveNewDocumentsToCloud",
-      "original_value": null
-    },
-    {
-      "domain": "com.apple.finder",
-      "key": "AppleShowAllFiles",
-      "original_value": null
-    },
-    {
-      "domain": "com.apple.screencapture",
-      "key": "type",
-      "original_value": null
-    },
-    {
-      "domain": "com.apple.menuextra.clock",
-      "key": "ShowSeconds",
-      "original_value": null
-    },
-    {
-      "domain": "NSGlobalDomain",
-      "key": "NSAutomaticSpellingCorrectionEnabled",
-      "original_value": null
-    },
-    {
-      "domain": "com.apple.menuextra.clock",
-      "key": "ShowAMPM",
-      "original_value": true
-    },
-    {
-      "domain": "com.apple.finder",
-      "key": "CreateDesktop",
-      "original_value": null
-    },
-    {
-      "domain": "com.apple.finder",
-      "key": "_FXSortFoldersFirst",
-      "original_value": false
-    },
-    {
-      "domain": "NSGlobalDomain",
       "key": "AppleKeyboardUIMode",
-      "original_value": null
-    },
-    {
-      "domain": "NSGlobalDomain",
-      "key": "com.apple.mouse.scaling",
-      "original_value": 3.0
-    },
-    {
-      "domain": "com.apple.HIToolbox",
-      "key": "AppleFnUsageType",
-      "original_value": null
-    },
-    {
-      "domain": "com.apple.dock",
-      "key": "autohide-delay",
-      "original_value": 0.0
-    },
-    {
-      "domain": "com.apple.dock",
-      "key": "autohide-time-modifier",
-      "original_value": null
-    },
-    {
-      "domain": "com.apple.dock",
-      "key": "orientation",
       "original_value": null
     },
     {
@@ -91,17 +81,27 @@
       "original_value": null
     },
     {
-      "domain": "com.apple.dock",
-      "key": "tilesize",
-      "original_value": 47.0
+      "domain": "NSGlobalDomain",
+      "key": "NSAutomaticSpellingCorrectionEnabled",
+      "original_value": null
     },
     {
-      "domain": "com.apple.menuextra.clock",
-      "key": "FlashDateSeparators",
+      "domain": "com.apple.finder",
+      "key": "AppleShowAllFiles",
       "original_value": null
+    },
+    {
+      "domain": "NSGlobalDomain",
+      "key": "com.apple.mouse.scaling",
+      "original_value": 3.0
+    },
+    {
+      "domain": "com.apple.dock",
+      "key": "autohide-delay",
+      "original_value": 0.0
     }
   ],
-  "exec_run_count": 1,
+  "exec_run_count": 0,
   "version": "0.19.7",
-  "digest": "1982d348727db9b2ed2972e332367eff9c6a7c7951cfe3ef19f47e33f6381ed2"
+  "digest": "cdc0d0d11d872e5c5117e1ebb31ae0e26c03909c5f19bfd594108b8e7523deac"
 }

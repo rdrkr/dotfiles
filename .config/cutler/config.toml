@@ -55,7 +55,7 @@ target = "file"
 type = "png"
 
 [set.NSGlobalDomain] # For global domains, use the NSGlobalDomain key.
-AppleKeyboardUIMode = 2                      # 0 = disabled, 2 = enabled
+AppleKeyboardUIMode = 0                      # 0 = disabled, 2 = enabled
 AppleShowAllExtensions = true
 NSAutomaticInlinePredictionEnabled = true
 NSAutomaticPeriodSubstitutionEnabled = false
