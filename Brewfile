@@ -272,8 +272,6 @@ cask "claude-code"
 cask "hamed-elfayome/claude-usage/claude-usage-tracker"
 # Write, edit, and chat about your code with AI
 cask "cursor"
-# Command-line agent for Cursor
-cask "cursor-cli"
 # Server and cloud storage browser
 cask "cyberduck"
 # Voice and text chat software
