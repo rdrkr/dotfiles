@@ -106,6 +106,7 @@ format_usage_str() {
   local resets_at=$2
   local is_weekly=$3
   local acc_prefix=$4
+  local acc_color=$5
 
   local label=""
   local bar_flag=""
@@ -121,8 +122,9 @@ format_usage_str() {
     reset_flag="$show_reset"
   fi
 
+  local prefix_part=""
   if [ -n "$acc_prefix" ]; then
-    label="${acc_prefix} ${label}"
+    prefix_part="${acc_color}${acc_prefix}${RESET} "
   fi
 
   if [ -n "$util" ] && [ "$util" != "ERROR" ] && [[ "$util" =~ ^[0-9]+$ ]]; then
@@ -209,9 +211,9 @@ format_usage_str() {
     fi
 
     local formatted_util=$(printf "%-4s" "${util}%")
-    echo "${usage_color}${label} ${formatted_util}${progress_bar}${reset_time_display}${RESET}"
+    echo "${prefix_part}${usage_color}${label} ${formatted_util}${progress_bar}${reset_time_display}${RESET}"
   else
-    echo "${YELLOW}${label} ~   ${RESET}"
+    echo "${prefix_part}${YELLOW}${label} ~   ${RESET}"
   fi
 }
 
@@ -220,6 +222,7 @@ usage_lines=()
 process_result() {
   local swift_result=$1
   local prefix=$2
+  local p_color=$3
 
   local utilization=""
   local resets_at=""
@@ -238,17 +241,17 @@ process_result() {
 
   local acc_line=""
   if [ "$show_usage" = "1" ]; then
-    local u_text=$(format_usage_str "$utilization" "$resets_at" "0" "$prefix")
+    local u_text=$(format_usage_str "$utilization" "$resets_at" "0" "$prefix" "$p_color")
     acc_line="${u_text}"
   fi
 
   if [ "$show_weekly_usage" = "1" ]; then
-    local w_text=$(format_usage_str "$sd_utilization" "$sd_resets_at" "1" "")
+    local w_text=$(format_usage_str "$sd_utilization" "$sd_resets_at" "1" "" "")
     if [ -n "$acc_line" ]; then
       acc_line="${acc_line}${separator}${w_text}"
     else
       # If session is hidden, still show prefix on weekly
-      w_text=$(format_usage_str "$sd_utilization" "$sd_resets_at" "1" "$prefix")
+      w_text=$(format_usage_str "$sd_utilization" "$sd_resets_at" "1" "$prefix" "$p_color")
       acc_line="${w_text}"
     fi
   fi
@@ -275,13 +278,41 @@ if [ "$show_usage" = "1" ] || [ "$show_weekly_usage" = "1" ]; then
         fi
       done
 
+      # Calculate max prefix length for alignment
+      max_len=0
       for acc in $ordered_sequence; do
         email=$(jq -r --arg acc "$acc" '.accounts[$acc].email' "$HOME/.claude-switch-backup/sequence.json" 2>/dev/null)
         domain=""
         if [ -n "$email" ] && [ "$email" != "null" ]; then
           domain=$(echo "$email" | awk -F'[@.]' '{print $2}')
         fi
-        acc_prefix="${acc}-${domain}"
+        raw_prefix="${acc}-${domain}"
+        if [ ${#raw_prefix} -gt $max_len ]; then
+          max_len=${#raw_prefix}
+        fi
+      done
+
+      colors=("$BLUE" "$GREEN" "$YELLOW" "$PURPLE")
+      color_idx=0
+
+      for acc in $ordered_sequence; do
+        email=$(jq -r --arg acc "$acc" '.accounts[$acc].email' "$HOME/.claude-switch-backup/sequence.json" 2>/dev/null)
+        domain=""
+        if [ -n "$email" ] && [ "$email" != "null" ]; then
+          domain=$(echo "$email" | awk -F'[@.]' '{print $2}')
+        fi
+        raw_prefix="${acc}-${domain}"
+        
+        pad_len=$((max_len - ${#raw_prefix}))
+        if [ "$pad_len" -gt 0 ]; then
+          pad_spaces=$(printf "%*s" $pad_len "")
+          acc_prefix="${raw_prefix}${pad_spaces}"
+        else
+          acc_prefix="${raw_prefix}"
+        fi
+
+        acc_color="${colors[$color_idx]}"
+        color_idx=$(( (color_idx + 1) % 4 ))
 
         if [ "$acc" = "$active_account" ]; then
           script_path="$HOME/.claude/fetch-claude-usage.swift"
@@ -291,9 +322,9 @@ if [ "$show_usage" = "1" ] || [ "$show_weekly_usage" = "1" ]; then
 
         if [ -f "$script_path" ]; then
           swift_result=$(swift "$script_path" 2>/dev/null)
-          process_result "$swift_result" "$acc_prefix"
+          process_result "$swift_result" "$acc_prefix" "$acc_color"
         else
-          process_result "ERROR" "$acc_prefix"
+          process_result "ERROR" "$acc_prefix" "$acc_color"
         fi
       done
     fi
