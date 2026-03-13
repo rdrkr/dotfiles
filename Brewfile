@@ -393,6 +393,7 @@ mas "Tag Editor 2", id: 984278082
 mas "Tailscale", id: 1475387142
 mas "TestFlight", id: 899247664
 mas "The Unarchiver", id: 425424353
+mas "WhatsApp", id: 310633997
 mas "Windows App", id: 1295203466
 mas "Xcode", id: 497799835
 mas "Xmind", id: 1327661892
