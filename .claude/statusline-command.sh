@@ -124,7 +124,7 @@ format_usage_str() {
 
   local prefix_part=""
   if [ -n "$acc_prefix" ]; then
-    prefix_part="${acc_color}${acc_prefix}${RESET} "
+    prefix_part="${GRAY}⎿ ${RESET}${acc_color}${acc_prefix}${RESET} "
   fi
 
   if [ -n "$util" ] && [ "$util" != "ERROR" ] && [[ "$util" =~ ^[0-9]+$ ]]; then
@@ -192,8 +192,12 @@ format_usage_str() {
     # reset time
     local reset_time_display=""
     if [ "$reset_flag" = "1" ] && [ -n "$resets_at" ] && [ "$resets_at" != "null" ]; then
-      local iso_time=$(echo "$resets_at" | sed 's/\.[0-9]*Z$//')
-      local epoch=$(date -ju -f "%Y-%m-%dT%H:%M:%S" "$iso_time" "+%s" 2>/dev/null)
+      local iso_time
+      iso_time=$(echo "$resets_at" | sed 's/\.[0-9]*Z$//')
+
+      local epoch
+      epoch=$(date -ju -f "%Y-%m-%dT%H:%M:%S" "$iso_time" "+%s" 2>/dev/null)
+
       if [ -n "$epoch" ]; then
         local time_format=$(defaults read -g AppleICUForce24HourTime 2>/dev/null)
         local reset_time=""
@@ -241,12 +245,16 @@ process_result() {
 
   local acc_line=""
   if [ "$show_usage" = "1" ]; then
-    local u_text=$(format_usage_str "$utilization" "$resets_at" "0" "$prefix" "$p_color")
+    local u_text
+    u_text=$(format_usage_str "$utilization" "$resets_at" "0" "$prefix" "$p_color")
+
     acc_line="${u_text}"
   fi
 
   if [ "$show_weekly_usage" = "1" ]; then
-    local w_text=$(format_usage_str "$sd_utilization" "$sd_resets_at" "1" "" "")
+    local w_text
+    w_text=$(format_usage_str "$sd_utilization" "$sd_resets_at" "1" "" "")
+
     if [ -n "$acc_line" ]; then
       acc_line="${acc_line}${separator}${w_text}"
     else
@@ -302,7 +310,7 @@ if [ "$show_usage" = "1" ] || [ "$show_weekly_usage" = "1" ]; then
           domain=$(echo "$email" | awk -F'[@.]' '{print $2}')
         fi
         raw_prefix="${acc}-${domain}"
-        
+
         pad_len=$((max_len - ${#raw_prefix}))
         if [ "$pad_len" -gt 0 ]; then
           pad_spaces=$(printf "%*s" $pad_len "")
@@ -312,7 +320,7 @@ if [ "$show_usage" = "1" ] || [ "$show_weekly_usage" = "1" ]; then
         fi
 
         acc_color="${colors[$color_idx]}"
-        color_idx=$(( (color_idx + 1) % 4 ))
+        color_idx=$(((color_idx + 1) % 4))
 
         if [ "$acc" = "$active_account" ]; then
           script_path="$HOME/.claude/fetch-claude-usage.swift"
