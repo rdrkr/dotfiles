@@ -267,8 +267,21 @@ if [ "$show_usage" = "1" ] || [ "$show_weekly_usage" = "1" ]; then
       swift_result=$(swift "$HOME/.claude/fetch-claude-usage.swift" 2>/dev/null)
       process_result "$swift_result" ""
     else
+      # Reorder sequence so active_account is first
+      ordered_sequence="$active_account"
       for acc in $sequence; do
+        if [ "$acc" != "$active_account" ]; then
+          ordered_sequence="$ordered_sequence $acc"
+        fi
+      done
+
+      for acc in $ordered_sequence; do
         email=$(jq -r --arg acc "$acc" '.accounts[$acc].email' "$HOME/.claude-switch-backup/sequence.json" 2>/dev/null)
+        domain=""
+        if [ -n "$email" ] && [ "$email" != "null" ]; then
+          domain=$(echo "$email" | awk -F'[@.]' '{print $2}')
+        fi
+        acc_prefix="${acc}-${domain}"
 
         if [ "$acc" = "$active_account" ]; then
           script_path="$HOME/.claude/fetch-claude-usage.swift"
@@ -278,9 +291,9 @@ if [ "$show_usage" = "1" ] || [ "$show_weekly_usage" = "1" ]; then
 
         if [ -f "$script_path" ]; then
           swift_result=$(swift "$script_path" 2>/dev/null)
-          process_result "$swift_result" "$acc"
+          process_result "$swift_result" "$acc_prefix"
         else
-          process_result "ERROR" "$acc"
+          process_result "ERROR" "$acc_prefix"
         fi
       done
     fi
