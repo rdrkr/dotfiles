@@ -110,3 +110,13 @@ keymaps
 popups
 ints
 unexported
+lazybeeper
+config
+CLIs
+enum
+XDG
+useReducer
+ESLint
+configs
+JSDoc
+tmux

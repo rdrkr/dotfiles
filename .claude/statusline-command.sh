@@ -50,6 +50,8 @@ LEVEL_8=$'\033[38;5;166m'  # darker orange
 LEVEL_9=$'\033[38;5;160m'  # dark red
 LEVEL_10=$'\033[38;5;124m' # deep red
 
+separator="${GRAY} │ ${RESET}"
+
 # Build components (without separators)
 account_text=""
 if [ "$show_account" = "1" ] && [ -f "$HOME/.claude-switch-backup/sequence.json" ]; then
@@ -81,187 +83,7 @@ if [ "$show_branch" = "1" ]; then
   fi
 fi
 
-usage_text=""
-weekly_usage_text=""
-if [ "$show_usage" = "1" ] || [ "$show_weekly_usage" = "1" ]; then
-  swift_result=$(swift "$HOME/.claude/fetch-claude-usage.swift" 2>/dev/null)
-
-  if [ $? -eq 0 ] && [ -n "$swift_result" ]; then
-    utilization=$(echo "$swift_result" | cut -d'|' -f1)
-    resets_at=$(echo "$swift_result" | cut -d'|' -f2)
-    sd_utilization=$(echo "$swift_result" | cut -d'|' -f3)
-    sd_resets_at=$(echo "$swift_result" | cut -d'|' -f4)
-
-    if [ "$show_usage" = "1" ]; then
-      if [ -n "$utilization" ] && [ "$utilization" != "ERROR" ]; then
-        if [ "$colorful_usage" = "1" ]; then
-          if [ "$utilization" -le 10 ]; then
-            usage_color="$LEVEL_1"
-          elif [ "$utilization" -le 20 ]; then
-            usage_color="$LEVEL_2"
-          elif [ "$utilization" -le 30 ]; then
-            usage_color="$LEVEL_3"
-          elif [ "$utilization" -le 40 ]; then
-            usage_color="$LEVEL_4"
-          elif [ "$utilization" -le 50 ]; then
-            usage_color="$LEVEL_5"
-          elif [ "$utilization" -le 60 ]; then
-            usage_color="$LEVEL_6"
-          elif [ "$utilization" -le 70 ]; then
-            usage_color="$LEVEL_7"
-          elif [ "$utilization" -le 80 ]; then
-            usage_color="$LEVEL_8"
-          elif [ "$utilization" -le 90 ]; then
-            usage_color="$LEVEL_9"
-          else usage_color="$LEVEL_10"; fi
-        else
-          if [ "$utilization" -le 60 ]; then
-            usage_color="$GRAY"
-          elif [ "$utilization" -le 70 ]; then
-            usage_color="$LEVEL_7"
-          elif [ "$utilization" -le 80 ]; then
-            usage_color="$LEVEL_8"
-          elif [ "$utilization" -le 90 ]; then
-            usage_color="$LEVEL_9"
-          else usage_color="$LEVEL_10"; fi
-        fi
-
-        if [ "$show_bar" = "1" ]; then
-          if [ "$utilization" -eq 0 ]; then
-            filled_blocks=0
-          elif [ "$utilization" -eq 100 ]; then
-            filled_blocks=10
-          else filled_blocks=$(((utilization * 10 + 50) / 100)); fi
-          [ "$filled_blocks" -lt 0 ] && filled_blocks=0
-          [ "$filled_blocks" -gt 10 ] && filled_blocks=10
-          empty_blocks=$((10 - filled_blocks))
-
-          progress_bar=" "
-          i=0
-          while [ $i -lt $filled_blocks ]; do
-            progress_bar="${progress_bar}▓"
-            i=$((i + 1))
-          done
-          i=0
-          while [ $i -lt $empty_blocks ]; do
-            progress_bar="${progress_bar}░"
-            i=$((i + 1))
-          done
-        else
-          progress_bar=""
-        fi
-
-        reset_time_display=""
-        if [ "$show_reset" = "1" ] && [ -n "$resets_at" ] && [ "$resets_at" != "null" ]; then
-          iso_time=$(echo "$resets_at" | sed 's/\.[0-9]*Z$//')
-          epoch=$(date -ju -f "%Y-%m-%dT%H:%M:%S" "$iso_time" "+%s" 2>/dev/null)
-
-          if [ -n "$epoch" ]; then
-            time_format=$(defaults read -g AppleICUForce24HourTime 2>/dev/null)
-            if [ "$time_format" = "1" ]; then
-              reset_time=$(date -r "$epoch" "+%H:%M" 2>/dev/null)
-            else reset_time=$(date -r "$epoch" "+%I:%M %p" 2>/dev/null); fi
-            [ -n "$reset_time" ] && reset_time_display=$(printf " → Reset: %s" "$reset_time")
-          fi
-        fi
-
-        formatted_utilization=$(printf "%-4s" "${utilization}%")
-        usage_text="${usage_color}Session: ${formatted_utilization}${progress_bar}${reset_time_display}${RESET}"
-      else
-        usage_text="${YELLOW}Session: ~   ${RESET}"
-      fi
-    fi
-
-    if [ "$show_weekly_usage" = "1" ]; then
-      if [ -n "$sd_utilization" ] && [ "$sd_utilization" != "ERROR" ]; then
-        if [ "$colorful_usage" = "1" ]; then
-          if [ "$sd_utilization" -le 10 ]; then
-            sd_usage_color="$LEVEL_1"
-          elif [ "$sd_utilization" -le 20 ]; then
-            sd_usage_color="$LEVEL_2"
-          elif [ "$sd_utilization" -le 30 ]; then
-            sd_usage_color="$LEVEL_3"
-          elif [ "$sd_utilization" -le 40 ]; then
-            sd_usage_color="$LEVEL_4"
-          elif [ "$sd_utilization" -le 50 ]; then
-            sd_usage_color="$LEVEL_5"
-          elif [ "$sd_utilization" -le 60 ]; then
-            sd_usage_color="$LEVEL_6"
-          elif [ "$sd_utilization" -le 70 ]; then
-            sd_usage_color="$LEVEL_7"
-          elif [ "$sd_utilization" -le 80 ]; then
-            sd_usage_color="$LEVEL_8"
-          elif [ "$sd_utilization" -le 90 ]; then
-            sd_usage_color="$LEVEL_9"
-          else sd_usage_color="$LEVEL_10"; fi
-        else
-          if [ "$sd_utilization" -le 60 ]; then
-            sd_usage_color="$GRAY"
-          elif [ "$sd_utilization" -le 70 ]; then
-            sd_usage_color="$LEVEL_7"
-          elif [ "$sd_utilization" -le 80 ]; then
-            sd_usage_color="$LEVEL_8"
-          elif [ "$sd_utilization" -le 90 ]; then
-            sd_usage_color="$LEVEL_9"
-          else sd_usage_color="$LEVEL_10"; fi
-        fi
-
-        if [ "$show_weekly_bar" = "1" ]; then
-          if [ "$sd_utilization" -eq 0 ]; then
-            sd_filled_blocks=0
-          elif [ "$sd_utilization" -eq 100 ]; then
-            sd_filled_blocks=10
-          else sd_filled_blocks=$(((sd_utilization * 10 + 50) / 100)); fi
-          [ "$sd_filled_blocks" -lt 0 ] && sd_filled_blocks=0
-          [ "$sd_filled_blocks" -gt 10 ] && sd_filled_blocks=10
-          sd_empty_blocks=$((10 - sd_filled_blocks))
-
-          sd_progress_bar=" "
-          j=0
-          while [ $j -lt $sd_filled_blocks ]; do
-            sd_progress_bar="${sd_progress_bar}▓"
-            j=$((j + 1))
-          done
-          j=0
-          while [ $j -lt $sd_empty_blocks ]; do
-            sd_progress_bar="${sd_progress_bar}░"
-            j=$((j + 1))
-          done
-        else
-          sd_progress_bar=""
-        fi
-
-        sd_reset_time_display=""
-        if [ "$show_weekly_reset" = "1" ] && [ -n "$sd_resets_at" ] && [ "$sd_resets_at" != "null" ]; then
-          sd_iso_time=$(echo "$sd_resets_at" | sed 's/\.[0-9]*Z$//')
-          sd_epoch=$(date -ju -f "%Y-%m-%dT%H:%M:%S" "$sd_iso_time" "+%s" 2>/dev/null)
-
-          if [ -n "$sd_epoch" ]; then
-            time_format=$(defaults read -g AppleICUForce24HourTime 2>/dev/null)
-            if [ "$time_format" = "1" ]; then
-              sd_reset_time=$(date -r "$sd_epoch" "+%a %H:%M" 2>/dev/null)
-            else sd_reset_time=$(date -r "$sd_epoch" "+%a %I:%M %p" 2>/dev/null); fi
-            [ -n "$sd_reset_time" ] && sd_reset_time_display=$(printf " → Reset: %s" "$sd_reset_time")
-          fi
-        fi
-
-        formatted_sd_utilization=$(printf "%-4s" "${sd_utilization}%")
-        weekly_usage_text="${sd_usage_color}Weekly:  ${formatted_sd_utilization}${sd_progress_bar}${sd_reset_time_display}${RESET}"
-      else
-        weekly_usage_text="${YELLOW}Weekly:  ~   ${RESET}"
-      fi
-    fi
-  else
-    if [ "$show_usage" = "1" ]; then usage_text="${YELLOW}Session: ~   ${RESET}"; fi
-    if [ "$show_weekly_usage" = "1" ]; then weekly_usage_text="${YELLOW}Weekly:  ~   ${RESET}"; fi
-  fi
-fi
-
 line1=""
-line2=""
-line3=""
-separator="${GRAY} │ ${RESET}"
-
 [ -n "$account_text" ] && line1="${account_text}"
 
 if [ -n "$dir_text" ]; then
@@ -279,22 +101,197 @@ if [ -n "$branch_text" ]; then
   line1="${line1}${branch_text}"
 fi
 
-if [ -n "$usage_text" ]; then
-  [ -n "$line2" ] && line2="${line2}${separator}"
-  line2="${line2}${usage_text}"
-fi
+format_usage_str() {
+  local util=$1
+  local resets_at=$2
+  local is_weekly=$3
+  local acc_prefix=$4
 
-if [ -n "$weekly_usage_text" ]; then
-  [ -n "$line3" ] && line3="${line3}${separator}"
-  line3="${line3}${weekly_usage_text}"
+  local label=""
+  local bar_flag=""
+  local reset_flag=""
+
+  if [ "$is_weekly" = "1" ]; then
+    label="w"
+    bar_flag="$show_weekly_bar"
+    reset_flag="$show_weekly_reset"
+  else
+    label="s"
+    bar_flag="$show_bar"
+    reset_flag="$show_reset"
+  fi
+
+  if [ -n "$acc_prefix" ]; then
+    label="${acc_prefix} ${label}"
+  fi
+
+  if [ -n "$util" ] && [ "$util" != "ERROR" ] && [[ "$util" =~ ^[0-9]+$ ]]; then
+    # color selection
+    local usage_color=""
+    if [ "$colorful_usage" = "1" ]; then
+      if [ "$util" -le 10 ]; then
+        usage_color="$LEVEL_1"
+      elif [ "$util" -le 20 ]; then
+        usage_color="$LEVEL_2"
+      elif [ "$util" -le 30 ]; then
+        usage_color="$LEVEL_3"
+      elif [ "$util" -le 40 ]; then
+        usage_color="$LEVEL_4"
+      elif [ "$util" -le 50 ]; then
+        usage_color="$LEVEL_5"
+      elif [ "$util" -le 60 ]; then
+        usage_color="$LEVEL_6"
+      elif [ "$util" -le 70 ]; then
+        usage_color="$LEVEL_7"
+      elif [ "$util" -le 80 ]; then
+        usage_color="$LEVEL_8"
+      elif [ "$util" -le 90 ]; then
+        usage_color="$LEVEL_9"
+      else usage_color="$LEVEL_10"; fi
+    else
+      if [ "$util" -le 60 ]; then
+        usage_color="$GRAY"
+      elif [ "$util" -le 70 ]; then
+        usage_color="$LEVEL_7"
+      elif [ "$util" -le 80 ]; then
+        usage_color="$LEVEL_8"
+      elif [ "$util" -le 90 ]; then
+        usage_color="$LEVEL_9"
+      else usage_color="$LEVEL_10"; fi
+    fi
+
+    # progress bar
+    local progress_bar=""
+    if [ "$bar_flag" = "1" ]; then
+      local filled_blocks=0
+      if [ "$util" -eq 0 ]; then
+        filled_blocks=0
+      elif [ "$util" -eq 100 ]; then
+        filled_blocks=10
+      else filled_blocks=$(((util * 10 + 50) / 100)); fi
+      [ "$filled_blocks" -lt 0 ] && filled_blocks=0
+      [ "$filled_blocks" -gt 10 ] && filled_blocks=10
+      local empty_blocks=$((10 - filled_blocks))
+
+      progress_bar=" "
+      local i=0
+      while [ $i -lt $filled_blocks ]; do
+        progress_bar="${progress_bar}▓"
+        i=$((i + 1))
+      done
+      i=0
+      while [ $i -lt $empty_blocks ]; do
+        progress_bar="${progress_bar}░"
+        i=$((i + 1))
+      done
+      progress_bar="${progress_bar} "
+    fi
+
+    # reset time
+    local reset_time_display=""
+    if [ "$reset_flag" = "1" ] && [ -n "$resets_at" ] && [ "$resets_at" != "null" ]; then
+      local iso_time=$(echo "$resets_at" | sed 's/\.[0-9]*Z$//')
+      local epoch=$(date -ju -f "%Y-%m-%dT%H:%M:%S" "$iso_time" "+%s" 2>/dev/null)
+      if [ -n "$epoch" ]; then
+        local time_format=$(defaults read -g AppleICUForce24HourTime 2>/dev/null)
+        local reset_time=""
+        if [ "$is_weekly" = "1" ]; then
+          if [ "$time_format" = "1" ]; then
+            reset_time=$(date -r "$epoch" "+%a %H:%M" 2>/dev/null)
+          else reset_time=$(date -r "$epoch" "+%a %I:%M %p" 2>/dev/null); fi
+        else
+          if [ "$time_format" = "1" ]; then
+            reset_time=$(date -r "$epoch" "+%H:%M" 2>/dev/null)
+          else reset_time=$(date -r "$epoch" "+%I:%M %p" 2>/dev/null); fi
+        fi
+        [ -n "$reset_time" ] && reset_time_display=$(printf "→ %s" "$reset_time")
+      fi
+    fi
+
+    local formatted_util=$(printf "%-4s" "${util}%")
+    echo "${usage_color}${label} ${formatted_util}${progress_bar}${reset_time_display}${RESET}"
+  else
+    echo "${YELLOW}${label} ~   ${RESET}"
+  fi
+}
+
+usage_lines=()
+
+process_result() {
+  local swift_result=$1
+  local prefix=$2
+
+  local utilization=""
+  local resets_at=""
+  local sd_utilization=""
+  local sd_resets_at=""
+
+  if [ -n "$swift_result" ]; then
+    utilization=$(echo "$swift_result" | cut -d'|' -f1)
+    resets_at=$(echo "$swift_result" | cut -d'|' -f2)
+    sd_utilization=$(echo "$swift_result" | cut -d'|' -f3)
+    sd_resets_at=$(echo "$swift_result" | cut -d'|' -f4)
+  else
+    utilization="ERROR"
+    sd_utilization="ERROR"
+  fi
+
+  local acc_line=""
+  if [ "$show_usage" = "1" ]; then
+    local u_text=$(format_usage_str "$utilization" "$resets_at" "0" "$prefix")
+    acc_line="${u_text}"
+  fi
+
+  if [ "$show_weekly_usage" = "1" ]; then
+    local w_text=$(format_usage_str "$sd_utilization" "$sd_resets_at" "1" "")
+    if [ -n "$acc_line" ]; then
+      acc_line="${acc_line}${separator}${w_text}"
+    else
+      # If session is hidden, still show prefix on weekly
+      w_text=$(format_usage_str "$sd_utilization" "$sd_resets_at" "1" "$prefix")
+      acc_line="${w_text}"
+    fi
+  fi
+
+  if [ -n "$acc_line" ]; then
+    usage_lines+=("$acc_line")
+  fi
+}
+
+if [ "$show_usage" = "1" ] || [ "$show_weekly_usage" = "1" ]; then
+  if [ -f "$HOME/.claude-switch-backup/sequence.json" ]; then
+    active_account=$(jq -r '.activeAccountNumber' "$HOME/.claude-switch-backup/sequence.json" 2>/dev/null)
+    sequence=$(jq -r '.sequence[]' "$HOME/.claude-switch-backup/sequence.json" 2>/dev/null)
+
+    if [ -z "$sequence" ]; then
+      swift_result=$(swift "$HOME/.claude/fetch-claude-usage.swift" 2>/dev/null)
+      process_result "$swift_result" ""
+    else
+      for acc in $sequence; do
+        email=$(jq -r --arg acc "$acc" '.accounts[$acc].email' "$HOME/.claude-switch-backup/sequence.json" 2>/dev/null)
+
+        if [ "$acc" = "$active_account" ]; then
+          script_path="$HOME/.claude/fetch-claude-usage.swift"
+        else
+          script_path="$HOME/.claude-switch-backup/scripts/.fetch-claude-usage-${acc}-${email}.swift"
+        fi
+
+        if [ -f "$script_path" ]; then
+          swift_result=$(swift "$script_path" 2>/dev/null)
+          process_result "$swift_result" "$acc"
+        else
+          process_result "ERROR" "$acc"
+        fi
+      done
+    fi
+  else
+    swift_result=$(swift "$HOME/.claude/fetch-claude-usage.swift" 2>/dev/null)
+    process_result "$swift_result" ""
+  fi
 fi
 
 printf "%s\n" "$line1"
 
-if [ -n "$line2" ]; then
-  printf "%s\n" "${line2:- }"
-fi
-
-if [ -n "$line3" ]; then
-  printf "%s\n" "${line3:- }"
-fi
+for line in "${usage_lines[@]}"; do
+  printf "%s\n" "$line"
+done
