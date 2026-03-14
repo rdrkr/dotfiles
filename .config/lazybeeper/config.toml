@@ -1,2 +1,2 @@
 theme = "gruvbox-dark"
-selection_mode = "enter"
+selection_mode = "navigate"

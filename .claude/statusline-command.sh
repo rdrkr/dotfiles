@@ -107,6 +107,7 @@ format_usage_str() {
   local is_weekly=$3
   local acc_prefix=$4
   local acc_color=$5
+  local connector=$6
 
   local label=""
   local bar_flag=""
@@ -124,7 +125,7 @@ format_usage_str() {
 
   local prefix_part=""
   if [ -n "$acc_prefix" ]; then
-    prefix_part="${GRAY}⎿ ${RESET}${acc_color}${acc_prefix}${RESET} "
+    prefix_part="${GRAY}${connector:-⎿} ${RESET}${acc_color}${acc_prefix}${RESET} "
   fi
 
   if [ -n "$util" ] && [ "$util" != "ERROR" ] && [[ "$util" =~ ^[0-9]+$ ]]; then
@@ -227,6 +228,7 @@ process_result() {
   local swift_result=$1
   local prefix=$2
   local p_color=$3
+  local connector=$4
 
   local utilization=""
   local resets_at=""
@@ -246,7 +248,7 @@ process_result() {
   local acc_line=""
   if [ "$show_usage" = "1" ]; then
     local u_text
-    u_text=$(format_usage_str "$utilization" "$resets_at" "0" "$prefix" "$p_color")
+    u_text=$(format_usage_str "$utilization" "$resets_at" "0" "$prefix" "$p_color" "$connector")
 
     acc_line="${u_text}"
   fi
@@ -259,7 +261,7 @@ process_result() {
       acc_line="${acc_line}${separator}${w_text}"
     else
       # If session is hidden, still show prefix on weekly
-      w_text=$(format_usage_str "$sd_utilization" "$sd_resets_at" "1" "$prefix" "$p_color")
+      w_text=$(format_usage_str "$sd_utilization" "$sd_resets_at" "1" "$prefix" "$p_color" "$connector")
       acc_line="${w_text}"
     fi
   fi
@@ -279,16 +281,16 @@ if [ "$show_usage" = "1" ] || [ "$show_weekly_usage" = "1" ]; then
       process_result "$swift_result" ""
     else
       # Reorder sequence so active_account is first
-      ordered_sequence="$active_account"
+      ordered_accounts=("$active_account")
       for acc in $sequence; do
         if [ "$acc" != "$active_account" ]; then
-          ordered_sequence="$ordered_sequence $acc"
+          ordered_accounts+=("$acc")
         fi
       done
 
       # Calculate max prefix length for alignment
       max_len=0
-      for acc in $ordered_sequence; do
+      for acc in "${ordered_accounts[@]}"; do
         email=$(jq -r --arg acc "$acc" '.accounts[$acc].email' "$HOME/.claude-switch-backup/sequence.json" 2>/dev/null)
         domain=""
         if [ -n "$email" ] && [ "$email" != "null" ]; then
@@ -302,8 +304,14 @@ if [ "$show_usage" = "1" ] || [ "$show_weekly_usage" = "1" ]; then
 
       colors=("$BLUE" "$GREEN" "$YELLOW" "$PURPLE")
       color_idx=0
+      num_accounts=${#ordered_accounts[@]}
+      count=0
 
-      for acc in $ordered_sequence; do
+      for acc in "${ordered_accounts[@]}"; do
+        count=$((count + 1))
+        connector="├─"
+        [ "$count" -eq "$num_accounts" ] && connector="└─"
+
         email=$(jq -r --arg acc "$acc" '.accounts[$acc].email' "$HOME/.claude-switch-backup/sequence.json" 2>/dev/null)
         domain=""
         if [ -n "$email" ] && [ "$email" != "null" ]; then
@@ -330,9 +338,9 @@ if [ "$show_usage" = "1" ] || [ "$show_weekly_usage" = "1" ]; then
 
         if [ -f "$script_path" ]; then
           swift_result=$(swift "$script_path" 2>/dev/null)
-          process_result "$swift_result" "$acc_prefix" "$acc_color"
+          process_result "$swift_result" "$acc_prefix" "$acc_color" "$connector"
         else
-          process_result "ERROR" "$acc_prefix" "$acc_color"
+          process_result "ERROR" "$acc_prefix" "$acc_color" "$connector"
         fi
       done
     fi
