@@ -301,7 +301,8 @@ backup() {
       print_warning "Changes detected. Committing and pushing..."
       run_command "git add ."
       run_command "git commit -m 'Automated backup: Update dotfiles'"
-      run_command "git push"
+      run_command "git pull origin main --rebase"
+      run_command "git push origin main"
       run_command "osascript -e 'display notification \"Changes detected. dotfiles updated\" with title \"Dotfiles\"'"
       print_success "Changes committed and pushed."
     else
