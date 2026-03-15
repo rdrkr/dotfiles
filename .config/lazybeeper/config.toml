@@ -1,2 +1,4 @@
 theme = "gruvbox-dark"
 selection_mode = "navigate"
+chat_list_style = "comfortable"
+style = "modern"
