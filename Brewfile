@@ -330,6 +330,8 @@ cask "mac-mouse-fix"
 cask "microsoft-auto-update"
 # Meet, chat, call, and collaborate in just one place
 cask "microsoft-teams"
+# Open-source software for live streaming and screen recording
+cask "obs"
 # Finds large, unwanted files and deletes them
 cask "omnidisksweeper"
 # Tiling window manager for macOS with Niri-inspired column-based layout
