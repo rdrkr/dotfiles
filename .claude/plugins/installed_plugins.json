@@ -4,10 +4,10 @@
     "frontend-design@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/frontend-design/d5c15b861cd2",
-        "version": "d5c15b861cd2",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/frontend-design/78497c524da3",
+        "version": "78497c524da3",
         "installedAt": "2026-01-31T09:18:47.057Z",
-        "lastUpdated": "2026-03-14T07:42:15.227Z",
+        "lastUpdated": "2026-03-17T09:05:50.129Z",
         "gitCommitSha": "27d2b86d72da27c64585150857cee8472ad47abb"
       }
     ],
@@ -24,10 +24,10 @@
     "commit-commands@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/commit-commands/d5c15b861cd2",
-        "version": "d5c15b861cd2",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/commit-commands/78497c524da3",
+        "version": "78497c524da3",
         "installedAt": "2026-01-31T09:18:47.110Z",
-        "lastUpdated": "2026-03-14T07:42:15.230Z",
+        "lastUpdated": "2026-03-17T09:05:50.128Z",
         "gitCommitSha": "27d2b86d72da27c64585150857cee8472ad47abb"
       }
     ],
@@ -84,10 +84,10 @@
     "skill-creator@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/skill-creator/d5c15b861cd2",
-        "version": "d5c15b861cd2",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/skill-creator/78497c524da3",
+        "version": "78497c524da3",
         "installedAt": "2026-03-06T10:02:33.773Z",
-        "lastUpdated": "2026-03-14T07:42:15.237Z",
+        "lastUpdated": "2026-03-17T09:05:50.137Z",
         "gitCommitSha": "205b6e0b30366a969412d9aab7b99bea99d58db1"
       }
     ],
