@@ -144,8 +144,6 @@ brew "pam-reattach"
 brew "periphery"
 # Bash completion for Pip
 brew "pip-completion"
-# Interpreted, interactive, object-oriented programming language
-brew "python@3.13"
 # Execute binaries from Python packages in isolated environments
 brew "pipx"
 # Python package management tool
@@ -158,6 +156,8 @@ brew "posting"
 brew "pre-commit"
 # Code formatter for JavaScript, CSS, JSON, GraphQL, Markdown, YAML
 brew "prettier"
+# Interpreted, interactive, object-oriented programming language
+brew "python@3.13"
 # Python interface to Tcl/Tk
 brew "python-tk@3.13"
 # Interpreted, interactive, object-oriented programming language
