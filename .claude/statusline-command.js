@@ -1,10 +1,79 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+/**
+ * Claude Code Status Line Command
+ *
+ * This script generates a formatted status line for the Claude CLI.
+ * It displays account info, working directory, active model, git branch,
+ * and usage statistics (session and weekly).
+ *
+ * Configuration:
+ *   Settings are read from ~/.claude/statusline-config.txt
+ */
 
-const configPath = path.join(process.env.HOME, '.claude/statusline-config.txt');
+/*
+Test Snippet (Copy-Pasteable):
+
+cat << 'EOF' | node ~/.claude/statusline-command.js
+{
+  "cwd": "/current/working/directory",
+  "session_id": "abc123...",
+  "transcript_path": "/path/to/transcript.jsonl",
+  "model": {
+    "id": "claude-opus-4-6",
+    "display_name": "Opus"
+  },
+  "workspace": {
+    "current_dir": "/current/working/directory",
+    "project_dir": "/original/project/directory"
+  },
+  "version": "1.0.80",
+  "output_style": {
+    "name": "default"
+  },
+  "cost": {
+    "total_cost_usd": 0.01234,
+    "total_duration_ms": 45000,
+    "total_api_duration_ms": 2300,
+    "total_lines_added": 156,
+    "total_lines_removed": 23
+  },
+  "context_window": {
+    "total_input_tokens": 15234,
+    "total_output_tokens": 4521,
+    "context_window_size": 200000,
+    "used_percentage": 8,
+    "remaining_percentage": 92,
+    "current_usage": {
+      "input_tokens": 8500,
+      "output_tokens": 1200,
+      "cache_creation_input_tokens": 5000,
+      "cache_read_input_tokens": 2000
+    }
+  },
+  "exceeds_200k_tokens": false,
+  "vim": {
+    "mode": "NORMAL"
+  },
+  "agent": {
+    "name": "security-reviewer"
+  },
+  "worktree": {
+    "name": "my-feature",
+    "path": "/path/to/.claude/worktrees/my-feature",
+    "branch": "worktree-my-feature",
+    "original_cwd": "/path/to/project",
+    "original_branch": "main"
+  }
+}
+EOF
+*/
+
+import { existsSync, readFileSync } from 'fs';
+import { join, basename } from 'path';
+import { execSync } from 'child_process';
+
+const configPath = join(process.env.HOME, '.claude/statusline-config.txt');
 const config = {
   SHOW_ACCOUNT: 1,
   SHOW_DIRECTORY: 1,
@@ -19,8 +88,8 @@ const config = {
   COLORFUL_USAGE: 0
 };
 
-if (fs.existsSync(configPath)) {
-  const content = fs.readFileSync(configPath, 'utf8');
+if (existsSync(configPath)) {
+  const content = readFileSync(configPath, 'utf8');
   content.split('\n').forEach(line => {
     const match = line.match(/^([A-Z_]+)=(.*)$/);
     if (match) {
@@ -43,7 +112,7 @@ const colorful_usage = config.COLORFUL_USAGE;
 
 let inputStr = '';
 try {
-  inputStr = fs.readFileSync(0, 'utf8');
+  inputStr = readFileSync(0, 'utf8');
 } catch (e) {
   // ignoring errors
 }
@@ -51,7 +120,7 @@ try {
 let current_dir = '';
 const dirMatch = inputStr.match(/"current_dir":"([^"]*)"/);
 if (dirMatch) {
-  current_dir = path.basename(dirMatch[1]);
+  current_dir = basename(dirMatch[1]);
 }
 
 let model_name = '';
@@ -84,12 +153,12 @@ const LEVEL_10 = '\x1b[38;5;124m';
 
 const separator = `${GRAY} │ ${RESET}`;
 
-const seqPath = path.join(process.env.HOME, '.claude-switch-backup/sequence.json');
+const seqPath = join(process.env.HOME, '.claude-switch-backup/sequence.json');
 let sequenceData = null;
-if (fs.existsSync(seqPath)) {
+if (existsSync(seqPath)) {
   try {
-    sequenceData = JSON.parse(fs.readFileSync(seqPath, 'utf8'));
-  } catch (e) {}
+    sequenceData = JSON.parse(readFileSync(seqPath, 'utf8'));
+  } catch (e) { }
 }
 
 let account_text = '';
@@ -125,7 +194,7 @@ if (show_branch === 1) {
     if (branch) {
       branch_text = `${GREEN}⎇ ${branch}${RESET}`;
     }
-  } catch (e) {}
+  } catch (e) { }
 }
 
 let line1_parts = [];
@@ -148,7 +217,7 @@ function format_usage_str(util, resets_at, is_weekly, acc_prefix, acc_color, con
   if (util !== null && util !== undefined && util !== 'ERROR' && /^\d+$/.test(util.trim())) {
     let utilNum = parseInt(util.trim(), 10);
     let usage_color = '';
-    
+
     if (colorful_usage === 1) {
       if (utilNum <= 10) usage_color = LEVEL_1;
       else if (utilNum <= 20) usage_color = LEVEL_2;
@@ -174,7 +243,7 @@ function format_usage_str(util, resets_at, is_weekly, acc_prefix, acc_color, con
       if (utilNum === 0) filled_blocks = 0;
       else if (utilNum === 100) filled_blocks = 10;
       else filled_blocks = Math.floor((utilNum * 10 + 50) / 100);
-      
+
       if (filled_blocks < 0) filled_blocks = 0;
       if (filled_blocks > 10) filled_blocks = 10;
       let empty_blocks = 10 - filled_blocks;
@@ -187,12 +256,12 @@ function format_usage_str(util, resets_at, is_weekly, acc_prefix, acc_color, con
       let time_format = '0';
       try {
         time_format = execSync('defaults read -g AppleICUForce24HourTime 2>/dev/null').toString().trim();
-      } catch (e) {}
+      } catch (e) { }
 
       let dateObj = new Date(resets_at.trim());
       if (!isNaN(dateObj.getTime())) {
         let is24 = time_format === '1';
-        
+
         let reset_time = '';
         const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         const pad = n => n.toString().padStart(2, '0');
@@ -200,7 +269,7 @@ function format_usage_str(util, resets_at, is_weekly, acc_prefix, acc_color, con
         const m = pad(dateObj.getMinutes());
         const h12 = h24 % 12 || 12;
         const ampm = h24 >= 12 ? 'PM' : 'AM';
-        
+
         if (is_weekly) {
           if (is24) {
             reset_time = `${dayNames[dateObj.getDay()]} ${pad(h24)}:${m}`;
@@ -214,13 +283,18 @@ function format_usage_str(util, resets_at, is_weekly, acc_prefix, acc_color, con
             reset_time = `${pad(h12)}:${m} ${ampm}`;
           }
         }
-        
+
         reset_time_display = `→ ${reset_time}`;
       }
     }
 
     let formatted_util = `${utilNum}%`.padEnd(4, ' ');
-    return `${prefix_part}${usage_color}${label} ${formatted_util}${progress_bar}${reset_time_display}${RESET}`;
+    let res = `${prefix_part}${usage_color}${label} ${formatted_util}${progress_bar}`;
+    if (reset_time_display) {
+      if (!res.endsWith(' ')) res += ' ';
+      res += reset_time_display;
+    }
+    return res + RESET;
   } else {
     return `${prefix_part}${YELLOW}${label} ~   ${RESET}`;
   }
@@ -273,7 +347,7 @@ if (show_usage === 1 || show_weekly_usage === 1) {
   if (sequenceData && sequenceData.activeAccountNumber && sequenceData.sequence) {
     let active_account = sequenceData.activeAccountNumber;
     let sequence = sequenceData.sequence;
-    
+
     let ordered_accounts = [active_account];
     for (let acc of sequence) {
       if (acc != active_account) {
@@ -288,7 +362,7 @@ if (show_usage === 1 || show_weekly_usage === 1) {
       if (email && email !== 'null') {
         let parts = email.split(/[@.]/);
         if (parts.length > 1) {
-           domain = parts[1];
+          domain = parts[1];
         }
       }
       let raw_prefix = `${acc}-${domain}`;
@@ -305,13 +379,13 @@ if (show_usage === 1 || show_weekly_usage === 1) {
     for (let acc of ordered_accounts) {
       count++;
       let connector = count === num_accounts ? '└─' : '├─';
-      
+
       let email = sequenceData.accounts[acc] ? sequenceData.accounts[acc].email : '';
       let domain = '';
       if (email && email !== 'null') {
         let parts = email.split(/[@.]/);
         if (parts.length > 1) {
-           domain = parts[1];
+          domain = parts[1];
         }
       }
       let raw_prefix = `${acc}-${domain}`;
@@ -322,15 +396,15 @@ if (show_usage === 1 || show_weekly_usage === 1) {
       let acc_color = colors[color_idx];
       color_idx = (color_idx + 1) % 4;
 
-      let script_path = acc == active_account 
-        ? path.join(process.env.HOME, '.claude/fetch-claude-usage.swift')
-        : path.join(process.env.HOME, `.claude-switch-backup/scripts/.fetch-claude-usage-${acc}-${email}.swift`);
+      let script_path = acc == active_account
+        ? join(process.env.HOME, '.claude/fetch-claude-usage.swift')
+        : join(process.env.HOME, `.claude-switch-backup/scripts/.fetch-claude-usage-${acc}-${email}.swift`);
 
       let swift_result = '';
-      if (fs.existsSync(script_path)) {
+      if (existsSync(script_path)) {
         try {
           swift_result = execSync(`swift "${script_path}" 2>/dev/null`).toString();
-        } catch (e) {}
+        } catch (e) { }
       } else {
         swift_result = 'ERROR';
       }
@@ -338,7 +412,7 @@ if (show_usage === 1 || show_weekly_usage === 1) {
     }
   } else {
     try {
-      let swift_result = execSync(`swift "${path.join(process.env.HOME, '.claude/fetch-claude-usage.swift')}" 2>/dev/null`).toString();
+      let swift_result = execSync(`swift "${join(process.env.HOME, '.claude/fetch-claude-usage.swift')}" 2>/dev/null`).toString();
       process_result(swift_result, '', '', '');
     } catch (e) {
       process_result('', '', '', '');
@@ -346,7 +420,7 @@ if (show_usage === 1 || show_weekly_usage === 1) {
   }
 }
 
-if (line1_str) process.stdout.write(line1_str + '\n');
+if (line1_str) process.stdout.write(line1_str + RESET + '\n');
 for (let line of usage_lines) {
-  process.stdout.write(line + '\n');
+  process.stdout.write(line + RESET + '\n');
 }

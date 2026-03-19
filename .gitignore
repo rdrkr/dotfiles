@@ -49,3 +49,4 @@ node_modules/
 /.claude/mcp-needs-auth-cache.json
 /.claude/plugins/blocklist.json
 /.claude/chrome/chrome-native-host
+/.claude/sessions
