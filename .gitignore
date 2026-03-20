@@ -50,3 +50,5 @@ node_modules/
 /.claude/plugins/blocklist.json
 /.claude/chrome/chrome-native-host
 /.claude/sessions
+
+.env

@@ -164,7 +164,7 @@ alias c='clear'
 alias ua='npx tsx ~/dotfiles/scripts/run-tasks/run-tasks.ts ~/dotfiles/scripts/run-tasks/update-all.yaml'
 
 ## claude code aliases
-alias cc='claude --remote-control --dangerously-skip-permissions'
+alias cc='claude --dangerously-skip-permissions'
 alias ccs="~/scripts/ccswitch.sh"
 alias ccl="ccs --list"
 alias cc1="ccs --switch-to 1 && cc"
