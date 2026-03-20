@@ -310,10 +310,10 @@ cask "imageoptim"
 cask "inkscape"
 # HTTP and GraphQL Client
 cask "insomnia"
+# Java IDE by JetBrains
+cask "intellij-idea"
 # Download manager
 cask "jdownloader"
-# JetBrains tools manager
-cask "jetbrains-toolbox"
 # Menu bar manager
 cask "jordanbaird-ice"
 # Keyboard customiser
@@ -373,7 +373,6 @@ cask "webstorm"
 # Video communication and virtual meeting platform
 cask "zoom"
 mas "1Password 7", id: 1333542190
-mas "Actions", id: 1586435171
 mas "Amphetamine", id: 937984704
 mas "Bandwidth+", id: 490461369
 mas "Cloud Battery", id: 1481005137
