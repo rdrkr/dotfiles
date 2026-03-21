@@ -19,13 +19,32 @@ if [ -n "${TMUX:-}" ] && [ -n "${TMUX_PANE:-}" ]; then
     PANE_ACTIVE=$(tmux display-message -t "$TMUX_PANE" -p '#{pane_active}' 2>/dev/null || echo "0")
     WINDOW_ACTIVE=$(tmux display-message -t "$TMUX_PANE" -p '#{window_active}' 2>/dev/null || echo "0")
     if [ "$SESSION_ATTACHED" != "0" ] && [ "$PANE_ACTIVE" = "1" ] && [ "$WINDOW_ACTIVE" = "1" ]; then
-        FRONTMOST=$(osascript -e 'tell application "System Events" to get name of first application process whose frontmost is true' 2>/dev/null || echo "")
-        FRONTMOST_LOWER=$(echo "$FRONTMOST" | tr '[:upper:]' '[:lower:]')
-        case "$FRONTMOST_LOWER" in
-            terminal|iterm2|alacritty|kitty|wezterm|ghostty)
-                exit 0
-                ;;
-        esac
+        # Check if focus-events is enabled (could be server or global option depending on tmux version)
+        FOCUS_EVENTS=$(tmux show-options -s focus-events 2>/dev/null | grep -q 'on$' && echo "1" || echo "0")
+        if [ "$FOCUS_EVENTS" = "0" ]; then
+            FOCUS_EVENTS=$(tmux show-options -g focus-events 2>/dev/null | grep -q 'on$' && echo "1" || echo "0")
+        fi
+
+        if [ "$FOCUS_EVENTS" = "1" ]; then
+            # If focus-events is on, we can accurately determine if the specific tmux client is focused.
+            # This solves the issue of multiple instances of the same terminal app.
+            CLIENTS_FOCUSED=$(tmux list-clients -t "$TMUX_PANE" -F '#{client_flags}' 2>/dev/null | grep -c "focused" || echo "0")
+            if [ "$CLIENTS_FOCUSED" -gt "0" ]; then
+                exit 0 # Safe to skip notification, user is looking right at it
+            fi
+            # If focus-events is on but no client is focused, the user is NOT looking at it.
+            # We should continue to send the notification, bypassing the inaccurate osascript check.
+        else
+            # Fallback for when focus-events is OFF.
+            # This is less accurate and has the "multiple terminal instances" bug.
+            FRONTMOST=$(osascript -e 'tell application "System Events" to get name of first application process whose frontmost is true' 2>/dev/null || echo "")
+            FRONTMOST_LOWER=$(echo "$FRONTMOST" | tr '[:upper:]' '[:lower:]')
+            case "$FRONTMOST_LOWER" in
+                terminal|iterm2|alacritty|kitty|wezterm|ghostty)
+                    exit 0
+                    ;;
+            esac
+        fi
     fi
 fi
 
