@@ -296,6 +296,8 @@ cask "gitkraken-cli"
 cask "glide"
 # Web browser
 cask "google-chrome"
+# Client for the Google Drive storage service
+cask "google-drive"
 # Desktop automation application
 cask "hammerspoon"
 # Open-source video transcoder
