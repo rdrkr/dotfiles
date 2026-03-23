@@ -6,7 +6,6 @@ return {
     },
     keys = {
         { "<leader>anf", "<cmd>AppleNotes<CR>", desc = "Find Apple Note" },
-        { "<leader>ans", "<cmd>AppleNotesSearch<CR>", desc = "Search Apple Notes" },
         { "<leader>ann", "<cmd>AppleNotesNew<CR>", desc = "New Apple Note" },
         { "<leader>ant", "<cmd>AppleNotesTree<CR>", desc = "Toggle Apple Notes tree" },
     },
