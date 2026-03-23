@@ -20,12 +20,35 @@
   },
   "model": "opus",
   "hooks": {
-    "Stop": [
+    "PreToolUse": [
       {
+        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/notify.sh 'Claude Code'"
+            "command": "~/.claude/hooks/stash_command.sh"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/notify.sh needs_input"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/notify.sh done"
           }
         ]
       }

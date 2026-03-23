@@ -140,6 +140,8 @@ brew "opencode"
 brew "openjdk@21"
 # PAM module for reattaching to the user's GUI (Aqua) session
 brew "pam-reattach"
+# Swiss-army knife of markup format conversion
+brew "pandoc"
 # Identify unused code in Swift projects
 brew "periphery"
 # Bash completion for Pip
