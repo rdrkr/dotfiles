@@ -224,8 +224,6 @@ brew "yazi"
 brew "zoxide"
 # A window border system for macOS
 brew "felixkratz/formulae/borders", args: ["HEAD"]
-# Custom macOS statusbar with shell plugin, interaction and graph support
-brew "felixkratz/formulae/sketchybar"
 # Interactive TUI installer for Gentleman.Dots development environment
 brew "gentleman-programming/tap/gentleman-dots"
 # Simple hotkey-daemon for macOS.
