@@ -3,10 +3,6 @@
     "notify-needs-input:~/.claude/hooks/notify.sh needs_input",
     "notify-auth-success:~/.claude/hooks/notify.sh needs_input",
     "notify-elicitation:~/.claude/hooks/notify.sh needs_input",
-    "notify-done:~/.claude/hooks/notify.sh done",
-    "notify-needs-input:~/dotfiles/scripts/notify.sh -title 'Gemini CLI — Needs Input' -message 'Gemini is waiting for your input' -sound 'Ping'",
-    "notify-auth-success:~/dotfiles/scripts/notify.sh -title 'Gemini CLI — Needs Input' -message 'Gemini is waiting for your input' -sound 'Ping'",
-    "notify-elicitation:~/dotfiles/scripts/notify.sh -title 'Gemini CLI — Needs Input' -message 'Gemini is waiting for your input' -sound 'Ping'",
-    "notify-done:~/dotfiles/scripts/notify.sh -title 'Gemini CLI — Done' -message 'Gemini has finished its task' -sound 'Glass'"
+    "notify-done:~/.claude/hooks/notify.sh done"
   ]
 }

@@ -31,7 +31,7 @@
           {
             "name": "notify-needs-input",
             "type": "command",
-            "command": "~/dotfiles/scripts/notify.sh --title 'Gemini CLI' --subtitle 'Needs Input' --message 'Gemini is waiting for your input' --sound 'Ping' --app-icon ~/dotfiles/scripts/icons/gemini.png",
+            "command": "~/.claude/hooks/notify.sh needs_input",
             "description": "Notify when a permission prompt is shown"
           }
         ]
@@ -42,7 +42,7 @@
           {
             "name": "notify-auth-success",
             "type": "command",
-            "command": "~/dotfiles/scripts/notify.sh --title 'Gemini CLI' --subtitle 'Needs Input' --message 'Gemini is waiting for your input' --sound 'Ping' --app-icon ~/dotfiles/scripts/icons/gemini.png",
+            "command": "~/.claude/hooks/notify.sh needs_input",
             "description": "Notify when authentication is successful"
           }
         ]
@@ -53,7 +53,7 @@
           {
             "name": "notify-elicitation",
             "type": "command",
-            "command": "~/dotfiles/scripts/notify.sh --title 'Gemini CLI' --subtitle 'Needs Input' --message 'Gemini is waiting for your input' --sound 'Ping' --app-icon ~/dotfiles/scripts/icons/gemini.png",
+            "command": "~/.claude/hooks/notify.sh needs_input",
             "description": "Notify when an elicitation dialog is shown"
           }
         ]
@@ -66,7 +66,7 @@
           {
             "name": "notify-done",
             "type": "command",
-            "command": "~/dotfiles/scripts/notify.sh --title 'Gemini CLI' --subtitle 'Done' --message 'Gemini has finished its task' --sound 'Glass' --app-icon ~/dotfiles/scripts/icons/gemini.png",
+            "command": "~/.claude/hooks/notify.sh done",
             "description": "Notify when the agent has finished its task"
           }
         ]
