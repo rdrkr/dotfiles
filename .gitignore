@@ -52,3 +52,16 @@ node_modules/
 /.claude/sessions
 
 .env
+/.gemini/antigravity
+/.gemini/antigravity-browser-profile
+/.gemini/history
+/.gemini/tmp
+/.gemini/google_account_id
+/.gemini/google_accounts.json
+/.gemini/installation_id
+/.gemini/oauth_creds.json
+/.gemini/projects.json
+/.gemini/settings.json.orig
+/.gemini/state.json
+/.gemini/user_id
+/.claude/skills/gstack

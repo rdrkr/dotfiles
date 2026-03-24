@@ -28,8 +28,9 @@ if [ -n "${TMUX:-}" ] && [ -n "${TMUX_PANE:-}" ]; then
         if [ "$FOCUS_EVENTS" = "1" ]; then
             # If focus-events is on, we can accurately determine if the specific tmux client is focused.
             # This solves the issue of multiple instances of the same terminal app.
-            CLIENTS_FOCUSED=$(tmux list-clients -t "$TMUX_PANE" -F '#{client_flags}' 2>/dev/null | grep -c "focused" || echo "0")
-            if [ "$CLIENTS_FOCUSED" -gt "0" ]; then
+            # (grep -c outputs "0" and exits 1 if no matches found, so we don't need '|| echo 0' here)
+            CLIENTS_FOCUSED=$(tmux list-clients -t "$TMUX_PANE" -F '#{client_flags}' 2>/dev/null | grep -c "focused" || true)
+            if [ "${CLIENTS_FOCUSED:-0}" -gt "0" ]; then
                 exit 0 # Safe to skip notification, user is looking right at it
             fi
             # If focus-events is on but no client is focused, the user is NOT looking at it.
@@ -94,12 +95,57 @@ if [ -z "$TERM_BUNDLE_ID" ]; then
     esac
 fi
 
+# --- Click-to-focus: find specific terminal PID ---
+# Try to find the specific terminal process PID attached to the tmux session.
+# This ensures that if multiple instances exist, we focus the correct one.
+TERM_PID=""
+if [ -n "${TMUX:-}" ] && [ -n "${TMUX_PANE:-}" ]; then
+    # Find the most recently active tmux client's PID attached to this session.
+    # client_activity is a timestamp (seconds since epoch).
+    BEST_CLIENT=$(tmux list-clients -t "$TMUX_PANE" -F '#{client_activity} #{client_pid}' 2>/dev/null | sort -nr | head -n 1 || echo "")
+    CPID=$(echo "$BEST_CLIENT" | awk '{print $2}')
+    
+    if [ -n "$CPID" ]; then
+        # Walk up the process tree to find the terminal emulator GUI process
+        CUR_PID="$CPID"
+        while [ -n "$CUR_PID" ] && [ "$CUR_PID" -gt 1 ]; do
+            INFO=$(ps -p "$CUR_PID" -o ppid= -o comm= 2>/dev/null || echo "")
+            [ -z "$INFO" ] && break
+            PARENT_PID=$(echo "$INFO" | awk '{print $1}')
+            COMM=$(echo "$INFO" | awk '{print $2}')
+            case "$COMM" in
+                *Ghostty*|*Terminal.app*|*iTerm2*|*Alacritty*|*kitty*|*wezterm*|*ghostty*)
+                    TERM_PID="$CUR_PID"
+                    break
+                    ;;
+            esac
+            CUR_PID="$PARENT_PID"
+        done
+    fi
+fi
+
 # Build click command: activate terminal + switch to the correct tmux window/pane.
 # Everything goes into -execute because -activate and -execute conflict in terminal-notifier.
 # Full paths are required because terminal-notifier runs -execute via bare /bin/sh (no PATH).
 CLICK_CMD=""
+if [ -n "$TERM_PID" ]; then
+    # Focus specific PID via AppleScript (precise for multiple instances/processes)
+    # Using 'every process' avoids errors if the PID is not found by the time it runs.
+    CLICK_CMD="/usr/bin/osascript -e 'tell application \"System Events\" to set frontmost of (every process whose unix id is ${TERM_PID}) to true'"
+fi
+
 if [ -n "$TERM_BUNDLE_ID" ]; then
-    CLICK_CMD="open -b '${TERM_BUNDLE_ID}'"
+    if [ -n "$CLICK_CMD" ]; then
+        # Try PID focus, fall back to bundle activation.
+        # || has higher precedence than && in most shells, but we want (A || B) && C.
+        # sh evaluates A || B && C as (A || B) && C because || and && have same precedence and are left-associative.
+        CLICK_CMD="${CLICK_CMD} || /usr/bin/open -b '${TERM_BUNDLE_ID}'"
+    else
+        CLICK_CMD="/usr/bin/open -b '${TERM_BUNDLE_ID}'"
+    fi
+fi
+
+if [ -n "$CLICK_CMD" ]; then
     TMUX_BIN=$(command -v tmux 2>/dev/null || echo "")
     if [ -n "$TMUX_BIN" ] && [ -n "${TMUX:-}" ] && [ -n "${TMUX_PANE:-}" ] && [ -n "${SESSION:-}" ] && [ -n "${WIN_INDEX:-}" ]; then
         CLICK_CMD="${CLICK_CMD} && '${TMUX_BIN}' switch-client -t '${SESSION}' && '${TMUX_BIN}' select-window -t '${SESSION}:${WIN_INDEX}' && '${TMUX_BIN}' select-pane -t '${TMUX_PANE}'"

@@ -1,0 +1,76 @@
+{
+  "general": {
+    "preferredEditor": "neovim",
+    "previewFeatures": true,
+    "sessionRetention": {
+      "warningAcknowledged": true,
+      "enabled": true,
+      "maxAge": "30d"
+    }
+  },
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  },
+  "ui": {
+    "theme": "GitHub",
+    "footer": {
+      "hideContextPercentage": false
+    },
+    "showLineNumbers": true
+  },
+  "model": {
+    "name": "gemini-3-pro-preview"
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "name": "notify-needs-input",
+            "type": "command",
+            "command": "~/.claude/hooks/notify.sh needs_input",
+            "description": "Notify when a permission prompt is shown"
+          }
+        ]
+      },
+      {
+        "matcher": "auth_success",
+        "hooks": [
+          {
+            "name": "notify-auth-success",
+            "type": "command",
+            "command": "~/.claude/hooks/notify.sh needs_input",
+            "description": "Notify when authentication is successful"
+          }
+        ]
+      },
+      {
+        "matcher": "elicitation_dialog",
+        "hooks": [
+          {
+            "name": "notify-elicitation",
+            "type": "command",
+            "command": "~/.claude/hooks/notify.sh needs_input",
+            "description": "Notify when an elicitation dialog is shown"
+          }
+        ]
+      }
+    ],
+    "AfterAgent": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "notify-done",
+            "type": "command",
+            "command": "~/.claude/hooks/notify.sh done",
+            "description": "Notify when the agent has finished its task"
+          }
+        ]
+      }
+    ]
+  }
+}
