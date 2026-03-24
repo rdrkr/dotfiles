@@ -3,7 +3,7 @@
   "LuaSnip": { "branch": "master", "commit": "5a1e39223db9a0498024a77b8441169d260c8c25" },
   "SchemaStore.nvim": { "branch": "main", "commit": "66e53f3316515ac8548b47826f8d273955aa7af1" },
   "android-nvim-plugin": { "branch": "main", "commit": "6db76865f6d16567b9db46fda90d2b10031adb2f" },
-  "apple-notes.nvim": { "branch": "main", "commit": "106db35fcc46ac0f956280ebfbe209ebd45338e5" },
+  "apple-notes.nvim": { "branch": "main", "commit": "0bf51323964d1254e8d7d8a3847b4fc58a94569b" },
   "auto-session": { "branch": "main", "commit": "62437532b38495551410b3f377bcf4aaac574ebe" },
   "blink-copilot": { "branch": "main", "commit": "7ad8209b2f880a2840c94cdcd80ab4dc511d4f39" },
   "blink.cmp": { "branch": "main", "commit": "451168851e8e2466bc97ee3e026c3dcb9141ce07" },
