@@ -22,7 +22,25 @@
   "hooks": {
     "Notification": [
       {
-        "matcher": "",
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/notify.sh needs_input"
+          }
+        ]
+      },
+      {
+        "matcher": "auth_success",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/notify.sh needs_input"
+          }
+        ]
+      },
+      {
+        "matcher": "elicitation_dialog",
         "hooks": [
           {
             "type": "command",
