@@ -99,28 +99,46 @@ fi
 # Try to find the specific terminal process PID attached to the tmux session.
 # This ensures that if multiple instances exist, we focus the correct one.
 TERM_PID=""
+TARGET_CLIENT=""
 if [ -n "${TMUX:-}" ] && [ -n "${TMUX_PANE:-}" ]; then
-    # Find the most recently active tmux client's PID attached to this session.
-    # client_activity is a timestamp (seconds since epoch).
-    BEST_CLIENT=$(tmux list-clients -t "$TMUX_PANE" -F '#{client_activity} #{client_pid}' 2>/dev/null | sort -nr | head -n 1 || echo "")
-    CPID=$(echo "$BEST_CLIENT" | awk '{print $2}')
-    
-    if [ -n "$CPID" ]; then
-        # Walk up the process tree to find the terminal emulator GUI process
-        CUR_PID="$CPID"
-        while [ -n "$CUR_PID" ] && [ "$CUR_PID" -gt 1 ]; do
-            INFO=$(ps -p "$CUR_PID" -o ppid= -o comm= 2>/dev/null || echo "")
-            [ -z "$INFO" ] && break
-            PARENT_PID=$(echo "$INFO" | awk '{print $1}')
-            COMM=$(echo "$INFO" | awk '{print $2}')
-            case "$COMM" in
-                *Ghostty*|*Terminal.app*|*iTerm2*|*Alacritty*|*kitty*|*wezterm*|*ghostty*)
-                    TERM_PID="$CUR_PID"
-                    break
-                    ;;
-            esac
-            CUR_PID="$PARENT_PID"
-        done
+    # 1. Find all clients and their terminal parents
+    # Format: activity|pid|tty|name|session
+    CLIENT_LIST=$(tmux list-clients -F '#{client_activity}|#{client_pid}|#{client_tty}|#{client_name}|#{client_session}' 2>/dev/null || echo "")
+
+    # 2. Look for a client already in the target session (prefer most recently active)
+    MATCH=$(echo "$CLIENT_LIST" | grep "|${SESSION}$" | sort -nr | head -n 1 || echo "")
+
+    # 3. If no client in target session, look for ANY client (prefer most recently active)
+    if [ -z "$MATCH" ]; then
+        MATCH=$(echo "$CLIENT_LIST" | sort -nr | head -n 1 || echo "")
+    fi
+
+    if [ -n "$MATCH" ]; then
+        CPID=$(echo "$MATCH" | cut -d'|' -f2)
+        CTTY=$(echo "$MATCH" | cut -d'|' -f3 | sed 's|^/dev/||; s|^tty||')
+        TARGET_CLIENT=$(echo "$MATCH" | cut -d'|' -f4)
+
+        # Try to find the terminal emulator PID.
+        # Method A: Use ps -t to find the parent of the process using that TTY (usually login or shell)
+        TERM_PID=$(ps -t "$CTTY" -o ppid= 2>/dev/null | head -n 1 | xargs || echo "")
+
+        # Method B: Fallback to walking up the process tree from the tmux client
+        if [ -z "$TERM_PID" ] || [ "$TERM_PID" -le 1 ]; then
+            CUR_PID="$CPID"
+            while [ -n "$CUR_PID" ] && [ "$CUR_PID" -gt 1 ]; do
+                INFO=$(ps -p "$CUR_PID" -o ppid= -o comm= 2>/dev/null || echo "")
+                [ -z "$INFO" ] && break
+                PARENT_PID=$(echo "$INFO" | awk '{print $1}')
+                COMM=$(echo "$INFO" | awk '{print $2}')
+                case "$COMM" in
+                    *Ghostty*|*Terminal.app*|*iTerm2*|*Alacritty*|*kitty*|*wezterm*|*ghostty*)
+                        TERM_PID="$CUR_PID"
+                        break
+                        ;;
+                esac
+                CUR_PID="$PARENT_PID"
+            done
+        fi
     fi
 fi
 
@@ -129,16 +147,28 @@ fi
 # Full paths are required because terminal-notifier runs -execute via bare /bin/sh (no PATH).
 CLICK_CMD=""
 if [ -n "$TERM_PID" ]; then
-    # Focus specific PID via AppleScript (precise for multiple instances/processes)
-    # Using 'every process' avoids errors if the PID is not found by the time it runs.
-    CLICK_CMD="/usr/bin/osascript -e 'tell application \"System Events\" to set frontmost of (every process whose unix id is ${TERM_PID}) to true'"
+    # Focus specific PID via AppleScript (precise for multiple instances/processes).
+    # Also attempt to find the window containing the session name if it's a multi-window app.
+    # The 'try' blocks handle cases where the PID or window properties aren't accessible.
+    CLICK_CMD="/usr/bin/osascript -e 'tell application \"System Events\"
+        try
+            set p to first process whose unix id is ${TERM_PID}
+            set frontmost of p to true
+            try
+                repeat with w in windows of p
+                    if name of w contains \"${SESSION}\" then
+                        perform action \"AXRaise\" of w
+                        exit repeat
+                    end if
+                end repeat
+            end try
+        end try
+    end tell'"
 fi
 
 if [ -n "$TERM_BUNDLE_ID" ]; then
     if [ -n "$CLICK_CMD" ]; then
         # Try PID focus, fall back to bundle activation.
-        # || has higher precedence than && in most shells, but we want (A || B) && C.
-        # sh evaluates A || B && C as (A || B) && C because || and && have same precedence and are left-associative.
         CLICK_CMD="${CLICK_CMD} || /usr/bin/open -b '${TERM_BUNDLE_ID}'"
     else
         CLICK_CMD="/usr/bin/open -b '${TERM_BUNDLE_ID}'"
@@ -148,7 +178,10 @@ fi
 if [ -n "$CLICK_CMD" ]; then
     TMUX_BIN=$(command -v tmux 2>/dev/null || echo "")
     if [ -n "$TMUX_BIN" ] && [ -n "${TMUX:-}" ] && [ -n "${TMUX_PANE:-}" ] && [ -n "${SESSION:-}" ] && [ -n "${WIN_INDEX:-}" ]; then
-        CLICK_CMD="${CLICK_CMD} && '${TMUX_BIN}' switch-client -t '${SESSION}' && '${TMUX_BIN}' select-window -t '${SESSION}:${WIN_INDEX}' && '${TMUX_BIN}' select-pane -t '${TMUX_PANE}'"
+        # Target the specific client we found to avoid switching sessions in the wrong window.
+        T_OPT=""
+        [ -n "$TARGET_CLIENT" ] && T_OPT="-c '${TARGET_CLIENT}'"
+        CLICK_CMD="${CLICK_CMD} && '${TMUX_BIN}' switch-client ${T_OPT} -t '${SESSION}' && '${TMUX_BIN}' select-window -t '${SESSION}:${WIN_INDEX}' && '${TMUX_BIN}' select-pane -t '${TMUX_PANE}'"
     fi
 fi
 

@@ -1,0 +1,8 @@
+{
+  "/Users/ronendruker/dotfiles": [
+    "notify-needs-input:~/.claude/hooks/notify.sh needs_input",
+    "notify-auth-success:~/.claude/hooks/notify.sh needs_input",
+    "notify-elicitation:~/.claude/hooks/notify.sh needs_input",
+    "notify-done:~/.claude/hooks/notify.sh done"
+  ]
+}
