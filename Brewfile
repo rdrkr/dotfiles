@@ -14,6 +14,7 @@ tap "oven-sh/bun"
 tap "rdrkr/tap"
 tap "steipete/tap"
 tap "touch-tap/tap"
+tap "vjeantet/tap"
 # Code searching, linting, rewriting
 brew "ast-grep"
 # Bourne-Again SHell, a UNIX command interpreter
@@ -194,8 +195,6 @@ brew "swiftformat"
 brew "swiftlint"
 # Modernized, complete, self-contained TeX/LaTeX engine
 brew "tectonic"
-# Send macOS User Notifications from the command-line
-brew "terminal-notifier"
 # Terminal multiplexer
 brew "tmux"
 # Display directories as trees (with optional color/HTML output)
@@ -238,6 +237,8 @@ brew "steipete/tap/gifgrep"
 brew "steipete/tap/remindctl"
 # Command-line ElevenLabs TTS with mac-style flags
 brew "steipete/tap/sag"
+# macOS notification CLI — send native notifications and capture user interactions
+brew "vjeantet/tap/alerter"
 # AeroSpace is an i3-like tiling window manager for macOS
 cask "nikitabobko/tap/aerospace"
 # Modern macOS menu bar application for managing AeroSpace window manager

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg1"
+   width="1400"
+   height="1400"
+   viewBox="0 0 1400 1400"
+   sodipodi:docname="clawd-mascot-notif-icon.png"
+   inkscape:export-filename="claude.svg"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1">
+    <inkscape:page
+       x="0"
+       y="0"
+       width="1400"
+       height="1400"
+       id="page2"
+       margin="0"
+       bleed="0" />
+  </sodipodi:namedview>
+  <path
+     style="fill:#db7b5c;fill-opacity:1"
+     d="m 480.41488,1126.6305 c 10.86153,-0.2244 28.26152,-0.2239 38.66666,0 10.40514,0.225 1.51844,0.4086 -19.74823,0.408 -21.26666,-7e-4 -29.77996,-0.1848 -18.91843,-0.4091 z m -180.73835,-86.669 -0.34321,-85.00004 -40.33333,-0.35288 -40.33333,-0.35289 V 868.94191 783.62814 H 138 57.333337 v -84 -83.99999 H 138 218.66666 V 444.29482 272.9615 h 481.32826 481.32828 l 0.3384,170.99999 0.3384,170.99999 80.3333,0.34374 80.3334,0.34374 v 83.97918 83.97918 l -80.3334,0.34374 -80.3333,0.34374 -0.3432,84.98017 -0.3432,84.98017 -39.6568,0.35316 -39.6568,0.35316 -0.3432,85.00004 -0.3432,84.9999 H 1062.6568 1024 v -83.8366 c 0,-69.37818 -0.3152,-84.09839 -1.8275,-85.35352 -1.2974,-1.07675 -13.3836,-1.41418 -41.66673,-1.16326 l -39.83915,0.35344 -0.3432,85.00004 -0.34321,84.9999 h -38.64692 -38.64693 l -0.3432,-84.9999 -0.3432,-85.00004 H 700.66663 539.33331 l -0.3432,85.00004 -0.34321,84.9999 h -38.65679 -38.6568 l -0.3184,-84.3332 -0.3184,-84.33341 -0.69653,84.66671 -0.69653,84.6666 -0.3184,-85.6861 -0.3184,-85.68631 -40.33333,0.35289 -40.33333,0.35288 -0.34321,85.00004 -0.3432,84.9999 H 338.66665 300.01973 Z M 460.66665,528.96149 v -86 l -41.66667,-0.35233 -41.66666,-0.35233 v 86.70466 86.70465 l 41.66666,-0.35233 41.66667,-0.35233 z m 562.66665,0 v -86 l -41.66668,-0.35233 -41.66667,-0.35233 v 86.70466 86.70465 l 41.66667,-0.35233 41.66668,-0.35233 z"
+     id="path14" />
+  <rect
+     style="fill:none;fill-opacity:1;stroke:#064c30;stroke-width:0"
+     id="rect15"
+     width="1400"
+     height="1400"
+     x="0"
+     y="0" />
+</svg>
