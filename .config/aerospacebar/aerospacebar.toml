@@ -140,9 +140,9 @@ corner-radius = 14.0
 
 [spaces.global-visual-config.background-tint-color]
 alpha = 1.0
-blue = 1.0
-green = 1.0
-red = 1.0
+blue = 0.85735976696014404
+green = 1.0038301944732666
+red = 0.87692427635192871
 
 [spaces.global-visual-config.border-tint-color]
 alpha = 1.0
@@ -152,6 +152,6 @@ red = 1.0
 
 [spaces.global-visual-config.foreground-color]
 alpha = 1.0
-blue = 1.0
-green = 1.0
-red = 1.0
+blue = 0.95460683107376099
+green = 0.69598853588104248
+red = 1.0511994361877441
