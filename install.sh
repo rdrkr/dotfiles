@@ -300,10 +300,10 @@ backup() {
     if [ -n "$(git status --porcelain)" ]; then
       print_warning "Changes detected. Committing and pushing..."
       run_command "git add ."
-      run_command "git commit -m 'Automated backup: Update dotfiles'"
+      run_command "git commit -m 'chore(backup): automated backup of dotfiles changes'"
       run_command "git pull origin main --rebase"
       run_command "git push origin main"
-      run_command "osascript -e 'display notification \"Changes detected. dotfiles updated\" with title \"Dotfiles\"'"
+      run_command "\"${SCRIPT_DIR}/scripts/notify.sh\" --title 'Dotfiles' --message 'Changes detected. dotfiles updated' --sound default"
       print_success "Changes committed and pushed."
     else
       print_success "No changes detected. Nothing to commit."

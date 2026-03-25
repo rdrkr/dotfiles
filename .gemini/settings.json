@@ -31,7 +31,7 @@
           {
             "name": "notify-needs-input",
             "type": "command",
-            "command": "~/.claude/hooks/notify.sh needs_input",
+            "command": "~/dotfiles/scripts/notify.sh --title 'Gemini — Needs Input' --message 'Gemini is waiting for your input' --sound Ping --app-icon ~/dotfiles/scripts/icons/gemini.png",
             "description": "Notify when a permission prompt is shown"
           }
         ]
@@ -42,7 +42,7 @@
           {
             "name": "notify-auth-success",
             "type": "command",
-            "command": "~/.claude/hooks/notify.sh needs_input",
+            "command": "~/dotfiles/scripts/notify.sh --title 'Gemini — Needs Input' --message 'Gemini is waiting for your input' --sound Ping --app-icon ~/dotfiles/scripts/icons/gemini.png",
             "description": "Notify when authentication is successful"
           }
         ]
@@ -53,7 +53,7 @@
           {
             "name": "notify-elicitation",
             "type": "command",
-            "command": "~/.claude/hooks/notify.sh needs_input",
+            "command": "~/dotfiles/scripts/notify.sh --title 'Gemini — Needs Input' --message 'Gemini is waiting for your input' --sound Ping --app-icon ~/dotfiles/scripts/icons/gemini.png",
             "description": "Notify when an elicitation dialog is shown"
           }
         ]
@@ -66,7 +66,7 @@
           {
             "name": "notify-done",
             "type": "command",
-            "command": "~/.claude/hooks/notify.sh done",
+            "command": "~/dotfiles/scripts/notify.sh --title 'Gemini — Done' --message 'Gemini has finished and is awaiting further instructions' --sound Glass --app-icon ~/dotfiles/scripts/icons/gemini.png",
             "description": "Notify when the agent has finished its task"
           }
         ]

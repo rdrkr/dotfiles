@@ -174,6 +174,7 @@ alias cc2="ccs --switch-to 2 && cc"
 # shell integrations
 eval "$(fzf --zsh)"
 eval "$(zoxide init zsh)"
+eval "$(~/scripts/notify.sh --completions zsh)"
 source <(carapace _carapace)
 
 # paths
