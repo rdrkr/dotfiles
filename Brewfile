@@ -313,8 +313,8 @@ cask "imageoptim"
 cask "inkscape"
 # HTTP and GraphQL Client
 cask "insomnia"
-# Java IDE by JetBrains
-cask "intellij-idea"
+# IntelliJ IDEA Early Access Program
+cask "intellij-idea@eap"
 # Download manager
 cask "jdownloader"
 # Menu bar manager
