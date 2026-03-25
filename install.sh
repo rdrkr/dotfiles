@@ -303,7 +303,7 @@ backup() {
       run_command "git commit -m 'chore(backup): automated backup of dotfiles changes'"
       run_command "git pull origin main --rebase"
       run_command "git push origin main"
-      run_command "\"${SCRIPT_DIR}/scripts/notify.sh\" --title 'Dotfiles' --message 'Changes detected. dotfiles updated' --sound default"
+      run_command "\"${SCRIPT_DIR}/scripts/notify.sh\" --title 'Dotfiles' --message 'Changes detected. dotfiles updated'"
       print_success "Changes committed and pushed."
     else
       print_success "No changes detected. Nothing to commit."
