@@ -175,6 +175,8 @@ alias cc2="ccs --switch-to 2 && cc"
 eval "$(fzf --zsh)"
 eval "$(zoxide init zsh)"
 eval "$(~/scripts/notify.sh --completions zsh)"
+if output="$(mole completion zsh 2>/dev/null)"; then eval "$output"; fi
+
 source <(carapace _carapace)
 
 # paths

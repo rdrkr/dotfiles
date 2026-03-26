@@ -5,10 +5,10 @@
 
 [advanced]
 enable-optimized-performance = true
-enable-performance-metrics = true
+enable-performance-metrics = false
 focus-window-on-click = true
 # Supported values: "debug", "info", "warning", "error", "fault"
-log-level = 'debug'
+log-level = 'info'
 
 [general]
 aerospace-path = '/opt/homebrew/bin/aerospace'
@@ -55,10 +55,10 @@ green = 1.0
 red = 1.0
 
 [groups.global-visual-config.foreground-color]
-alpha = 1.0
-blue = 0.010899375192821026
-green = -0.047335483133792877
-red = 0.36223521828651428
+alpha = 0.84705883264541626
+blue = 0.0
+green = 0.0
+red = 0.0
 
 [[groups.groups]]
 end-index = -1
@@ -98,7 +98,7 @@ red = 0.0
 appearance-mode = 'all-spaces'
 effect-config = []
 geometric-config = []
-show-apple-button-as-space = false
+show-apple-button-as-space = true
 show-empty-spaces = false
 visual-config = []
 
@@ -152,6 +152,6 @@ red = 1.0
 
 [spaces.global-visual-config.foreground-color]
 alpha = 1.0
-blue = -0.15065094828605652
-green = -0.2244834303855896
-red = 1.0929876565933228
+blue = 1.0
+green = 1.0
+red = 1.0
