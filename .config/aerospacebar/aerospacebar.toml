@@ -15,14 +15,13 @@ aerospace-path = '/opt/homebrew/bin/aerospace'
 quick-hide-enabled = true
 quick-hide-trigger-key = 'fn'
 show-window-titles = true
-theme-mode = 'custom'
+theme-mode = 'preset'
 theme-preset = 'gruvbox-dark'
 
 [general.theme-preset-effect]
 background-blur-radius = 0.80000000000000004
 background-opacity = 0.80000000000000004
 border-opacity = 0.80000000000000004
-foreground-opacity = 0.29999999999999999
 
 [general.theme-preset-geometric]
 border-width = 2.0
@@ -38,7 +37,6 @@ show-groups = true
 background-blur-radius = 0.0
 background-opacity = 0.20000000000000001
 border-opacity = 0.80000000000000004
-foreground-opacity = 1.0
 
 [groups.global-geometric-config]
 border-width = 0.0
@@ -59,8 +57,8 @@ red = 1.0
 [groups.global-visual-config.foreground-color]
 alpha = 1.0
 blue = 0.010899375192821026
-green = -0.047335490584373474
-red = 0.36223524808883667
+green = -0.047335483133792877
+red = 0.36223521828651428
 
 [[groups.groups]]
 end-index = -1
@@ -71,7 +69,6 @@ start-index = 1
 background-blur-radius = 0.0
 background-opacity = 0.20000000000000001
 border-opacity = 0.80000000000000004
-foreground-opacity = 0.0
 
 [groups.groups.geometric-config]
 border-width = 0.0
@@ -109,7 +106,6 @@ visual-config = []
 background-blur-radius = 0.0
 background-opacity = 0.20000000000000001
 border-opacity = 0.80000000000000004
-foreground-opacity = 0.0
 
 [spaces.apple-button-geometric-config]
 border-width = 0.0
@@ -137,7 +133,6 @@ red = 1.0
 background-blur-radius = 0.0
 background-opacity = 0.20000000000000001
 border-opacity = 0.80000000000000004
-foreground-opacity = 0.5
 
 [spaces.global-geometric-config]
 border-width = 0.0
@@ -158,5 +153,5 @@ red = 1.0
 [spaces.global-visual-config.foreground-color]
 alpha = 1.0
 blue = -0.15065094828605652
-green = -0.22448346018791199
+green = -0.2244834303855896
 red = 1.0929876565933228
