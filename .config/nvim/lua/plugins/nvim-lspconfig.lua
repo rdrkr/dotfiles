@@ -9,6 +9,11 @@ return {
             lua_ls = {
                 mason = false,
             },
+            kotlin_ls = {
+                init_options = {
+                    storagePath = vim.fn.stdpath("data") .. "/kotlin_ls",
+                },
+            },
         },
     },
 }
