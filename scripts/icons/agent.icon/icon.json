@@ -6,7 +6,7 @@
     {
       "layers" : [
         {
-          "hidden" : false,
+          "hidden" : true,
           "image-name" : "gemini.png",
           "name" : "gemini",
           "position" : {
@@ -24,6 +24,19 @@
           "name" : "claude",
           "position" : {
             "scale" : 0.6,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "glass" : false,
+          "hidden" : false,
+          "image-name" : "capybara.svg",
+          "name" : "capybara",
+          "position" : {
+            "scale" : 0.86,
             "translation-in-points" : [
               0,
               0
