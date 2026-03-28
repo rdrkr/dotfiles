@@ -241,8 +241,6 @@ brew "steipete/tap/sag"
 brew "vjeantet/tap/alerter"
 # AeroSpace is an i3-like tiling window manager for macOS
 cask "nikitabobko/tap/aerospace"
-# Modern macOS menu bar application for managing AeroSpace window manager
-cask "rdrkr/tap/aerospacebar"
 # Image editing and design software
 cask "affinity"
 # Enable Windows-like alt-tab
