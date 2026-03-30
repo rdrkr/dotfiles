@@ -15,7 +15,7 @@ aerospace-path = '/opt/homebrew/bin/aerospace'
 quick-hide-enabled = true
 quick-hide-trigger-key = 'control'
 show-window-titles = true
-theme-mode = 'preset'
+theme-mode = 'custom'
 theme-preset = 'gruvbox-dark'
 
 [general.theme-preset-effect]
@@ -30,7 +30,7 @@ corner-radius = 14.0
 [groups]
 # Groups appearance mode: appearance-mode = <value>
 # Supported values: "per-group", "all-groups", "match-spaces"
-appearance-mode = 'match-spaces'
+appearance-mode = 'all-groups'
 show-groups = true
 
 [groups.global-effect-config]
@@ -56,9 +56,9 @@ red = 1.0
 
 [groups.global-visual-config.foreground-color]
 alpha = 1.0
-blue = -0.15259340405464172
-green = -0.20684069395065308
-red = 1.0924841165542603
+blue = -0.15436702966690063
+green = -0.18883076310157776
+red = 1.0919849872589111
 
 [[groups.groups]]
 end-index = -1
@@ -152,6 +152,6 @@ red = 1.0
 
 [spaces.global-visual-config.foreground-color]
 alpha = 1.0
-blue = -0.24895808100700378
+blue = -0.2489580512046814
 green = 0.6388440728187561
-red = 1.0579003095626831
+red = 1.0579004287719727
