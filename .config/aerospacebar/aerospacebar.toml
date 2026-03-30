@@ -57,7 +57,7 @@ red = 1.0
 [groups.global-visual-config.foreground-color]
 alpha = 1.0
 blue = -0.15259340405464172
-green = -0.20684084296226501
+green = -0.20684075355529785
 red = 1.0924841165542603
 
 [[groups.groups]]
@@ -152,6 +152,6 @@ red = 1.0
 
 [spaces.global-visual-config.foreground-color]
 alpha = 1.0
-blue = 0.97162264585494995
-green = -0.22657498717308044
-red = 1.093018651008606
+blue = -0.24895814061164856
+green = 0.6388440728187561
+red = 1.057900071144104
