@@ -30,7 +30,7 @@ corner-radius = 14.0
 [groups]
 # Groups appearance mode: appearance-mode = <value>
 # Supported values: "per-group", "all-groups", "match-spaces"
-appearance-mode = 'all-groups'
+appearance-mode = 'match-spaces'
 show-groups = true
 
 [groups.global-effect-config]
@@ -55,10 +55,10 @@ green = 1.0
 red = 1.0
 
 [groups.global-visual-config.foreground-color]
-alpha = 0.84705883264541626
-blue = 0.0
-green = 0.0
-red = 0.0
+alpha = 1.0
+blue = -0.15259340405464172
+green = -0.20684084296226501
+red = 1.0924841165542603
 
 [[groups.groups]]
 end-index = -1
@@ -152,6 +152,6 @@ red = 1.0
 
 [spaces.global-visual-config.foreground-color]
 alpha = 1.0
-blue = 1.0
-green = 1.0
-red = 1.0
+blue = 0.97162264585494995
+green = -0.22657498717308044
+red = 1.093018651008606
