@@ -5,18 +5,18 @@
 
 [advanced]
 enable-optimized-performance = true
-enable-performance-metrics = false
+enable-performance-metrics = true
 focus-window-on-click = true
 # Supported values: "debug", "info", "warning", "error", "fault"
-log-level = 'info'
+log-level = 'debug'
 
 [general]
 aerospace-path = '/opt/homebrew/bin/aerospace'
 quick-hide-enabled = true
-quick-hide-trigger-key = 'control'
+quick-hide-trigger-key = 'fn'
 show-window-titles = true
 theme-mode = 'custom'
-theme-preset = 'gruvbox-dark'
+theme-preset = 'catppuccin-mocha'
 
 [general.theme-preset-effect]
 background-blur-radius = 0.80000000000000004
@@ -56,9 +56,9 @@ red = 1.0
 
 [groups.global-visual-config.foreground-color]
 alpha = 1.0
-blue = -0.15436702966690063
-green = -0.18883076310157776
-red = 1.0919849872589111
+blue = -0.1903960108757019
+green = 0.34502124786376953
+red = 1.0812127590179443
 
 [[groups.groups]]
 end-index = -1
@@ -98,7 +98,7 @@ red = 0.0
 appearance-mode = 'all-spaces'
 effect-config = []
 geometric-config = []
-show-apple-button-as-space = true
+show-apple-button-as-space = false
 show-empty-spaces = false
 visual-config = []
 
@@ -152,6 +152,6 @@ red = 1.0
 
 [spaces.global-visual-config.foreground-color]
 alpha = 1.0
-blue = -0.2489580512046814
-green = 0.6388440728187561
-red = 1.0579004287719727
+blue = -0.15223899483680725
+green = -0.21020111441612244
+red = 1.0925766229629517
