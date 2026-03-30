@@ -5,18 +5,18 @@
 
 [advanced]
 enable-optimized-performance = true
-enable-performance-metrics = true
+enable-performance-metrics = false
 focus-window-on-click = true
 # Supported values: "debug", "info", "warning", "error", "fault"
-log-level = 'debug'
+log-level = 'info'
 
 [general]
 aerospace-path = '/opt/homebrew/bin/aerospace'
 quick-hide-enabled = true
 quick-hide-trigger-key = 'fn'
 show-window-titles = true
-theme-mode = 'custom'
-theme-preset = 'catppuccin-mocha'
+theme-mode = 'preset'
+theme-preset = 'gruvbox-dark'
 
 [general.theme-preset-effect]
 background-blur-radius = 0.80000000000000004
@@ -30,7 +30,7 @@ corner-radius = 14.0
 [groups]
 # Groups appearance mode: appearance-mode = <value>
 # Supported values: "per-group", "all-groups", "match-spaces"
-appearance-mode = 'all-groups'
+appearance-mode = 'match-spaces'
 show-groups = true
 
 [groups.global-effect-config]
@@ -55,10 +55,10 @@ green = 1.0
 red = 1.0
 
 [groups.global-visual-config.foreground-color]
-alpha = 1.0
-blue = -0.1903960108757019
-green = 0.34502124786376953
-red = 1.0812127590179443
+alpha = 0.84705883264541626
+blue = 0.0
+green = 0.0
+red = 0.0
 
 [[groups.groups]]
 end-index = -1
@@ -152,6 +152,6 @@ red = 1.0
 
 [spaces.global-visual-config.foreground-color]
 alpha = 1.0
-blue = -0.15223899483680725
-green = -0.21020111441612244
-red = 1.0925766229629517
+blue = 1.0
+green = 1.0
+red = 1.0
