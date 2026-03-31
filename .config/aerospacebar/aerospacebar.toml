@@ -13,7 +13,7 @@ log-level = 'info'
 [general]
 aerospace-path = '/opt/homebrew/bin/aerospace'
 quick-hide-enabled = true
-quick-hide-trigger-key = 'fn'
+quick-hide-trigger-key = 'control'
 show-window-titles = true
 theme-mode = 'preset'
 theme-preset = 'gruvbox-dark'
@@ -98,7 +98,7 @@ red = 0.0
 appearance-mode = 'all-spaces'
 effect-config = []
 geometric-config = []
-show-apple-button-as-space = false
+show-apple-button-as-space = true
 show-empty-spaces = false
 visual-config = []
 
