@@ -98,7 +98,7 @@ red = 0.0
 appearance-mode = 'all-spaces'
 effect-config = []
 geometric-config = []
-show-apple-button-as-space = false
+show-apple-button-as-space = true
 show-empty-spaces = false
 visual-config = []
 
