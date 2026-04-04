@@ -15,7 +15,7 @@ aerospace-path = '/opt/homebrew/bin/aerospace'
 quick-hide-enabled = true
 quick-hide-trigger-key = 'control'
 show-window-titles = true
-theme-mode = 'preset'
+theme-mode = 'custom'
 theme-preset = 'gruvbox-dark'
 
 [general.theme-preset-effect]
@@ -131,8 +131,8 @@ red = 1.0
 
 [spaces.global-effect-config]
 background-blur-radius = 0.0
-background-opacity = 0.20000000000000001
-border-opacity = 0.80000000000000004
+background-opacity = 1.0
+border-opacity = 0.0
 
 [spaces.global-geometric-config]
 border-width = 0.0
@@ -140,9 +140,9 @@ corner-radius = 14.0
 
 [spaces.global-visual-config.background-tint-color]
 alpha = 1.0
-blue = 1.0
-green = 1.0
-red = 1.0
+blue = -0.30635741353034973
+green = 1.0181982517242432
+red = -0.5113527774810791
 
 [spaces.global-visual-config.border-tint-color]
 alpha = 1.0
@@ -152,6 +152,6 @@ red = 1.0
 
 [spaces.global-visual-config.foreground-color]
 alpha = 1.0
-blue = 1.0
-green = 1.0
-red = 1.0
+blue = -0.15113919973373413
+green = -0.22021868824958801
+red = 1.0928617715835571
