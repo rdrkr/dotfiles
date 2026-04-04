@@ -5,10 +5,10 @@
 
 [advanced]
 enable-optimized-performance = true
-enable-performance-metrics = false
+enable-performance-metrics = true
 focus-window-on-click = true
 # Supported values: "debug", "info", "warning", "error", "fault"
-log-level = 'info'
+log-level = 'debug'
 
 [general]
 aerospace-path = '/opt/homebrew/bin/aerospace'
@@ -131,8 +131,8 @@ red = 1.0
 
 [spaces.global-effect-config]
 background-blur-radius = 0.0
-background-opacity = 1.0
-border-opacity = 0.0
+background-opacity = 0.20000000000000001
+border-opacity = 0.80000000000000004
 
 [spaces.global-geometric-config]
 border-width = 0.0
@@ -140,18 +140,18 @@ corner-radius = 14.0
 
 [spaces.global-visual-config.background-tint-color]
 alpha = 1.0
-blue = -0.30635738372802734
+blue = -0.28346073627471924
 green = 1.0181982517242432
 red = -0.5113527774810791
 
 [spaces.global-visual-config.border-tint-color]
 alpha = 1.0
-blue = 1.0
-green = 1.0
-red = 1.0
+blue = -0.1504061222076416
+green = -0.22658291459083557
+red = 1.0930508375167847
 
 [spaces.global-visual-config.foreground-color]
 alpha = 1.0
-blue = -0.15113919973373413
-green = -0.22021868824958801
-red = 1.0928617715835571
+blue = -0.15259340405464172
+green = -0.2068408727645874
+red = 1.0924841165542603
