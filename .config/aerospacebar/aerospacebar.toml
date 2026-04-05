@@ -13,9 +13,9 @@ log-level = 'debug'
 [general]
 aerospace-path = '/opt/homebrew/bin/aerospace'
 quick-hide-enabled = true
-quick-hide-trigger-key = 'control'
+quick-hide-trigger-key = 'fn'
 show-window-titles = true
-theme-mode = 'preset'
+theme-mode = 'custom'
 theme-preset = 'gruvbox-dark'
 
 [general.theme-preset-effect]
@@ -31,6 +31,7 @@ corner-radius = 14.0
 # Groups appearance mode: appearance-mode = <value>
 # Supported values: "per-group", "all-groups", "match-spaces"
 appearance-mode = 'match-spaces'
+show-foreground-overlay = true
 show-groups = true
 
 [groups.global-effect-config]
@@ -131,8 +132,8 @@ red = 1.0
 
 [spaces.global-effect-config]
 background-blur-radius = 0.0
-background-opacity = 0.20000000000000001
-border-opacity = 0.80000000000000004
+background-opacity = 1.0
+border-opacity = 1.0
 
 [spaces.global-geometric-config]
 border-width = 0.0
@@ -140,18 +141,18 @@ corner-radius = 14.0
 
 [spaces.global-visual-config.background-tint-color]
 alpha = 1.0
-blue = -0.28346073627471924
-green = 1.0181982517242432
-red = -0.5113527774810791
+blue = -0.30409955978393555
+green = 1.0181972980499268
+red = -0.51128238439559937
 
 [spaces.global-visual-config.border-tint-color]
 alpha = 1.0
-blue = -0.1504061222076416
-green = -0.22658291459083557
-red = 1.0930508375167847
+blue = 1.0
+green = 1.0
+red = 1.0
 
 [spaces.global-visual-config.foreground-color]
 alpha = 1.0
-blue = -0.15259340405464172
-green = -0.2068408727645874
-red = 1.0924841165542603
+blue = -0.15065094828605652
+green = -0.22448346018791199
+red = 1.0929876565933228
