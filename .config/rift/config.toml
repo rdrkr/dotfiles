@@ -233,7 +233,7 @@ drag_swap_fraction = 0.3
 #   that's already active, it will switch to the last workspace instead
 # - reapply_app_rules_on_title_change: if true, app rules are re-evaluated when a window's title changes
 enabled = true
-default_workspace_count = 4
+default_workspace_count = 6
 auto_assign_windows = true
 preserve_focus_per_workspace = true
 workspace_auto_back_and_forth = false
@@ -376,15 +376,15 @@ comb1 = "Alt + Shift"
 
 "Alt + Z" = "toggle_space_activated"
 
-"Alt + H" = { move_focus = "left" }
-"Alt + J" = { move_focus = "down" }
-"Alt + K" = { move_focus = "up" }
-"Alt + L" = { move_focus = "right" }
+"Ctrl + Left" = { move_focus = "left" }
+"Ctrl + Down" = { move_focus = "down" }
+"Ctrl + Up" = { move_focus = "up" }
+"Ctrl + Right" = { move_focus = "right" }
 
-"comb1 + H" = { move_node = "left" }
-"comb1 + J" = { move_node = "down" }
-"comb1 + K" = { move_node = "up" }
-"comb1 + L" = { move_node = "right" }
+"Ctrl + Shift + Left" = { move_node = "left" }
+"Ctrl + Shift + Down" = { move_node = "down" }
+"Ctrl + Shift + Up" = { move_node = "up" }
+"Ctrl + Shift + Right" = { move_node = "right" }
 
 "Alt + 0" = { switch_to_workspace = 0 }
 "Alt + 1" = { switch_to_workspace = 1 }
