@@ -221,6 +221,8 @@ brew "yamlfmt"
 brew "yazi"
 # Shell extension to navigate your filesystem faster
 brew "zoxide"
+# Tiling window manager for macOS
+brew "acsandmann/tap/rift"
 # A window border system for macOS
 brew "felixkratz/formulae/borders", args: ["HEAD"]
 # Interactive TUI installer for Gentleman.Dots development environment
