@@ -57,7 +57,7 @@ auto_focus_blacklist = []
 # ]
 
 run_on_start = [
-  "rift-cli subscribe cli --event windows_changed --command sh --args -c --args 'osascript -e \" tell application \"System Events\" to     if (get name of every process) contains \"AeroSpaceBar\" then         tell application \"AeroSpaceBar\" to «event ascrpsbr» \"updateOnFocusChanged\" \"'",
+  "rift-cli subscribe cli --event windows_changed --command sh --args -c --args \"$HOME/.config/rift/update_aerospacebar.sh\"",
   'borders active_color=0xffebdbb2 inactive_color=0x00000000 width=5.0 style=round hidpi=on blacklist="iPhone Mirroring"',
 ]
 
@@ -163,7 +163,7 @@ vertical = 16
 # vertical = 8
 [settings.ui.menu_bar]
 # enable menu bar workspace indicators
-enabled = false
+enabled = true
 # if enabled, it will show all workspaces including empty ones. disabled because this
 # tends to take up too much room in the menubar and then is auto hidden by macos
 show_empty = false
@@ -386,17 +386,21 @@ comb1 = "Alt + Shift"
 "Ctrl + Shift + Up" = { move_node = "up" }
 "Ctrl + Shift + Right" = { move_node = "right" }
 
-"Alt + 0" = { switch_to_workspace = 0 }
 "Alt + 1" = { switch_to_workspace = 1 }
 "Alt + 2" = { switch_to_workspace = 2 }
 "Alt + 3" = { switch_to_workspace = 3 }
+"Alt + 4" = { switch_to_workspace = 4 }
+"Alt + 5" = { switch_to_workspace = 5 }
+"Alt + 6" = { switch_to_workspace = 6 }
 
-"comb1 + 0" = { move_window_to_workspace = 0 }
-"comb1 + 1" = { move_window_to_workspace = 1 }
-"comb1 + 2" = { move_window_to_workspace = 2 }
-"comb1 + 3" = { move_window_to_workspace = 3 }
+"Ctrl + Shift + 1" = { move_window_to_workspace = 1 }
+"Ctrl + Shift + 2" = { move_window_to_workspace = 2 }
+"Ctrl + Shift + 3" = { move_window_to_workspace = 3 }
+"Ctrl + Shift + 4" = { move_window_to_workspace = 4 }
+"Ctrl + Shift + 5" = { move_window_to_workspace = 5 }
+"Ctrl + Shift + 6" = { move_window_to_workspace = 6 }
 
-"Alt + Tab" = "switch_to_last_workspace"
+# "Alt + Tab" = "switch_to_last_workspace"
 
 # commands to change the layout engine of the active workspace
 # "Alt + Ctrl + 1" = { set_workspace_layout = { mode = "traditional" } }
@@ -404,22 +408,22 @@ comb1 = "Alt + Shift"
 # "Alt + Ctrl + 3" = { set_workspace_layout = { mode = "master_stack" } }
 # "Alt + Ctrl + 4" = { set_workspace_layout = { mode = "scrolling" } }
 
-"Alt + Shift + Left" = { join_window = "left" }
-"Alt + Shift + Right" = { join_window = "right" }
-"Alt + Shift + Up" = { join_window = "up" }
-"Alt + Shift + Down" = { join_window = "down" }
-"Alt + Comma" = "toggle_stack"
-"Alt + Slash" = "toggle_orientation"
+"Ctrl + Alt + Shift + Left" = { join_window = "left" }
+"Ctrl + Alt + Shift + Right" = { join_window = "right" }
+"Ctrl + Alt + Shift + Up" = { join_window = "up" }
+"Ctrl + Alt + Shift + Down" = { join_window = "down" }
+#"Alt + Comma" = "toggle_stack"
+"Alt + Comma" = "toggle_orientation"
 "Alt + Ctrl + E" = "unjoin_windows"
 
-"Alt + Shift + Space" = "toggle_window_floating"
+"Alt + Slash" = "toggle_window_floating"
 "Alt + F" = "toggle_fullscreen"
 "Alt + Shift + F" = "toggle_fullscreen_within_gaps"
 "comb1 + Ctrl + Space" = "toggle_focus_floating"    # briefly bring focus to floating window
 
 # smartly resize windows
-"Alt + Shift + Equal" = "resize_window_grow"
-"Alt + Shift + Minus" = "resize_window_shrink"
+"Ctrl + Minus" = "resize_window_shrink"
+"Ctrl + Equal" = "resize_window_grow"
 
 # Move mouse cursor to display by index (0-based) or UUID
 # Examples:
@@ -442,11 +446,11 @@ comb1 = "Alt + Shift"
 # this will show the mission control view shown in the readme
 # "Alt + Ctrl + M" = "show_mission_control_all"
 
-"Alt + Enter" = { "exec" = [
-  "/bin/bash",
-  "-c",
-  "open -a \"/System/Applications/Utilities/Terminal.app\"",
-] }
+#"Alt + Enter" = { "exec" = [
+#  "/bin/bash",
+#  "-c",
+#  "open -a \"/System/Applications/Utilities/Terminal.app\"",
+#] }
 
 "Alt + Shift + D" = "debug" # prints layout tree
 
