@@ -1,0 +1,26 @@
+# Homebrew packages to exclude when installing on Linux.
+# One package name per line. Lines starting with # are comments.
+# Supports exact matches against the package name inside quotes in the Brewfile.
+
+# Conflicts with util-linux on Linux
+bash-completion
+
+# macOS-only tools
+cocoapods
+infat
+ios-deploy
+mas
+pam-reattach
+periphery
+xcbeautify
+xcode-build-server
+xcodegen
+
+# macOS-only third-party formulae
+acsandmann/tap/rift
+felixkratz/formulae/borders
+koekeishiya/formulae/skhd
+machlit/tap/cutler
+steipete/tap/remindctl
+steipete/tap/sag
+vjeantet/tap/alerter

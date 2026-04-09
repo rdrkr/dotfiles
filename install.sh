@@ -1,5 +1,95 @@
 #!/bin/bash
 
+# --- Configuration ---
+DOTFILES_DIR="${HOME}/dotfiles"
+DOTFILES_REPO="https://github.com/rdrkr/dotfiles.git"
+DRY_RUN=false
+
+# --- Bootstrap ---
+# When the script is executed remotely (e.g. curl | bash), BASH_SOURCE[0]
+# resolves to stdin rather than a file inside the cloned repo. In that case
+# we install the bare-minimum prerequisites, clone the repo, and re-execute
+# the local copy so that Brewfile, package lists, and configs are available.
+is_local() {
+  local src="${BASH_SOURCE[0]}"
+  [ -n "$src" ] && [ "$src" != "/dev/stdin" ] && [ -d "$(dirname "$src")/.git" ]
+}
+
+bootstrap() {
+  echo -e "\033[38;2;137;180;250m=== Bootstrapping dotfiles ===\033[0m"
+
+  case "$(uname -s)" in
+  Darwin)
+    # Xcode Command Line Tools
+    if ! xcode-select -p &>/dev/null; then
+      echo "Installing Xcode Command Line Tools..."
+      xcode-select --install
+      echo "Waiting for Xcode Command Line Tools installation..."
+      until xcode-select -p &>/dev/null; do sleep 5; done
+    fi
+    # Homebrew
+    if ! command -v brew &>/dev/null; then
+      echo "Installing Homebrew..."
+      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      # Add brew to PATH for the rest of this session
+      if [ -f /opt/homebrew/bin/brew ]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+      elif [ -f /usr/local/bin/brew ]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+      fi
+    fi
+    # Git (via Homebrew)
+    if ! command -v git &>/dev/null; then
+      brew install git
+    fi
+    ;;
+  Linux)
+    if ! command -v git &>/dev/null; then
+      echo "Installing git..."
+      if command -v apt-get &>/dev/null; then
+        sudo apt-get update && sudo apt-get install -y git
+      elif command -v dnf &>/dev/null; then
+        sudo dnf install -y git
+      elif command -v pacman &>/dev/null; then
+        sudo pacman -Sy --noconfirm git
+      elif command -v zypper &>/dev/null; then
+        sudo zypper install -y git
+      else
+        echo "Error: no supported package manager found. Install git manually."
+        exit 1
+      fi
+    fi
+    ;;
+  *)
+    echo "Error: unsupported OS."
+    exit 1
+    ;;
+  esac
+
+  # Clone the repo (or pull if it already exists)
+  if [ -d "$DOTFILES_DIR/.git" ]; then
+    echo "Dotfiles repo already exists. Pulling latest changes..."
+    git -C "$DOTFILES_DIR" pull origin main
+  else
+    echo "Cloning dotfiles repo..."
+    git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
+  fi
+
+  # Re-execute from the cloned repo, forwarding any arguments
+  echo "Handing off to local install.sh..."
+  exec "$DOTFILES_DIR/install.sh" "$@"
+}
+
+# If running remotely, bootstrap first and exit (exec replaces the process)
+if ! is_local; then
+  # Default to restore when invoked via the one-liner with no arguments
+  if [ $# -eq 0 ]; then
+    bootstrap restore
+  else
+    bootstrap "$@"
+  fi
+fi
+
 # --- Go to dotfiles repo directory ---
 # Store the original directory and change to the script's directory.
 # This allows the script to be run from any location.
@@ -8,9 +98,6 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 cd "$SCRIPT_DIR" || exit
 # Restore the original directory when the script exits.
 trap 'cd "$ORIGINAL_DIR"' EXIT
-
-# --- Configuration ---
-DRY_RUN=false
 
 NPM_GLOBAL_FILE="${SCRIPT_DIR}/.config/npm-global-packages.txt"
 PIPX_PACKAGES_FILE="${SCRIPT_DIR}/.config/pipx-packages.txt"
@@ -72,12 +159,14 @@ print_help() {
   echo ""
   echo "Commands:"
   echo "  restore      Restore dotfiles and install dependencies"
-  echo "  backup       Update Brewfile with current setup"
+  echo "  backup       Update package lists with current setup"
   echo "  schedule     Schedule hourly backups using cron"
   echo ""
   echo "Options:"
   echo "  -h, --help     Show this help message and exit"
   echo "  -d, --dry-run  Run the script in dry-run mode (no changes will be made)"
+  echo ""
+  echo "Supported platforms: macOS, Linux (apt, dnf, pacman, zypper), WSL"
 }
 
 run_command() {
@@ -88,28 +177,114 @@ run_command() {
   fi
 }
 
+# --- Platform Detection ---
+# Detects the current operating system and sets OS_TYPE, IS_WSL, and DISTRO_ID.
+detect_platform() {
+  OS_TYPE="unknown"
+  IS_WSL=false
+  DISTRO_ID="unknown"
+
+  case "$(uname -s)" in
+  Darwin)
+    OS_TYPE="macos"
+    ;;
+  Linux)
+    OS_TYPE="linux"
+    if grep -qi microsoft /proc/version 2>/dev/null; then
+      IS_WSL=true
+    fi
+    if [ -f /etc/os-release ]; then
+      DISTRO_ID=$(. /etc/os-release && echo "$ID")
+    fi
+    ;;
+  *)
+    print_error "Unsupported operating system: $(uname -s)"
+    exit 1
+    ;;
+  esac
+}
+
+# --- Package Manager Abstraction ---
+# Detects the system package manager and sets PKG_MANAGER, along with
+# PKG_INSTALL, PKG_UPDATE, and PKG_LIST_FILE for use in restore/backup.
+detect_package_manager() {
+  PKG_MANAGER="unknown"
+  PKG_INSTALL=""
+  PKG_UPDATE=""
+  PKG_LIST_FILE=""
+
+  if [ "$OS_TYPE" = "macos" ]; then
+    PKG_MANAGER="brew"
+    PKG_INSTALL="brew install"
+    PKG_UPDATE="brew update"
+    PKG_LIST_FILE="${SCRIPT_DIR}/.config/Brewfile"
+  elif [ "$OS_TYPE" = "linux" ]; then
+    if command -v apt-get &>/dev/null; then
+      PKG_MANAGER="apt"
+      PKG_INSTALL="sudo apt-get install -y"
+      PKG_UPDATE="sudo apt-get update"
+      PKG_LIST_FILE="${SCRIPT_DIR}/.config/apt-packages.txt"
+    elif command -v dnf &>/dev/null; then
+      PKG_MANAGER="dnf"
+      PKG_INSTALL="sudo dnf install -y"
+      PKG_UPDATE="sudo dnf check-update || true"
+      PKG_LIST_FILE="${SCRIPT_DIR}/.config/dnf-packages.txt"
+    elif command -v pacman &>/dev/null; then
+      PKG_MANAGER="pacman"
+      PKG_INSTALL="sudo pacman -S --noconfirm"
+      PKG_UPDATE="sudo pacman -Sy"
+      PKG_LIST_FILE="${SCRIPT_DIR}/.config/pacman-packages.txt"
+    elif command -v zypper &>/dev/null; then
+      PKG_MANAGER="zypper"
+      PKG_INSTALL="sudo zypper install -y"
+      PKG_UPDATE="sudo zypper refresh"
+      PKG_LIST_FILE="${SCRIPT_DIR}/.config/zypper-packages.txt"
+    else
+      print_error "No supported package manager found (apt, dnf, pacman, zypper)."
+      exit 1
+    fi
+  fi
+}
+
+# --- Stow ---
+# Runs GNU Stow to symlink dotfiles into the home directory.
+# Uses --adopt to handle pre-existing files: stow moves them into the repo,
+# then git checkout restores the repo's canonical versions.
 run_stow() {
   print_header "Running stow..."
   if command -v stow &>/dev/null; then
-    run_command "stow ."
+    run_command "stow --adopt ."
     if [ $? -ne 0 ] && [ "$DRY_RUN" = false ]; then
       print_error "Stow command failed."
       exit 1
     fi
+    # Restore repo files that --adopt may have overwritten with local copies
+    if [ "$DRY_RUN" = false ]; then
+      run_command "git -C \"$SCRIPT_DIR\" checkout ."
+    fi
     print_success "Stow command completed successfully."
   else
-    print_error "Stow is not installed. Please install it first (e.g., 'brew install stow')."
+    print_error "Stow is not installed. Please install it first."
     exit 1
   fi
 }
 
-restore() {
-  print_header "Starting Restore..."
+# --- Install System Packages ---
+# Installs system packages from the appropriate package list for the detected platform.
+install_system_packages() {
+  if [ "$OS_TYPE" = "macos" ]; then
+    install_macos_packages
+  elif [ "$OS_TYPE" = "linux" ]; then
+    install_linux_packages
+  fi
+}
 
-  # 1. Install Homebrew
+# --- macOS Package Installation ---
+# Installs Homebrew if needed, then runs brew bundle from the Brewfile.
+install_macos_packages() {
   print_header "Checking for Homebrew..."
   if ! command -v brew &>/dev/null; then
-    print_warning "xcode command line tools. Installing..."
+    print_warning "Installing Xcode Command Line Tools..."
     xcode-select --install || true
 
     print_warning "Homebrew not found. Installing..."
@@ -123,9 +298,8 @@ restore() {
     print_success "Homebrew is already installed."
   fi
 
-  # 2. Install formulas, casks, and VS Code extensions from Brewfile
   print_header "Installing from Brewfile..."
-  if [ -f "Brewfile" ]; then
+  if [ -f ".config/Brewfile" ]; then
     if [ "$DRY_RUN" = false ]; then
       read -p "Are you logged into the App Store? (y/n) " -n 1 -r
       echo
@@ -135,7 +309,7 @@ restore() {
         exit 1
       fi
     fi
-    run_command "brew bundle --file=Brewfile"
+    run_command "brew bundle --file=.config/Brewfile"
     if [ $? -ne 0 ] && [ "$DRY_RUN" = false ]; then
       print_error "Brew bundle command failed."
       exit 1
@@ -144,25 +318,174 @@ restore() {
   else
     print_warning "Brewfile not found. Skipping brew bundle."
   fi
+}
 
-  # 3. Setup default macOS applications with infat
-  print_header "Setting up default macOS applications..."
-  run_command "source \"${HOME}/.zshrc\""
-  if command -v infat &>/dev/null; then
-    run_command "infat --config ~/.config/infat/config.toml"
-    if [ $? -ne 0 ] && [ "$DRY_RUN" = false ]; then
-      print_error "infat command failed."
-      exit 1
+# --- Linux Package Installation ---
+# Installs native distro packages, then Linuxbrew and Brewfile packages.
+install_linux_packages() {
+  print_header "Updating package index ($PKG_MANAGER)..."
+  run_command "$PKG_UPDATE"
+
+  print_header "Installing system packages ($PKG_MANAGER)..."
+  if [ -f "$PKG_LIST_FILE" ]; then
+    if [ "$DRY_RUN" = false ]; then
+      local packages=""
+      while IFS= read -r package; do
+        [ -n "$package" ] && [ "${package:0:1}" != "#" ] && packages="$packages $package"
+      done <"$PKG_LIST_FILE"
+      if [ -n "$packages" ]; then
+        run_command "$PKG_INSTALL $packages"
+        if [ $? -ne 0 ]; then
+          print_error "Package installation failed."
+          exit 1
+        fi
+      fi
+    else
+      print_warning "[DRY RUN] Would install packages from $PKG_LIST_FILE"
     fi
-    print_success "Default macOS applications configured."
+    print_success "System packages installed."
   else
-    print_warning "infat not found. Skipping default application setup."
+    print_warning "$PKG_LIST_FILE not found. Skipping system package installation."
+    print_warning "Create $PKG_LIST_FILE with one package name per line."
   fi
 
-  # 4. Install Global NPM Packages
+  # Ensure stow is installed on Linux
+  if ! command -v stow &>/dev/null; then
+    print_header "Installing stow..."
+    run_command "$PKG_INSTALL stow"
+  fi
+
+  # Install zsh and set it as the default shell
+  install_zsh
+
+  # Install Linuxbrew and Brewfile packages
+  install_linuxbrew
+}
+
+# --- Zsh Installation ---
+# Installs zsh via the native package manager and sets it as the default login shell.
+install_zsh() {
+  if command -v zsh &>/dev/null; then
+    print_success "zsh is already installed."
+  else
+    print_header "Installing zsh..."
+    run_command "$PKG_INSTALL zsh"
+    if [ $? -ne 0 ] && [ "$DRY_RUN" = false ]; then
+      print_error "Failed to install zsh."
+      return 1
+    fi
+    print_success "zsh installed."
+  fi
+
+  # Set zsh as the default shell if it isn't already
+  local zsh_path
+  zsh_path="$(command -v zsh)"
+  if [ "$DRY_RUN" = false ] && [ "$(basename "$SHELL")" != "zsh" ]; then
+    # Ensure zsh is listed in /etc/shells
+    if ! grep -qF "$zsh_path" /etc/shells 2>/dev/null; then
+      print_warning "Adding $zsh_path to /etc/shells..."
+      run_command "echo '$zsh_path' | sudo tee -a /etc/shells >/dev/null"
+    fi
+    print_warning "Changing default shell to zsh..."
+    run_command "sudo chsh -s '$zsh_path' '$(whoami)'"
+    if [ $? -eq 0 ]; then
+      print_success "Default shell changed to zsh. Log out and back in for it to take effect."
+    else
+      print_error "Failed to change default shell. You can run: chsh -s $zsh_path"
+    fi
+  else
+    print_success "zsh is already the default shell."
+  fi
+}
+
+# --- Linuxbrew Installation ---
+# Installs Homebrew on Linux and runs brew bundle from the Brewfile.
+# This provides the same CLI toolset available on macOS.
+install_linuxbrew() {
+  print_header "Checking for Linuxbrew..."
+  if ! command -v brew &>/dev/null; then
+    # Linuxbrew requires build-essential/gcc and curl
+    case "$PKG_MANAGER" in
+    apt)    run_command "sudo apt-get install -y build-essential curl" ;;
+    dnf)    run_command "sudo dnf groupinstall -y 'Development Tools' && sudo dnf install -y curl" ;;
+    pacman) run_command "sudo pacman -S --noconfirm --needed base-devel curl" ;;
+    zypper) run_command "sudo zypper install -y -t pattern devel_basis && sudo zypper install -y curl" ;;
+    esac
+
+    print_warning "Installing Linuxbrew..."
+    run_command 'NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
+    if [ $? -ne 0 ] && [ "$DRY_RUN" = false ]; then
+      print_error "Linuxbrew installation failed."
+      return 1
+    fi
+    # Add brew to PATH for the rest of this session
+    if [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
+      eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    fi
+    print_success "Linuxbrew installed successfully."
+
+    # Install GCC as recommended by Homebrew on Linux
+    print_header "Installing GCC (recommended by Linuxbrew)..."
+    run_command "brew install gcc"
+  else
+    print_success "Linuxbrew is already installed."
+  fi
+
+  print_header "Installing from Brewfile (Linuxbrew)..."
+  if [ -f ".config/Brewfile" ]; then
+    # Filter out packages that conflict on Linux.
+    local linux_brewfile
+    linux_brewfile=$(mktemp)
+    grep -vE '"bash-completion"' ".config/Brewfile" > "$linux_brewfile"
+    run_command "brew bundle --file=$linux_brewfile"
+    if [ $? -ne 0 ] && [ "$DRY_RUN" = false ]; then
+      print_warning "Some Brewfile entries may have failed (macOS-only packages are expected to skip)."
+    fi
+    rm -f "$linux_brewfile"
+    print_success "Brewfile dependencies installed."
+  else
+    print_warning "Brewfile not found. Skipping brew bundle."
+  fi
+}
+
+# --- Restore ---
+# Restores dotfiles and installs all dependencies for the detected platform.
+restore() {
+  print_header "Starting Restore... (platform: ${OS_TYPE}, pkg manager: ${PKG_MANAGER})"
+
+  # 1. Install system packages
+  install_system_packages
+
+  # 2. macOS-only: Setup default applications with infat
+  if [ "$OS_TYPE" = "macos" ]; then
+    print_header "Setting up default macOS applications..."
+    run_command "source \"${HOME}/.zshrc\""
+    if command -v infat &>/dev/null; then
+      run_command "infat --config ~/.config/infat/config.toml"
+      if [ $? -ne 0 ] && [ "$DRY_RUN" = false ]; then
+        print_error "infat command failed."
+        exit 1
+      fi
+      print_success "Default macOS applications configured."
+    else
+      print_warning "infat not found. Skipping default application setup."
+    fi
+  fi
+
+  # 3. Install Global NPM Packages
   print_header "Installing Global NPM Packages..."
   if [ -f "$NPM_GLOBAL_FILE" ]; then
     if command -v npm &>/dev/null; then
+      # On Linux, set a user-writable npm prefix to avoid EACCES errors
+      if [ "$OS_TYPE" = "linux" ]; then
+        local npm_prefix="${HOME}/.npm-global"
+        if [ "$(npm config get prefix)" != "$npm_prefix" ]; then
+          run_command "mkdir -p $npm_prefix"
+          run_command "npm config set prefix $npm_prefix"
+          export PATH="$npm_prefix/bin:$PATH"
+          print_success "npm global prefix set to $npm_prefix."
+        fi
+      fi
       if [ "$DRY_RUN" = false ]; then
         while read -r package; do
           if [ -n "$package" ]; then
@@ -180,7 +503,7 @@ restore() {
     print_warning "$NPM_GLOBAL_FILE not found. Skipping."
   fi
 
-  # 5. Install Pipx Packages
+  # 4. Install Pipx Packages
   print_header "Installing Pipx Packages..."
   if [ -f "$PIPX_PACKAGES_FILE" ]; then
     if command -v pipx &>/dev/null; then
@@ -201,7 +524,7 @@ restore() {
     print_warning "$PIPX_PACKAGES_FILE not found. Skipping."
   fi
 
-  # 6. Install Bun Packages
+  # 5. Install Bun Packages
   print_header "Installing Bun Packages..."
   if [ -f "$BUN_PACKAGES_FILE" ]; then
     if command -v bun &>/dev/null; then
@@ -224,24 +547,27 @@ restore() {
 
   run_stow
 
-  print_header "Applying cutler configuration..."
-  if command -v cutler &>/dev/null; then
-    run_command "cutler apply"
-    if [ $? -ne 0 ] && [ "$DRY_RUN" = false ]; then
-      print_error "cutler apply command failed."
-      exit 1
+  # 6. macOS-only: Apply cutler configuration
+  if [ "$OS_TYPE" = "macos" ]; then
+    print_header "Applying cutler configuration..."
+    if command -v cutler &>/dev/null; then
+      run_command "cutler apply"
+      if [ $? -ne 0 ] && [ "$DRY_RUN" = false ]; then
+        print_error "cutler apply command failed."
+        exit 1
+      fi
+      print_success "cutler configuration applied."
+    else
+      print_warning "cutler not found. Skipping."
     fi
-    print_success "cutler configuration applied."
-  else
-    print_warning "cutler not found. Skipping."
-  fi
 
-  print_header "Installing custom scripts..."
-  if [ -d "scripts/Nvim.app" ]; then
-    run_command "cp -R scripts/Nvim.app /Applications/"
-    print_success "Nvim.app copied to /Applications."
-  else
-    print_warning "scripts/Nvim.app not found. Skipping."
+    print_header "Installing custom scripts..."
+    if [ -d "scripts/Nvim.app" ]; then
+      run_command "cp -R scripts/Nvim.app /Applications/"
+      print_success "Nvim.app copied to /Applications."
+    else
+      print_warning "scripts/Nvim.app not found. Skipping."
+    fi
   fi
 
   echo -e "
@@ -249,15 +575,20 @@ ${C_GREEN}All done! Your dotfiles are set up.${NC}
 "
 }
 
+# --- Backup ---
+# Backs up the current system state: package lists, npm/pipx/bun globals,
+# and commits changes to git.
 backup() {
-  print_header "Starting Backup..."
-  run_command "brew bundle dump --all --force --describe"
-  if [ $? -ne 0 ] && [ "$DRY_RUN" = false ]; then
-    print_error "Brew bundle dump command failed."
-    exit 1
-  fi
-  print_success "Brewfile updated successfully."
+  print_header "Starting Backup... (platform: ${OS_TYPE}, pkg manager: ${PKG_MANAGER})"
 
+  # Backup system packages
+  if [ "$OS_TYPE" = "macos" ]; then
+    backup_macos_packages
+  elif [ "$OS_TYPE" = "linux" ]; then
+    backup_linux_packages
+  fi
+
+  # Backup Global NPM Packages
   print_header "Backing up Global NPM Packages..."
   if command -v npm &>/dev/null; then
     if [ "$DRY_RUN" = false ]; then
@@ -270,6 +601,7 @@ backup() {
     print_warning "npm not found. Skipping npm backup."
   fi
 
+  # Backup Pipx Packages
   print_header "Backing up Pipx Packages..."
   if command -v pipx &>/dev/null; then
     if [ "$DRY_RUN" = false ]; then
@@ -282,6 +614,7 @@ backup() {
     print_warning "pipx not found. Skipping pipx backup."
   fi
 
+  # Backup Bun Packages
   print_header "Backing up Bun Packages..."
   if command -v bun &>/dev/null; then
     if [ "$DRY_RUN" = false ]; then
@@ -311,6 +644,45 @@ backup() {
   fi
 }
 
+# --- macOS Backup ---
+# Dumps the current Homebrew state into a Brewfile.
+backup_macos_packages() {
+  print_header "Backing up Homebrew packages..."
+  run_command "brew bundle dump --all --force --describe --file=.config/Brewfile"
+  if [ $? -ne 0 ] && [ "$DRY_RUN" = false ]; then
+    print_error "Brew bundle dump command failed."
+    exit 1
+  fi
+  print_success "Brewfile updated successfully."
+}
+
+# --- Linux Backup ---
+# Exports the list of explicitly installed packages for the detected distro.
+backup_linux_packages() {
+  print_header "Backing up system packages ($PKG_MANAGER)..."
+  if [ "$DRY_RUN" = false ]; then
+    case "$PKG_MANAGER" in
+    apt)
+      apt-mark showmanual | sort >"$PKG_LIST_FILE"
+      ;;
+    dnf)
+      dnf repoquery --userinstalled --qf '%{name}' | sort >"$PKG_LIST_FILE"
+      ;;
+    pacman)
+      pacman -Qqe | sort >"$PKG_LIST_FILE"
+      ;;
+    zypper)
+      zypper se --installed-only | awk -F'|' '/^i/ {gsub(/^ +| +$/, "", $2); print $2}' | sort >"$PKG_LIST_FILE"
+      ;;
+    esac
+    print_success "System packages backed up to $PKG_LIST_FILE."
+  else
+    print_warning "[DRY RUN] Would backup $PKG_MANAGER packages to $PKG_LIST_FILE"
+  fi
+}
+
+# --- Schedule ---
+# Registers an hourly cron job that runs the backup command.
 schedule() {
   print_header "Scheduling Hourly Backups..."
 
@@ -388,11 +760,17 @@ if [ -z "$COMMAND" ]; then
   exit 1
 fi
 
+# Detect platform before running any command
+detect_platform
+detect_package_manager
+
 if [ "$DRY_RUN" = true ]; then
   print_warning "Running in dry-run mode. No commands will be executed."
 fi
 
 print_logo
+print_success "Detected platform: ${OS_TYPE} (${PKG_MANAGER})$([ "$IS_WSL" = true ] && echo ' [WSL]')"
+echo
 
 case $COMMAND in
 restore)

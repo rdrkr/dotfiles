@@ -10,7 +10,6 @@ tap "machlit/tap"
 tap "mediosz/tap"
 tap "mocki-toki/formulae"
 tap "nikitabobko/tap"
-tap "oven-sh/bun"
 tap "rdrkr/tap"
 tap "steipete/tap"
 tap "touch-tap/tap"
@@ -231,8 +230,6 @@ brew "gentleman-programming/tap/gentleman-dots"
 brew "koekeishiya/formulae/skhd"
 # Powerful, declarative settings management for your Mac, with speed.
 brew "machlit/tap/cutler"
-# Incredibly fast JavaScript runtime, bundler, transpiler and package manager - all in one.
-brew "oven-sh/bun/bun"
 # Grep the GIF. Stick the landing
 brew "steipete/tap/gifgrep"
 # Fast CLI for Apple Reminders
@@ -293,8 +290,6 @@ cask "font-symbols-only-nerd-font"
 cask "ghostty@tip"
 # Free and open-source image editor
 cask "gimp"
-# CLI for GitKraken
-cask "gitkraken-cli"
 # Tiling window manager with tree layouts
 cask "glide"
 # Web browser

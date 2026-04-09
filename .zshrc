@@ -1,9 +1,23 @@
 # initialization
 export XDG_CONFIG_HOME="${HOME}/.config"
 
-if [[ -f "/opt/homebrew/bin/brew" ]] then
-  export FPATH="$(brew --prefix)/share/zsh-completions:${FPATH}"
+# platform detection
+case "$(uname -s)" in
+  Darwin) _OS="macos" ;;
+  Linux)  _OS="linux" ;;
+  *)      _OS="unknown" ;;
+esac
+
+# homebrew (macOS Apple Silicon, macOS Intel, or Linuxbrew)
+if [[ -f "/opt/homebrew/bin/brew" ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -f "/usr/local/bin/brew" ]]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+elif [[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
+if command -v brew &>/dev/null; then
+  export FPATH="$(brew --prefix)/share/zsh-completions:${FPATH}"
 fi
 
 if [[ -f "${HOME}/.env" ]] then
@@ -153,8 +167,10 @@ bindkey '^[^?'    backward-kill-word  # delete previous word
 #bindkey '^S'     history-incremental-search-forward
 
 # aliases
-l() { nu -c "ls -a $@" }
-which() { nu -c "which $@" }
+if command -v nu &>/dev/null; then
+  l() { nu -c "ls -a $@" }
+  which() { nu -c "which $@" }
+fi
 
 alias ls='ls --color=always'
 alias vim='nvim'
@@ -172,12 +188,11 @@ alias cc1="ccs --switch-to 1 && cc"
 alias cc2="ccs --switch-to 2 && cc"
 
 # shell integrations
-eval "$(fzf --zsh)"
-eval "$(zoxide init zsh)"
-eval "$(~/scripts/notify.sh --completions zsh)"
+command -v fzf      &>/dev/null && eval "$(fzf --zsh)"
+command -v zoxide   &>/dev/null && eval "$(zoxide init zsh)"
+[[ -x ~/scripts/notify.sh ]]   && eval "$(~/scripts/notify.sh --completions zsh)"
 if output="$(mole completion zsh 2>/dev/null)"; then eval "$output"; fi
-
-source <(carapace _carapace)
+command -v carapace &>/dev/null && source <(carapace _carapace)
 
 # paths
 path_dirs=()
@@ -197,6 +212,7 @@ fi
 path_dirs+=(
   "$HOME/.local/bin"
   "$HOME/local/bin"
+  "$HOME/.npm-global/bin"
   "$HOME/.antigravity/antigravity/bin"
   "$HOME/.bun/bin"
 )
@@ -264,7 +280,11 @@ if [[ ("${TERM_PROGRAM}" == "ghostty" || -n "${SSH_CONNECTION}") && -z "$TMUX" &
 
         # if there are more detached sessions, open another terminal window to handle them
         if [[ ${#_detached_sessions[@]} -gt 1 ]]; then
-          nohup open -n -a Ghostty >/dev/null 2>&1 &
+          if [[ "$_OS" == "macos" ]]; then
+            nohup open -n -a Ghostty >/dev/null 2>&1 &
+          elif command -v ghostty &>/dev/null; then
+            nohup ghostty >/dev/null 2>&1 &
+          fi
         fi
 
         tmux attach-session -t "$_target_session"

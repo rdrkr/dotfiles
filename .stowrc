@@ -1,3 +1,4 @@
 --ignore=.stowrc
 --ignore=install.sh
+--ignore=install.ps1
 --ignore=DS_Store
