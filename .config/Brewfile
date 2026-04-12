@@ -5,11 +5,11 @@ tap "blacktop/tap"
 tap "felixkratz/formulae"
 tap "gentleman-programming/tap"
 tap "hamed-elfayome/claude-usage"
-tap "koekeishiya/formulae"
 tap "machlit/tap"
 tap "mediosz/tap"
 tap "mocki-toki/formulae"
 tap "nikitabobko/tap"
+tap "oven-sh/bun"
 tap "rdrkr/tap"
 tap "steipete/tap"
 tap "touch-tap/tap"
@@ -226,10 +226,10 @@ brew "acsandmann/tap/rift"
 brew "felixkratz/formulae/borders", args: ["HEAD"]
 # Interactive TUI installer for Gentleman.Dots development environment
 brew "gentleman-programming/tap/gentleman-dots"
-# Simple hotkey-daemon for macOS.
-brew "koekeishiya/formulae/skhd"
 # Powerful, declarative settings management for your Mac, with speed.
 brew "machlit/tap/cutler"
+# Incredibly fast JavaScript runtime, bundler, transpiler and package manager - all in one.
+brew "oven-sh/bun/bun"
 # Grep the GIF. Stick the landing
 brew "steipete/tap/gifgrep"
 # Fast CLI for Apple Reminders

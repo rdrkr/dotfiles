@@ -251,6 +251,7 @@ detect_package_manager() {
 # Uses --adopt to handle pre-existing files: stow moves them into the repo,
 # then git checkout restores the repo's canonical versions.
 run_stow() {
+  local mode="${1:-restore}"
   print_header "Running stow..."
   if command -v stow &>/dev/null; then
     run_command "stow --adopt ."
@@ -258,8 +259,9 @@ run_stow() {
       print_error "Stow command failed."
       exit 1
     fi
-    # Restore repo files that --adopt may have overwritten with local copies
-    if [ "$DRY_RUN" = false ]; then
+    # During restore, discard adopted files so symlinks point to repo versions.
+    # During backup, keep adopted files — they represent the current state we want to commit.
+    if [ "$mode" = "restore" ] && [ "$DRY_RUN" = false ]; then
       run_command "git -C \"$SCRIPT_DIR\" checkout ."
     fi
     print_success "Stow command completed successfully."
@@ -627,7 +629,7 @@ backup() {
     print_warning "bun not found. Skipping bun backup."
   fi
 
-  run_stow
+  run_stow "backup"
 
   if [ "$DRY_RUN" = false ]; then
     if [ -n "$(git status --porcelain)" ]; then
