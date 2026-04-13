@@ -78,7 +78,6 @@ export FZF_DEFAULT_OPTS='
   --color=info:#fabd2f,prompt:#fabd2f,pointer:#fe8019
   --color=marker:#b8bb26,spinner:#8ec07c,header:#83a598
   --layout=reverse-list
-  --popup=bottom
 '
 
 # zsh-vi-mode
@@ -168,7 +167,8 @@ zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
 zstyle ':fzf-tab:*' query-string prefix first
 zstyle ':fzf-tab:*' use-fzf-default-opts yes
 zstyle ':fzf-tab:*' continuous-trigger '/'
-#zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
+zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
+zstyle ':fzf-tab:*' popup-smart-tab yes
 zstyle ':fzf-tab:*' popup-min-size 40 20
 #zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 
