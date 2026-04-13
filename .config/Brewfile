@@ -206,6 +206,8 @@ brew "trufflehog"
 brew "typescript-language-server"
 # Extremely fast Python package installer and resolver, written in Rust
 brew "uv"
+# Generator for LS_COLORS with support for multiple color themes
+brew "vivid"
 # Internet file retriever
 brew "wget"
 # Little beautifier tool for xcodebuild
