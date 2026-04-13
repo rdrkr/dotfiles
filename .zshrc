@@ -70,6 +70,17 @@ if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
   eval "$(starship init zsh)"
 fi
 
+# fzf
+export FZF_DEFAULT_OPTS='
+  --color=bg:#282828,bg+:#3c3836
+  --color=fg:#ebdbb2,fg+:#fbf1c7
+  --color=hl:#83a598,hl+:#8ec07c
+  --color=info:#fabd2f,prompt:#fabd2f,pointer:#fe8019
+  --color=marker:#b8bb26,spinner:#8ec07c,header:#83a598
+  --layout=reverse-list
+  --popup=bottom
+'
+
 # zsh-vi-mode
 ZVM_SYSTEM_CLIPBOARD_ENABLED=true
 
@@ -143,6 +154,10 @@ setopt hist_save_no_dups
 setopt hist_ignore_dups
 setopt hist_find_no_dups
 
+if command -v vivid &>/dev/null; then
+  export LS_COLORS="$(vivid generate ansi)"
+fi
+
 # completion styling
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
@@ -151,8 +166,9 @@ zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
 zstyle ':completion:*' menu no
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
 zstyle ':fzf-tab:*' query-string prefix first
+zstyle ':fzf-tab:*' use-fzf-default-opts yes
 zstyle ':fzf-tab:*' continuous-trigger '/'
-zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
+#zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
 zstyle ':fzf-tab:*' popup-min-size 40 20
 #zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 
