@@ -215,11 +215,12 @@ path_dirs=()
 
 if [[ -f "/opt/homebrew/bin/brew" ]] then
   path_dirs+=(
-    "/opt/homebrew/opt/python@3.13/bin"
-    "/opt/homebrew/opt/openjdk@21/bin"
-    "/opt/homebrew/opt/node@22/bin"
-    "/opt/homebrew/opt/libpq/bin"
+    "/opt/homebrew/opt/coreutils/libexec/gnubin"
     "/opt/homebrew/opt/ffmpeg-full/bin"
+    "/opt/homebrew/opt/libpq/bin"
+    "/opt/homebrew/opt/node@22/bin"
+    "/opt/homebrew/opt/openjdk@21/bin"
+    "/opt/homebrew/opt/python@3.13/bin"
   )
 
   export DYLD_LIBRARY_PATH="/opt/homebrew/lib:/opt/homebrew/lib/pam:$DYLD_LIBRARY_PATH"
