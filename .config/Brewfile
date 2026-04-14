@@ -190,6 +190,8 @@ brew "shallow-backup"
 brew "shellcheck"
 # Autoformat shell script source code
 brew "shfmt"
+# Add a public key to a remote machine's authorized_keys file
+brew "ssh-copy-id"
 # Cross-shell prompt for astronauts
 brew "starship"
 # Organize software neatly under a single directory tree (e.g. /usr/local)
