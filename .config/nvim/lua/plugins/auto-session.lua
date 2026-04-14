@@ -8,14 +8,13 @@ return {
     ---@module "auto-session"
     ---@type AutoSession.Config
     opts = {
+        bypass_save_filetypes = { "neo-tree" },
         suppressed_dirs = {
             "~/",
             "~/Projects",
             "~/Downloads",
             "/",
         },
-        bypass_session_save_file_types = { "neo-tree" },
         -- log_level = 'debug',
     },
 }
-
