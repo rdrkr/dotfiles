@@ -14,6 +14,9 @@ exec-on-workspace-change = [
   # '/bin/bash',
   # '-c',
   # 'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE',
+  '/usr/bin/osascript',
+  '-e',
+  'tell application "System Events" to if (get name of every process) contains "AeroSpaceBar" then tell application "AeroSpaceBar" to «event ascrpsbr» "updateOnFocusChanged"',
 ]
 
 # Start AeroSpace at login
