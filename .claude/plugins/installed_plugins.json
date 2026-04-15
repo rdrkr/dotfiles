@@ -134,10 +134,10 @@
     "telegram@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/telegram/0.0.5",
-        "version": "0.0.5",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/telegram/0.0.6",
+        "version": "0.0.6",
         "installedAt": "2026-03-20T08:49:30.757Z",
-        "lastUpdated": "2026-04-12T07:16:36.964Z",
+        "lastUpdated": "2026-04-15T06:48:35.487Z",
         "gitCommitSha": "b664e152af5742dd11b6a6e5d7a65848a8c5a261"
       }
     ]
