@@ -549,13 +549,19 @@ run_alerter_worker() {
   local alerter_bin="${_NOTIFY_ALERTER_BIN:-$(command -v alerter 2>/dev/null || echo "")}"
   [ -z "$alerter_bin" ] || [ ! -x "$alerter_bin" ] && exit 1
 
+  # Use provided group or generate a unique one if in tmux (for auto-dismissal)
+  local group="${_NOTIFY_GROUP:-}"
+  if [ -z "$group" ] && [ -n "${_NOTIFY_TMUX_PANE:-}" ]; then
+    group="notify-pane-${_NOTIFY_TMUX_PANE//%/_}-$$"
+  fi
+
   # Rebuild alerter args from individual env vars
   local -a args=(--title "${_NOTIFY_TITLE:-}" --message "${_NOTIFY_MESSAGE:-}")
   [ -n "${_NOTIFY_SUBTITLE:-}" ] && args+=(--subtitle "$_NOTIFY_SUBTITLE")
   [ -n "${_NOTIFY_SOUND:-}" ] && args+=(--sound "$_NOTIFY_SOUND")
   [ -n "${_NOTIFY_APP_ICON:-}" ] && args+=(--app-icon "$_NOTIFY_APP_ICON")
   [ -n "${_NOTIFY_SENDER:-}" ] && args+=(--sender "$_NOTIFY_SENDER")
-  [ -n "${_NOTIFY_GROUP:-}" ] && args+=(--group "$_NOTIFY_GROUP")
+  [ -n "$group" ] && args+=(--group "$group")
   [ -n "${_NOTIFY_TIMEOUT:-}" ] && [ "$_NOTIFY_TIMEOUT" != "0" ] && args+=(--timeout "$_NOTIFY_TIMEOUT")
   [ -n "${_NOTIFY_ACTIONS:-}" ] && args+=(--actions "$_NOTIFY_ACTIONS")
   [ -n "${_NOTIFY_DROPDOWN_LABEL:-}" ] && args+=(--dropdown-label "$_NOTIFY_DROPDOWN_LABEL")
@@ -566,9 +572,37 @@ run_alerter_worker() {
   [ "${_NOTIFY_IGNORE_DND:-}" = "1" ] && args+=(--ignore-dnd)
   [ -n "${_NOTIFY_CLICK_CMD:-}" ] && args+=(--actions "Open")
 
+  # Start a monitor process to dismiss the notification if the user manually focuses the pane
+  local monitor_pid=""
+  if [ -n "${_NOTIFY_TMUX_PANE:-}" ] && [ -n "$group" ] && [ "${_NOTIFY_SKIP_TMUX_CHECK:-0}" != "1" ]; then
+    (
+      export TMUX="${_NOTIFY_TMUX:-}"
+      export TMUX_PANE="${_NOTIFY_TMUX_PANE:-}"
+      export ARG_SKIP_TMUX_CHECK="${_NOTIFY_SKIP_TMUX_CHECK:-}"
+
+      # Wait a moment before polling to let the notification appear
+      sleep 1
+
+      # Poll until the parent (run_alerter_worker) dies or we suppress
+      while kill -0 $$ 2>/dev/null; do
+        if should_suppress_notification; then
+          "$alerter_bin" --remove "$group" 2>/dev/null || true
+          break
+        fi
+        sleep 1
+      done
+    ) &
+    monitor_pid=$!
+  fi
+
   # Run alerter (blocks until user dismisses/clicks)
   local result
   result=$("$alerter_bin" "${args[@]}" 2>/dev/null) || true
+
+  # Clean up monitor process
+  if [ -n "$monitor_pid" ]; then
+    kill "$monitor_pid" 2>/dev/null || true
+  fi
 
   # If user clicked "Open" action, execute the click-to-focus command
   if [ -n "${_NOTIFY_CLICK_CMD:-}" ]; then
@@ -611,6 +645,9 @@ send_notification_alerter() {
       _NOTIFY_JSON="$ARG_JSON" \
       _NOTIFY_IGNORE_DND="$ARG_IGNORE_DND" \
       _NOTIFY_CLICK_CMD="${CLICK_CMD:-}" \
+      _NOTIFY_TMUX="${TMUX:-}" \
+      _NOTIFY_TMUX_PANE="${TMUX_PANE:-}" \
+      _NOTIFY_SKIP_TMUX_CHECK="${ARG_SKIP_TMUX_CHECK:-}" \
       nohup "$0" __worker >/dev/null 2>&1 </dev/null &
   else
     send_notification_osascript
