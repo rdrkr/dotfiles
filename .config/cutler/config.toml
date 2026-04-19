@@ -31,7 +31,7 @@ TrackpadThreeFingerDrag = false
 
 [set.dock]
 autohide = true
-autohide-delay = 0
+autohide-delay = 0.0
 autohide-time-modifier = 0.5
 expose-group-apps = true
 magnification = false
@@ -62,7 +62,7 @@ NSAutomaticPeriodSubstitutionEnabled = false
 NSAutomaticSpellingCorrectionEnabled = true
 NSDocumentSaveNewDocumentsToCloud = true
 "com.apple.keyboard.fnState" = true
-"com.apple.mouse.scaling" = 3
+"com.apple.mouse.scaling" = 3.0
 
 # cutler can also help you run shell commands every now and then.
 # Store them inside their own [commands] table instance and run them by name using the command:
