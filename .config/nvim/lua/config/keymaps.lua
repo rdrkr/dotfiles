@@ -17,3 +17,8 @@ vim.keymap.set({ "n", "i" }, "<M-f>", function()
         return "w"
     end
 end, { expr = true, desc = "Jump word forward" })
+
+-- Close current buffer with Alt+w
+vim.keymap.set({ "n", "i", "v" }, "<M-w>", function()
+    Snacks.bufdelete()
+end, { desc = "Close Buffer" })
