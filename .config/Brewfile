@@ -1,9 +1,9 @@
-tap "acsandmann/tap"
 tap "alexstrnik/browserino"
 tap "barutsrb/tap"
 tap "blacktop/tap"
 tap "felixkratz/formulae"
 tap "gentleman-programming/tap"
+tap "glzr-io/tap"
 tap "hamed-elfayome/claude-usage"
 tap "machlit/tap"
 tap "mediosz/tap"
@@ -234,8 +234,6 @@ brew "yamlfmt"
 brew "yazi"
 # Shell extension to navigate your filesystem faster
 brew "zoxide"
-# Tiling window manager for macOS
-brew "acsandmann/tap/rift"
 # A window border system for macOS
 brew "felixkratz/formulae/borders", args: ["HEAD"]
 # Interactive TUI installer for Gentleman.Dots development environment
@@ -302,6 +300,8 @@ cask "font-symbols-only-nerd-font"
 cask "ghostty@tip"
 # Free and open-source image editor
 cask "gimp"
+# A tiling window manager for macOS and Windows
+cask "glzr-io/tap/glazewm"
 # Tiling window manager with tree layouts
 cask "glide"
 # Web browser
