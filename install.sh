@@ -330,10 +330,27 @@ install_linux_packages() {
 
   print_header "Installing system packages ($PKG_MANAGER)..."
   if [ -f "$PKG_LIST_FILE" ]; then
+    # Build the exclude set: apt-specific exclusions for WSL (GUI/boot/kernel
+    # packages that don't belong in a Windows-hosted Linux distro).
+    local -A excluded=()
+    if [ "$PKG_MANAGER" = "apt" ] && [ "$IS_WSL" = true ]; then
+      local exclude_file="${SCRIPT_DIR}/.config/apt-exclude-windows.txt"
+      if [ -f "$exclude_file" ]; then
+        while IFS= read -r line; do
+          [ -z "$line" ] && continue
+          [ "${line:0:1}" = "#" ] && continue
+          excluded["$line"]=1
+        done <"$exclude_file"
+      fi
+    fi
+
     if [ "$DRY_RUN" = false ]; then
       local packages=""
       while IFS= read -r package; do
-        [ -n "$package" ] && [ "${package:0:1}" != "#" ] && packages="$packages $package"
+        [ -z "$package" ] && continue
+        [ "${package:0:1}" = "#" ] && continue
+        [ -n "${excluded[$package]:-}" ] && continue
+        packages="$packages $package"
       done <"$PKG_LIST_FILE"
       if [ -n "$packages" ]; then
         run_command "$PKG_INSTALL $packages"
@@ -379,24 +396,32 @@ install_zsh() {
     print_success "zsh installed."
   fi
 
-  # Set zsh as the default shell if it isn't already
-  local zsh_path
+  if [ "$DRY_RUN" = true ]; then
+    print_warning "[DRY RUN] Would ensure zsh is the default login shell."
+    return 0
+  fi
+
+  # Use the real login shell from /etc/passwd, not $SHELL (which just reflects
+  # the shell that invoked this script).
+  local zsh_path login_shell
   zsh_path="$(command -v zsh)"
-  if [ "$DRY_RUN" = false ] && [ "$(basename "$SHELL")" != "zsh" ]; then
-    # Ensure zsh is listed in /etc/shells
-    if ! grep -qF "$zsh_path" /etc/shells 2>/dev/null; then
-      print_warning "Adding $zsh_path to /etc/shells..."
-      run_command "echo '$zsh_path' | sudo tee -a /etc/shells >/dev/null"
-    fi
-    print_warning "Changing default shell to zsh..."
-    run_command "sudo chsh -s '$zsh_path' '$(whoami)'"
-    if [ $? -eq 0 ]; then
-      print_success "Default shell changed to zsh. Log out and back in for it to take effect."
-    else
-      print_error "Failed to change default shell. You can run: chsh -s $zsh_path"
-    fi
-  else
+  login_shell="$(getent passwd "$USER" 2>/dev/null | cut -d: -f7)"
+  if [ "$login_shell" = "$zsh_path" ]; then
     print_success "zsh is already the default shell."
+    return 0
+  fi
+
+  # Ensure zsh is listed in /etc/shells so chsh accepts it.
+  if ! grep -qxF "$zsh_path" /etc/shells 2>/dev/null; then
+    print_warning "Adding $zsh_path to /etc/shells..."
+    run_command "echo '$zsh_path' | sudo tee -a /etc/shells >/dev/null"
+  fi
+  print_warning "Changing default shell to zsh..."
+  run_command "sudo chsh -s '$zsh_path' '$USER'"
+  if [ $? -eq 0 ]; then
+    print_success "Default shell changed to zsh. Log out and back in for it to take effect."
+  else
+    print_error "Failed to change default shell. You can run: chsh -s $zsh_path"
   fi
 }
 
@@ -435,13 +460,34 @@ install_linuxbrew() {
 
   print_header "Installing from Brewfile (Linuxbrew)..."
   if [ -f ".config/Brewfile" ]; then
-    # Filter out packages that conflict on Linux.
+    # Filter out packages that don't apply on Linux (always) and, when running
+    # inside WSL on Windows, additional packages provided by Docker Desktop.
+    # Each exclude file contains one bare package name per line. We strip
+    # matching `"<name>"` occurrences via fixed-string grep.
     local linux_brewfile
     linux_brewfile=$(mktemp)
-    grep -vE '"bash-completion"' ".config/Brewfile" > "$linux_brewfile"
+    cp ".config/Brewfile" "$linux_brewfile"
+
+    local exclude_files=("${SCRIPT_DIR}/.config/brew-exclude-linux.txt")
+    if [ "$IS_WSL" = true ]; then
+      exclude_files+=("${SCRIPT_DIR}/.config/brew-exclude-windows.txt")
+    fi
+
+    for ef in "${exclude_files[@]}"; do
+      [ -f "$ef" ] || continue
+      while IFS= read -r pkg; do
+        [ -z "$pkg" ] && continue
+        [ "${pkg:0:1}" = "#" ] && continue
+        local filtered
+        filtered=$(mktemp)
+        grep -vF "\"$pkg\"" "$linux_brewfile" >"$filtered" || true
+        mv "$filtered" "$linux_brewfile"
+      done <"$ef"
+    done
+
     run_command "brew bundle --file=$linux_brewfile"
     if [ $? -ne 0 ] && [ "$DRY_RUN" = false ]; then
-      print_warning "Some Brewfile entries may have failed (macOS-only packages are expected to skip)."
+      print_warning "Some Brewfile entries may have failed (platform-specific packages are expected to skip)."
     fi
     rm -f "$linux_brewfile"
     print_success "Brewfile dependencies installed."

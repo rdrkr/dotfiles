@@ -1,0 +1,11 @@
+# Copyright (c) 2026 by Ronen Druker.
+
+config:
+  # MD013
+  line-length:
+    line_length: 120
+    tables: false
+  no-emphasis-as-heading: false
+  no-inline-html: false
+
+fix: true

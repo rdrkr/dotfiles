@@ -4,19 +4,20 @@ My personal dotfiles, managed with `stow` (macOS/Linux) and PowerShell symlinks 
 
 ## 🖥️ Supported Platforms
 
-| Platform | Script | Package Manager |
-|----------|--------|-----------------|
-| macOS | `install.sh` | Homebrew |
-| Ubuntu / Debian | `install.sh` | apt + Linuxbrew |
-| Fedora / RHEL | `install.sh` | dnf + Linuxbrew |
-| Arch Linux | `install.sh` | pacman + Linuxbrew |
-| openSUSE | `install.sh` | zypper + Linuxbrew |
-| WSL | `install.sh` | (distro PM + Linuxbrew) |
-| Windows (native) | `install.ps1` | winget |
+| Platform         | Script        | Package Manager         |
+| ---------------- | ------------- | ----------------------- |
+| macOS            | `install.sh`  | Homebrew                |
+| Ubuntu / Debian  | `install.sh`  | apt + Linuxbrew         |
+| Fedora / RHEL    | `install.sh`  | dnf + Linuxbrew         |
+| Arch Linux       | `install.sh`  | pacman + Linuxbrew      |
+| openSUSE         | `install.sh`  | zypper + Linuxbrew      |
+| WSL              | `install.sh`  | (distro PM + Linuxbrew) |
+| Windows (native) | `install.ps1` | winget                  |
 
 ## 🚀 Installation
 
-One command to set up everything. The script automatically installs prerequisites (Xcode CLI tools, Homebrew, git, etc.), clones the repo, and runs a full restore.
+One command to set up everything. The script automatically installs prerequisites (Xcode CLI tools,
+Homebrew, git, etc.), clones the repo, and runs a full restore.
 
 ### macOS / Linux / WSL
 
@@ -29,7 +30,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/rdrkr/dotfiles/main/install.
 Run as Administrator in PowerShell:
 
 ```powershell
-irm https://raw.githubusercontent.com/rdrkr/dotfiles/main/install.ps1 | iex
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+irm "https://raw.githubusercontent.com/rdrkr/dotfiles/main/install.ps1?$(Get-Date -UFormat %s)" | iex
 ```
 
 > The scripts detect your platform, install any missing prerequisites, clone the repo to `~/dotfiles`, and run `restore`.
@@ -86,18 +88,18 @@ Preview what would happen without making changes:
 
 ## 📁 Package List Files
 
-| File | Purpose |
-|------|---------|
-| `.config/Brewfile` | Homebrew packages (macOS) |
-| `.config/apt-packages.txt` | apt packages (Debian/Ubuntu) |
-| `.config/dnf-packages.txt` | dnf packages (Fedora/RHEL) |
-| `.config/pacman-packages.txt` | pacman packages (Arch) |
-| `.config/zypper-packages.txt` | zypper packages (openSUSE) |
-| `.config/winget-packages.txt` | winget packages (Windows) |
+| File                              | Purpose                             |
+| --------------------------------- | ----------------------------------- |
+| `.config/Brewfile`                | Homebrew packages (macOS)           |
+| `.config/apt-packages.txt`        | apt packages (Debian/Ubuntu)        |
+| `.config/dnf-packages.txt`        | dnf packages (Fedora/RHEL)          |
+| `.config/pacman-packages.txt`     | pacman packages (Arch)              |
+| `.config/zypper-packages.txt`     | zypper packages (openSUSE)          |
+| `.config/winget-packages.txt`     | winget packages (Windows)           |
 | `.config/npm-global-packages.txt` | Global npm packages (all platforms) |
-| `.config/pipx-packages.txt` | Pipx packages (all platforms) |
-| `.config/bun-packages.txt` | Bun packages (all platforms) |
+| `.config/pipx-packages.txt`       | Pipx packages (all platforms)       |
+| `.config/bun-packages.txt`        | Bun packages (all platforms)        |
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE] file for details.

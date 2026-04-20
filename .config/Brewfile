@@ -160,8 +160,6 @@ brew "poetry"
 brew "poppler"
 # Modern API client that lives in your terminal
 brew "posting"
-# Framework for managing multi-language pre-commit hooks
-brew "pre-commit"
 # Code formatter for JavaScript, CSS, JSON, GraphQL, Markdown, YAML
 brew "prettier"
 # Interpreted, interactive, object-oriented programming language
@@ -346,6 +344,8 @@ cask "microsoft-auto-update"
 cask "microsoft-teams"
 # Open-source software for live streaming and screen recording
 cask "obs"
+# Get up and running with large language models locally
+cask "ollama-app"
 # Finds large, unwanted files and deletes them
 cask "omnidisksweeper"
 # Tiling window manager for macOS with Niri-inspired column-based layout
@@ -356,8 +356,6 @@ cask "pearcleaner"
 cask "plex-media-server"
 # VPN client focusing on security
 cask "protonvpn"
-# IDE for professional Python development
-cask "pycharm"
 # Control your tools with a few keystrokes
 cask "raycast"
 # Rust IDE
@@ -380,8 +378,6 @@ cask "tuist"
 cask "warp"
 # Video communication and virtual meeting platform
 cask "webex"
-# JavaScript IDE
-cask "webstorm"
 # Video communication and virtual meeting platform
 cask "zoom"
 mas "1Password 7", id: 1333542190

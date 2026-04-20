@@ -1,0 +1,44 @@
+# apt packages to exclude when installing inside WSL on Windows.
+# These GUI/desktop/boot/kernel packages from apt-packages.txt don't belong
+# in a Windows-hosted Linux distro.
+# One package name per line. Lines starting with # are comments.
+
+# Boot loader (WSL has no boot process)
+efibootmgr
+grub-efi-arm64
+grub-efi-arm64-signed
+shim-signed
+
+# Kernel (WSL provides its own kernel)
+linux-generic-hwe-24.04
+
+# Disk management (WSL doesn't manage physical disks)
+lvm2
+
+# Desktop environment / GUI
+gnome-shell-extension-manager
+gnome-tweaks
+ubuntu-desktop-minimal
+ubuntu-restricted-addons
+ubuntu-wallpapers
+
+# Input method editors (require a GUI session)
+ibus-table-cangjie3
+ibus-table-cangjie5
+ibus-table-cangjie-big
+libchewing3
+libchewing3-data
+libm17n-0
+libmarisa0
+libopencc1.1
+libopencc-data
+libotf1
+libpinyin15
+libpinyin-data
+m17n-db
+
+# Language packs (large, rarely needed in a dev WSL)
+language-pack-en
+language-pack-en-base
+language-pack-gnome-en
+language-pack-gnome-en-base

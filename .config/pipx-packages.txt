@@ -3,5 +3,6 @@ datamodel-code-generator
 fastapi
 httpx
 mypy
+pre-commit
 pytest
 sqlit-tui

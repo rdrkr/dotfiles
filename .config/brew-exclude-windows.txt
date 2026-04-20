@@ -1,0 +1,13 @@
+# Homebrew packages to exclude when installing inside WSL on Windows.
+# Applied on top of brew-exclude-linux.txt.
+# One package name per line. Lines starting with # are comments.
+
+# Docker Desktop on Windows exposes docker to WSL; no need to install
+# the docker CLI separately via brew inside WSL.
+docker
+docker-buildx
+docker-compose
+lazydocker
+
+# colima isn't used when Docker Desktop is the provider
+colima

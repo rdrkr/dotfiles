@@ -2,3 +2,6 @@
 --ignore=install.sh
 --ignore=install.ps1
 --ignore=DS_Store
+--ignore=.markdownlint-cli2.yaml
+--ignore=.pre-commit-config.yaml
+

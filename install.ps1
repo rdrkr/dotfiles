@@ -34,11 +34,54 @@ param(
 )
 
 # --- Configuration ---
+$ESC = [char]27
+$NC = "$($ESC)[0m"
+$C_LAVENDER = "$($ESC)[38;2;180;190;254m"
+$C_BLUE = "$($ESC)[38;2;137;180;250m"
+$C_PEACH = "$($ESC)[38;2;250;179;135m"
+
+# Enable ANSI colors for Windows PowerShell (5.1)
+if ($PSVersionTable.PSVersion.Major -le 5) {
+    try {
+        $Signature = @'
+[DllImport("kernel32.dll", SetLastError = true)]
+public static extern IntPtr GetStdHandle(int nStdHandle);
+[DllImport("kernel32.dll", SetLastError = true)]
+public static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
+[DllImport("kernel32.dll", SetLastError = true)]
+public static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
+'@
+        $null = Add-Type -MemberDefinition $Signature -Name "Win32" -Namespace "Win32" -ErrorAction SilentlyContinue
+        $handle = [Win32.Win32]::GetStdHandle(-11) # STDOUT
+        $mode = 0
+        if ([Win32.Win32]::GetConsoleMode($handle, [ref]$mode)) {
+            $null = [Win32.Win32]::SetConsoleMode($handle, $mode -bor 4)
+        }
+    } catch { }
+}
+
 $ValidCommands = @("restore", "backup", "schedule", "help")
 if ($Command -and $Command -notin $ValidCommands) {
-    Write-Host "`e[38;2;250;179;135m✗ Invalid command: $Command. Valid commands are: $($ValidCommands -join ', ')`e[0m"
+    Write-Host "${C_PEACH}X Invalid command: $Command. Valid commands are: $($ValidCommands -join ', ')${NC}"
     exit 1
 }
+
+# --- Admin Gate ---
+# Require elevation upfront for any command that changes system state.
+# Developer Mode, wsl --install, and some winget packages all need admin;
+# a single early check produces one clear message instead of per-step
+# warnings mid-run. Skipped for help/dry-run since those don't mutate.
+$needsAdmin = if ($Command) { $Command -in @("restore", "backup", "schedule") } else { $true }
+if ($needsAdmin -and -not $Help -and -not $DryRun) {
+    $principal = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
+    if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+        Write-Host "${C_PEACH}X This script must be run from an Administrator PowerShell.${NC}"
+        Write-Host "${C_YELLOW}! Right-click 'Windows Terminal' (or 'PowerShell') and pick 'Run as Administrator', then re-run:${NC}"
+        Write-Host "    irm `"https://raw.githubusercontent.com/rdrkr/dotfiles/main/install.ps1`" | iex"
+        return
+    }
+}
+
 $DotfilesDir = Join-Path $env:USERPROFILE "dotfiles"
 $DotfilesRepo = "https://github.com/rdrkr/dotfiles.git"
 
@@ -52,17 +95,41 @@ function Test-IsLocal {
     return (Test-Path (Join-Path $parentDir ".git"))
 }
 
+function Wait-ForExit {
+    <#
+    .SYNOPSIS
+        Pauses so the user can read output before the window closes.
+        Falls back to Read-Host when the host doesn't support RawUI.ReadKey
+        (e.g., ISE, VS Code integrated terminal).
+    #>
+    param([string]$Message = "Press Enter to close...")
+    Write-Host ""
+    Write-Host $Message
+    try {
+        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    }
+    catch {
+        $null = Read-Host
+    }
+}
+
 function Invoke-Bootstrap {
     <#
     .SYNOPSIS
         Installs git via winget, clones the repo, and re-executes locally.
+
+    .NOTES
+        Uses `return` instead of `exit` throughout. When this script is run
+        via `irm ... | iex`, calling `exit` terminates the user's interactive
+        PowerShell session (closing the terminal window). Returning instead
+        just stops the bootstrap scriptblock and leaves the session alive.
     #>
-    Write-Host "`e[38;2;137;180;250m=== Bootstrapping dotfiles ===`e[0m"
+    Write-Host "${C_BLUE}=== Bootstrapping dotfiles ===${NC}"
 
     # Ensure winget is available
     if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-        Write-Host "`e[38;2;250;179;135m✗ winget not found. Please install App Installer from the Microsoft Store.`e[0m"
-        exit 1
+        Write-Host "${C_PEACH}X winget not found. Please install App Installer from the Microsoft Store.${NC}"
+        return
     }
 
     # Install git if missing
@@ -77,54 +144,95 @@ function Invoke-Bootstrap {
     if (Test-Path (Join-Path $DotfilesDir ".git")) {
         Write-Host "Dotfiles repo already exists. Pulling latest changes..."
         git -C $DotfilesDir pull origin main
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "${C_PEACH}X Failed to pull latest changes.${NC}"
+            return
+        }
     }
     else {
         Write-Host "Cloning dotfiles repo..."
         git clone $DotfilesRepo $DotfilesDir
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "${C_PEACH}X Failed to clone dotfiles repo.${NC}"
+            # Attempt to fix partial clone/checkout if it failed due to paths (e.g. symlinks)
+            if (Test-Path $DotfilesDir) {
+                 Write-Host "Attempting to restore checkout..."
+                 git -C $DotfilesDir restore --source=HEAD :/
+            }
+
+            if (-not (Test-Path (Join-Path $DotfilesDir "install.ps1"))) {
+                 Write-Host "${C_PEACH}X Bootstrap failed: Repo cloned but checkout is incomplete.${NC}"
+                 return
+            }
+        }
     }
 
     # Re-execute from the cloned repo
-    Write-Host "Handing off to local install.ps1..."
     $localScript = Join-Path $DotfilesDir "install.ps1"
-    if ($Command) {
-        & $localScript $Command
+    if (-not (Test-Path $localScript)) {
+        Write-Host "${C_PEACH}X Could not find local install.ps1 at $localScript. Bootstrap failed.${NC}"
+        return
+    }
+
+    Write-Host "Handing off to local install.ps1..."
+    $effectiveCommand = if ($Command) { $Command } else { "restore" }
+
+    # Try pwsh first, then powershell.exe
+    $exe = if (Get-Command pwsh -ErrorAction SilentlyContinue) { "pwsh" } else { "powershell.exe" }
+
+    # Use -File to avoid ampersand parser issues. -ExecutionPolicy Bypass ensures it runs.
+    if ($exe -eq "pwsh") {
+        pwsh -NoProfile -ExecutionPolicy Bypass -File "$localScript" $effectiveCommand
     }
     else {
-        & $localScript restore
+        powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$localScript" $effectiveCommand
     }
-    exit $LASTEXITCODE
+
+    $childExit = $LASTEXITCODE
+    if ($childExit -ne 0) {
+        Write-Host "${C_PEACH}X Local execution failed with exit code $childExit.${NC}"
+    }
+    # Intentionally no `exit` here -- returning normally keeps the caller's
+    # interactive session (and its terminal window) open.
 }
 
 if (-not (Test-IsLocal)) {
-    Invoke-Bootstrap
+    try {
+        Invoke-Bootstrap
+    }
+    catch {
+        Write-Host "${C_PEACH}X A bootstrap error occurred: $($_.Exception.Message)${NC}"
+    }
+    # Stop here -- the rest of this file expects to run from a cloned repo
+    # on disk, which is not the case when invoked via `irm | iex`.
+    # `return` at script scope ends the iex scriptblock without closing
+    # the user's PowerShell session.
+    return
 }
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $WingetPackagesFile = Join-Path $ScriptDir ".config\winget-packages.txt"
+$ScoopBucketsFile = Join-Path $ScriptDir ".config\scoop-buckets.txt"
+$ScoopPackagesFile = Join-Path $ScriptDir ".config\scoop-packages.txt"
 $NpmGlobalFile = Join-Path $ScriptDir ".config\npm-global-packages.txt"
 $PipxPackagesFile = Join-Path $ScriptDir ".config\pipx-packages.txt"
 $BunPackagesFile = Join-Path $ScriptDir ".config\bun-packages.txt"
 $DotfilesTarget = $env:USERPROFILE
 
 # --- Colors (ANSI escape sequences) ---
-$NC = "`e[0m"
-$C_LAVENDER = "`e[38;2;180;190;254m"
-$C_BLUE = "`e[38;2;137;180;250m"
-$C_SAPPHIRE = "`e[38;2;116;199;236m"
-$C_SKY = "`e[38;2;137;220;235m"
-$C_TEAL = "`e[38;2;148;226;213m"
-$C_GREEN = "`e[38;2;166;227;161m"
-$C_YELLOW = "`e[38;2;249;226;175m"
-$C_PEACH = "`e[38;2;250;179;135m"
+$C_SAPPHIRE = "$($ESC)[38;2;116;199;236m"
+$C_SKY = "$($ESC)[38;2;137;220;235m"
+$C_TEAL = "$($ESC)[38;2;148;226;213m"
+$C_GREEN = "$($ESC)[38;2;166;227;161m"
+$C_YELLOW = "$($ESC)[38;2;249;226;175m"
 
 # --- Logo ---
 function Print-Logo {
-    Write-Host "${C_LAVENDER}██████╗   ██████╗  ████████╗ ███████╗ ██╗ ██╗      ███████╗ ███████╗${NC}"
-    Write-Host "${C_BLUE}██╔══██╗ ██╔═══██╗ ╚══██╔══╝ ██╔════╝ ██║ ██║      ██╔════╝ ██╔════╝${NC}"
-    Write-Host "${C_SAPPHIRE}██║  ██║ ██║   ██║    ██║    █████╗   ██║ ██║      █████╗   ███████╗${NC}"
-    Write-Host "${C_SKY}██║  ██║ ██║   ██║    ██║    ██╔══╝   ██║ ██║      ██╔════╝ ╚════██║${NC}"
-    Write-Host "${C_TEAL}██████╔╝ ╚██████╔╝    ██║    ██║      ██║ ███████╗ ███████║ ███████║${NC}"
-    Write-Host "${C_GREEN}╚═════╝   ╚═════╝     ╚═╝    ╚═╝      ╚═╝ ╚══════╝ ╚══════╝ ╚══════╝${NC}"
+    Write-Host "${C_LAVENDER} ____        _    __ _ _           ${NC}"
+    Write-Host "${C_BLUE}|  _ \  ___ | |_ / _(_) | ___  ___ ${NC}"
+    Write-Host "${C_SAPPHIRE}| | | |/ _ \| __| |_| | |/ _ \/ __|${NC}"
+    Write-Host "${C_SKY}| |_| | (_) | |_|  _| | |  __/\__ \ ${NC}"
+    Write-Host "${C_TEAL}|____/ \___/ \__|_| |_|_|\___||___/${NC}"
     Write-Host ""
 }
 
@@ -138,22 +246,22 @@ function Print-Header {
 
 function Print-Success {
     param([string]$Message)
-    Write-Host "${C_GREEN}✓ $Message${NC}"
+    Write-Host "${C_GREEN}+ $Message${NC}"
 }
 
 function Print-Warning {
     param([string]$Message)
-    Write-Host "${C_YELLOW}⚠ $Message${NC}"
+    Write-Host "${C_YELLOW}! $Message${NC}"
 }
 
 function Print-Error {
     param([string]$Message)
-    Write-Host "${C_PEACH}✗ $Message${NC}"
+    Write-Host "${C_PEACH}X $Message${NC}"
 }
 
 function Print-Help {
     Print-Logo
-    Write-Host "Usage: .\install.ps1 <command> [options]"
+    Write-Host 'Usage: .\install.ps1 <command> [options]'
     Write-Host ""
     Write-Host "Commands:"
     Write-Host "  restore      Restore dotfiles and install dependencies"
@@ -172,7 +280,7 @@ function Run-Command {
     #>
     param([string]$Cmd)
     if ($DryRun) {
-        Write-Host "${C_YELLOW}[DRY RUN] Would execute: $Cmd${NC}"
+        Write-Host "${C_YELLOW}`[DRY RUN`] Would execute: $Cmd${NC}"
     }
     else {
         Invoke-Expression $Cmd
@@ -180,6 +288,31 @@ function Run-Command {
 }
 
 # --- Symlink Creation (stow alternative) ---
+function Get-StowIgnorePatterns {
+    <#
+    .SYNOPSIS
+        Parses .stowrc at the repo root and returns user-supplied ignore
+        regex patterns.
+
+    .DESCRIPTION
+        Each `--ignore=<regex>` line contributes one pattern. Blank lines and
+        comments (`#`) are skipped. Matches GNU Stow's semantics: each pattern
+        is a regex matched against a path's basename.
+    #>
+    $stowrc = Join-Path $ScriptDir ".stowrc"
+    if (-not (Test-Path $stowrc)) { return @() }
+
+    $patterns = @()
+    foreach ($line in Get-Content $stowrc) {
+        $trimmed = $line.Trim()
+        if (-not $trimmed -or $trimmed.StartsWith('#')) { continue }
+        if ($trimmed -match '^--ignore=(.+)$') {
+            $patterns += $matches[1].Trim()
+        }
+    }
+    return $patterns
+}
+
 function Create-Symlinks {
     <#
     .SYNOPSIS
@@ -188,53 +321,309 @@ function Create-Symlinks {
     #>
     Print-Header "Creating symlinks..."
 
-    # Directories to symlink into $HOME (mirrors stow behavior)
-    $configSource = Join-Path $ScriptDir ".config"
-    $configTarget = Join-Path $DotfilesTarget ".config"
+    # Windows privilege strategy:
+    #   - Directories -> Junction (no admin, no Developer Mode required)
+    #   - Files       -> HardLink (no admin required on NTFS)
+    # SymbolicLink is avoided because it requires admin OR Developer Mode on Windows.
+    #
+    # Layout strategy (mirrors stow on Unix):
+    #   - .config/* is expanded per-child so ~/.config can coexist with non-repo tools
+    #   - All other top-level directories are junctioned whole into $HOME
+    #   - Top-level files are hardlinked into $HOME
+    # Ignore list has two layers, mirroring GNU Stow:
+    #   1. Built-in defaults: VCS metadata + README/LICENSE (stow always
+    #      ignores these regardless of .stowrc).
+    #   2. User patterns from .stowrc (each `--ignore=<regex>` line). Stow
+    #      treats each ignore entry as a regex matched against the basename.
+    $builtinIgnoreRegex = @(
+        '^\.git$', '^\.gitignore$', '^\.gitmodules$',
+        '^RCS$', '^CVS$', '^\.svn$', '^_darcs$', '^\.hg$',
+        '^README.*', '^LICENSE.*', '^COPYING$',
+        '^\.DS_Store$'
+    )
+    $userIgnoreRegex = Get-StowIgnorePatterns
+    $allIgnoreRegex = $builtinIgnoreRegex + $userIgnoreRegex
 
-    if (Test-Path $configSource) {
-        $items = Get-ChildItem -Path $configSource -Directory
-        foreach ($item in $items) {
-            $target = Join-Path $configTarget $item.Name
-            if (Test-Path $target) {
-                Print-Warning "Already exists, skipping: $target"
+    function Test-IsIgnored([string]$name) {
+        foreach ($pat in $allIgnoreRegex) {
+            if ($name -match $pat) { return $true }
+        }
+        return $false
+    }
+
+    # Helper: create a junction at $dest pointing to $src.
+    function New-JunctionLink($dest, $src, $label) {
+        if (Test-Path $dest) {
+            Print-Warning "Already exists, skipping: $dest"
+            $script:skipped++
+            return
+        }
+        if ($DryRun) {
+            Print-Warning "`[DRY RUN`] Would link: $dest -> $src"
+            return
+        }
+        try {
+            New-Item -ItemType Junction -Path $dest -Target $src -ErrorAction Stop | Out-Null
+            Print-Success "Linked: $dest -> $src"
+            $script:linked++
+        }
+        catch {
+            Print-Error "Failed to link ${label}: $($_.Exception.Message)"
+            $script:failed++
+        }
+    }
+
+    # Helper: create a hardlink at $dest pointing to $src.
+    function New-FileLink($dest, $src, $label) {
+        if (Test-Path $dest) {
+            Print-Warning "Already exists, skipping: $dest"
+            $script:skipped++
+            return
+        }
+        if ($DryRun) {
+            Print-Warning "`[DRY RUN`] Would link: $dest -> $src"
+            return
+        }
+        try {
+            New-Item -ItemType HardLink -Path $dest -Target $src -ErrorAction Stop | Out-Null
+            Print-Success "Linked: $dest -> $src"
+            $script:linked++
+        }
+        catch {
+            Print-Error "Failed to link ${label}: $($_.Exception.Message)"
+            $script:failed++
+        }
+    }
+
+    $script:linked = 0
+    $script:skipped = 0
+    $script:failed = 0
+
+    $topLevel = Get-ChildItem -Path $ScriptDir -Force | Where-Object { -not (Test-IsIgnored $_.Name) }
+
+    foreach ($item in $topLevel) {
+        if ($item.Name -eq ".config" -and $item.PSIsContainer) {
+            # Special: iterate children of .config so ~/.config can host links
+            # from this repo alongside directories created by other tools.
+            #   - Subdirectories (e.g. .config/glazewm)  -> Junction
+            #   - Loose files    (e.g. .config/Brewfile, *.txt) -> HardLink
+            $configTarget = Join-Path $DotfilesTarget ".config"
+            if (-not $DryRun -and -not (Test-Path $configTarget)) {
+                New-Item -ItemType Directory -Path $configTarget -Force | Out-Null
             }
-            else {
-                if (-not $DryRun) {
-                    if (-not (Test-Path $configTarget)) {
-                        New-Item -ItemType Directory -Path $configTarget -Force | Out-Null
-                    }
-                    New-Item -ItemType SymbolicLink -Path $target -Target $item.FullName -Force | Out-Null
-                    Print-Success "Linked: $($item.FullName) -> $target"
+            foreach ($child in Get-ChildItem -Path $item.FullName -Force) {
+                if (Test-IsIgnored $child.Name) { continue }
+                $dest = Join-Path $configTarget $child.Name
+                if ($child.PSIsContainer) {
+                    New-JunctionLink $dest $child.FullName $child.Name
                 }
                 else {
-                    Print-Warning "[DRY RUN] Would link: $($item.FullName) -> $target"
+                    New-FileLink $dest $child.FullName $child.Name
                 }
             }
         }
-    }
-
-    # Symlink individual dotfiles from repo root (e.g., .zshrc, .gitconfig)
-    $dotfiles = Get-ChildItem -Path $ScriptDir -File -Filter ".*" | Where-Object {
-        $_.Name -notin @(".git", ".gitignore", ".gitmodules", ".DS_Store")
-    }
-    foreach ($file in $dotfiles) {
-        $target = Join-Path $DotfilesTarget $file.Name
-        if (Test-Path $target) {
-            Print-Warning "Already exists, skipping: $target"
+        elseif ($item.PSIsContainer) {
+            # Other top-level directory: junction whole thing into $HOME
+            New-JunctionLink (Join-Path $DotfilesTarget $item.Name) $item.FullName $item.Name
         }
         else {
-            if (-not $DryRun) {
-                New-Item -ItemType SymbolicLink -Path $target -Target $file.FullName -Force | Out-Null
-                Print-Success "Linked: $($file.FullName) -> $target"
-            }
-            else {
-                Print-Warning "[DRY RUN] Would link: $($file.FullName) -> $target"
-            }
+            # Top-level file: hardlink into $HOME
+            New-FileLink (Join-Path $DotfilesTarget $item.Name) $item.FullName $item.Name
         }
     }
 
-    Print-Success "Symlink creation completed."
+    Print-Success "Symlinks: $($script:linked) linked, $($script:skipped) skipped, $($script:failed) failed."
+    if ($script:failed -gt 0) {
+        throw "Symlink creation had $($script:failed) failure(s)."
+    }
+}
+
+# --- Developer Mode ---
+function Test-IsAdmin {
+    <#
+    .SYNOPSIS
+        Returns $true if the current session is elevated (Administrator).
+    #>
+    $principal = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
+    return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
+function Enable-DeveloperMode {
+    <#
+    .SYNOPSIS
+        Enables Windows Developer Mode by setting the AppModelUnlock flag in
+        HKLM. Developer Mode lets non-admin users create SymbolicLinks and
+        enables sideloading; it's a one-time, machine-scope flip.
+    #>
+    Print-Header "Enabling Windows Developer Mode..."
+    $regPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock"
+    $valueName = "AllowDevelopmentWithoutDevLicense"
+
+    $current = Get-ItemProperty -Path $regPath -Name $valueName -ErrorAction SilentlyContinue
+    if ($current -and $current.$valueName -eq 1) {
+        Print-Success "Developer Mode is already enabled."
+        return
+    }
+
+    if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would set $regPath\$valueName = 1 (enables Developer Mode)."
+        return
+    }
+
+    try {
+        if (-not (Test-Path $regPath)) {
+            New-Item -Path $regPath -Force -ErrorAction Stop | Out-Null
+        }
+        New-ItemProperty -Path $regPath -Name $valueName -PropertyType DWord -Value 1 -Force -ErrorAction Stop | Out-Null
+        Print-Success "Developer Mode enabled."
+    }
+    catch {
+        Print-Error "Failed to enable Developer Mode: $($_.Exception.Message)"
+    }
+}
+
+# --- Windows Theme ---
+function Apply-WindowsTheme {
+    <#
+    .SYNOPSIS
+        Applies the gruvbox .deskthemepack and sets the desktop wallpaper.
+
+    .DESCRIPTION
+        `.deskthemepack` is a self-extracting theme bundle. Launching it with
+        the default handler opens Settings and applies the theme silently on
+        modern Windows. The wallpaper is also set explicitly via the Win32
+        SystemParametersInfo SPI, so the desired background is used even if
+        the theme doesn't bundle it.
+    #>
+    Print-Header "Applying Windows theme..."
+    $themeFile = Join-Path $ScriptDir ".win-themes\gruvbox-win-theme.deskthemepack"
+    $wallpaperFile = Join-Path $ScriptDir ".wallpapers\BFD78173-A38C-4F68-BA51-06ED0CFD1B24_1_105_c.jpeg"
+
+    # 1. Apply the .deskthemepack
+    if (Test-Path $themeFile) {
+        if ($DryRun) {
+            Print-Warning "`[DRY RUN`] Would apply theme: $themeFile"
+        }
+        else {
+            try {
+                Start-Process -FilePath $themeFile -ErrorAction Stop
+                Print-Success "Theme applied: $themeFile"
+                # Theme application is async via Settings; give it a beat so
+                # our SystemParametersInfo call below isn't overwritten.
+                Start-Sleep -Seconds 3
+            }
+            catch {
+                Print-Error "Failed to apply theme: $($_.Exception.Message)"
+            }
+        }
+    }
+    else {
+        Print-Warning "Theme file not found: $themeFile. Skipping theme."
+    }
+
+    # 2. Set the wallpaper directly via Win32 SPI_SETDESKWALLPAPER (20).
+    #    SPIF_UPDATEINIFILE (0x01) | SPIF_SENDCHANGE (0x02) = 3.
+    if (Test-Path $wallpaperFile) {
+        if ($DryRun) {
+            Print-Warning "`[DRY RUN`] Would set wallpaper: $wallpaperFile"
+        }
+        else {
+            try {
+                if (-not ([System.Management.Automation.PSTypeName]'_DotfilesWallpaper').Type) {
+                    Add-Type -TypeDefinition @"
+using System.Runtime.InteropServices;
+public class _DotfilesWallpaper {
+    [DllImport("user32.dll", CharSet=CharSet.Auto)]
+    public static extern int SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);
+}
+"@
+                }
+                [_DotfilesWallpaper]::SystemParametersInfo(20, 0, $wallpaperFile, 3) | Out-Null
+                Print-Success "Wallpaper set: $wallpaperFile"
+            }
+            catch {
+                Print-Error "Failed to set wallpaper: $($_.Exception.Message)"
+            }
+        }
+    }
+    else {
+        Print-Warning "Wallpaper not found: $wallpaperFile. Skipping wallpaper."
+    }
+}
+
+# --- WSL Bridge ---
+function Invoke-WslInstall {
+    <#
+    .SYNOPSIS
+        Runs install.sh <subcommand> inside the Ubuntu WSL distro so Linux-side
+        dotfiles state (apt, Linuxbrew, stow, zsh) stays in sync with Windows.
+
+    .DESCRIPTION
+        Preflights WSL + Ubuntu readiness before attempting. On fresh installs,
+        Ubuntu is registered but cannot run commands until the VM Platform
+        reboot completes — that case is detected and skipped with a warning.
+
+        We invoke install.sh via the public one-liner (curl | bash) rather than
+        a Windows path because install.sh has its own bootstrap that clones
+        into the WSL-side $HOME/dotfiles, where stow and Linuxbrew expect it.
+
+    .PARAMETER Subcommand
+        'restore' or 'backup' — forwarded as-is to install.sh.
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("restore", "backup")]
+        [string]$Subcommand
+    )
+
+    Print-Header "Running install.sh $Subcommand inside WSL (Ubuntu)..."
+
+    if (-not (Get-Command wsl -ErrorAction SilentlyContinue)) {
+        Print-Warning "wsl command not found. Skipping WSL $Subcommand."
+        return
+    }
+
+    # Confirm Ubuntu distro is registered
+    $ubuntuInstalled = $false
+    try {
+        $distros = wsl --list --quiet 2>$null
+        if ($LASTEXITCODE -eq 0 -and ($distros -join "`n") -match '(?im)^\s*Ubuntu') {
+            $ubuntuInstalled = $true
+        }
+    } catch { }
+    if (-not $ubuntuInstalled) {
+        Print-Warning "Ubuntu distro not found in WSL. Skipping WSL $Subcommand."
+        return
+    }
+
+    if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would run inside WSL (Ubuntu): install.sh $Subcommand"
+        return
+    }
+
+    # Preflight: ensure the distro can actually run commands. On the first
+    # install, Ubuntu is registered but exec fails until the VM Platform
+    # reboot is done.
+    wsl -d Ubuntu -- bash -c ":" 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        Print-Warning "Ubuntu is registered but not ready (reboot may be required). Skipping WSL $Subcommand."
+        return
+    }
+
+    $remoteUrl = "https://raw.githubusercontent.com/rdrkr/dotfiles/main/install.sh"
+    $cmd = "curl -fsSL $remoteUrl | bash -s -- $Subcommand"
+    try {
+        wsl -d Ubuntu -- bash -lc $cmd
+        if ($LASTEXITCODE -eq 0) {
+            Print-Success "WSL $Subcommand completed."
+        }
+        else {
+            Print-Warning "WSL $Subcommand exited with code $LASTEXITCODE."
+        }
+    }
+    catch {
+        Print-Error "WSL $Subcommand failed: $($_.Exception.Message)"
+    }
 }
 
 # --- Restore ---
@@ -243,7 +632,10 @@ function Invoke-Restore {
     .SYNOPSIS
         Restores dotfiles and installs all dependencies on Windows.
     #>
-    Print-Header "Starting Restore... (platform: Windows, pkg manager: winget)"
+    Print-Header "Starting Restore... (platform: Windows, pkg managers: winget + scoop)"
+
+    # 0. Enable Developer Mode (best-effort; requires admin)
+    Enable-DeveloperMode
 
     # 1. Check for winget
     Print-Header "Checking for winget..."
@@ -272,7 +664,73 @@ function Invoke-Restore {
         Print-Warning "Create it with one winget package ID per line."
     }
 
-    # 3. Install Global NPM Packages
+    # 3. Install scoop (https://scoop.sh) if missing
+    Print-Header "Checking for scoop..."
+    if (Get-Command scoop -ErrorAction SilentlyContinue) {
+        Print-Success "scoop is available."
+    }
+    else {
+        Print-Warning "scoop not found. Installing from get.scoop.sh..."
+        if (-not $DryRun) {
+            try {
+                Invoke-RestMethod -Uri "https://get.scoop.sh" | Invoke-Expression
+                # Refresh PATH so scoop shims are visible in this session
+                $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+                Print-Success "scoop installed."
+            }
+            catch {
+                Print-Error "Failed to install scoop: $($_.Exception.Message)"
+            }
+        }
+        else {
+            Print-Warning "`[DRY RUN`] Would install scoop via get.scoop.sh"
+        }
+    }
+
+    # 4. Add scoop buckets from scoop-buckets.txt
+    Print-Header "Adding scoop buckets..."
+    if (Test-Path $ScoopBucketsFile) {
+        if (Get-Command scoop -ErrorAction SilentlyContinue) {
+            $buckets = Get-Content $ScoopBucketsFile | Where-Object { $_ -and $_ -notmatch '^\s*#' }
+            foreach ($bucket in $buckets) {
+                $bucket = $bucket.Trim()
+                if ($bucket) {
+                    Run-Command "scoop bucket add $bucket"
+                }
+            }
+            Print-Success "Scoop buckets added."
+        }
+        else {
+            Print-Warning "scoop not found. Skipping bucket setup."
+        }
+    }
+    else {
+        Print-Warning "$ScoopBucketsFile not found. Skipping."
+    }
+
+    # 5. Install scoop packages from scoop-packages.txt
+    Print-Header "Installing scoop packages..."
+    if (Test-Path $ScoopPackagesFile) {
+        if (Get-Command scoop -ErrorAction SilentlyContinue) {
+            $packages = Get-Content $ScoopPackagesFile | Where-Object { $_ -and $_ -notmatch '^\s*#' }
+            foreach ($pkg in $packages) {
+                $pkg = $pkg.Trim()
+                if ($pkg) {
+                    Run-Command "scoop install $pkg"
+                }
+            }
+            Print-Success "Scoop packages installed."
+        }
+        else {
+            Print-Warning "scoop not found. Skipping scoop package installation."
+        }
+    }
+    else {
+        Print-Warning "$ScoopPackagesFile not found. Skipping."
+        Print-Warning "Create it with one scoop package per line (use 'bucket/name' for non-main buckets)."
+    }
+
+    # 6. Install Global NPM Packages
     Print-Header "Installing Global NPM Packages..."
     if (Test-Path $NpmGlobalFile) {
         if (Get-Command npm -ErrorAction SilentlyContinue) {
@@ -290,7 +748,7 @@ function Invoke-Restore {
         Print-Warning "$NpmGlobalFile not found. Skipping."
     }
 
-    # 4. Install Pipx Packages
+    # 7. Install Pipx Packages
     Print-Header "Installing Pipx Packages..."
     if (Test-Path $PipxPackagesFile) {
         if (Get-Command pipx -ErrorAction SilentlyContinue) {
@@ -308,7 +766,7 @@ function Invoke-Restore {
         Print-Warning "$PipxPackagesFile not found. Skipping."
     }
 
-    # 5. Install Bun Packages
+    # 8. Install Bun Packages
     Print-Header "Installing Bun Packages..."
     if (Test-Path $BunPackagesFile) {
         if (Get-Command bun -ErrorAction SilentlyContinue) {
@@ -326,8 +784,42 @@ function Invoke-Restore {
         Print-Warning "$BunPackagesFile not found. Skipping."
     }
 
-    # 6. Create symlinks
+    # 9. Install WSL with the latest Ubuntu.
+    # `wsl --install -d Ubuntu` is idempotent: if WSL and/or Ubuntu are
+    # already present, it no-ops. A reboot may be required on first install
+    # (Windows enables the Virtual Machine Platform + WSL features). The
+    # `Ubuntu` alias always resolves to the latest Ubuntu LTS that Microsoft
+    # ships in the Store. `--no-launch` skips the interactive first-run.
+    Print-Header "Installing WSL (with Ubuntu)..."
+    $ubuntuInstalled = $false
+    try {
+        $distros = wsl --list --quiet 2>$null
+        if ($LASTEXITCODE -eq 0 -and ($distros -join "`n") -match '(?im)^\s*Ubuntu') {
+            $ubuntuInstalled = $true
+        }
+    }
+    catch { }
+
+    if ($ubuntuInstalled) {
+        Print-Success "WSL + Ubuntu already installed."
+    }
+    elseif ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would run: wsl --install -d Ubuntu --no-launch"
+    }
+    else {
+        Run-Command "wsl --install -d Ubuntu --no-launch"
+        Print-Success "WSL + Ubuntu install initiated. A reboot may be required to finish setup."
+    }
+
+    # 10. Create symlinks
     Create-Symlinks
+
+    # 11. Apply Windows theme + wallpaper
+    Apply-WindowsTheme
+
+    # 12. Run install.sh restore inside WSL so Linux-side state (apt, Linuxbrew,
+    # stow, zsh) is set up to match.
+    Invoke-WslInstall -Subcommand 'restore'
 
     Write-Host ""
     Write-Host "${C_GREEN}All done! Your dotfiles are set up.${NC}"
@@ -341,23 +833,81 @@ function Invoke-Backup {
         Backs up the current system state: winget packages, npm/pipx/bun globals,
         and commits changes to git.
     #>
-    Print-Header "Starting Backup... (platform: Windows, pkg manager: winget)"
+    Print-Header "Starting Backup... (platform: Windows, pkg managers: winget + scoop)"
 
-    # Backup winget packages
+    # Backup winget packages.
+    # Use `winget export --source winget` so the file only contains packages
+    # the `winget` source can actually install. Plain `winget list` also shows
+    # MSIX/ARP entries (Microsoft Store, classic installers), which break
+    # `winget install --id` on restore.
     Print-Header "Backing up winget packages..."
     if (Get-Command winget -ErrorAction SilentlyContinue) {
         if (-not $DryRun) {
-            winget list | Select-Object -Skip 2 | ForEach-Object {
-                ($_ -split '\s{2,}')[1]
-            } | Where-Object { $_ } | Sort-Object > $WingetPackagesFile
-            Print-Success "Winget packages backed up to $WingetPackagesFile."
+            $tempJson = [System.IO.Path]::GetTempFileName()
+            try {
+                winget export --output $tempJson --source winget --accept-source-agreements | Out-Null
+                if (Test-Path $tempJson) {
+                    $data = Get-Content $tempJson -Raw -Encoding UTF8 | ConvertFrom-Json
+                    $ids = @()
+                    foreach ($src in $data.Sources) {
+                        foreach ($pkg in $src.Packages) { $ids += $pkg.PackageIdentifier }
+                    }
+                    $ids | Where-Object { $_ } | Sort-Object -Unique |
+                        Out-File -FilePath $WingetPackagesFile -Encoding utf8
+                    Print-Success "Winget packages backed up to $WingetPackagesFile."
+                }
+                else {
+                    Print-Warning "winget export produced no output. Skipping."
+                }
+            }
+            finally {
+                if (Test-Path $tempJson) { Remove-Item $tempJson -Force -ErrorAction SilentlyContinue }
+            }
         }
         else {
-            Print-Warning "[DRY RUN] Would backup winget packages to $WingetPackagesFile"
+            Print-Warning "`[DRY RUN`] Would backup winget packages to $WingetPackagesFile"
         }
     }
     else {
         Print-Warning "winget not found. Skipping."
+    }
+
+    # Backup scoop buckets.
+    Print-Header "Backing up scoop buckets..."
+    if (Get-Command scoop -ErrorAction SilentlyContinue) {
+        if (-not $DryRun) {
+            scoop bucket list | ForEach-Object { $_.Name } |
+                Where-Object { $_ } | Sort-Object -Unique |
+                Out-File -FilePath $ScoopBucketsFile -Encoding utf8
+            Print-Success "Scoop buckets backed up to $ScoopBucketsFile."
+        }
+        else {
+            Print-Warning "`[DRY RUN`] Would backup scoop buckets to $ScoopBucketsFile"
+        }
+    }
+    else {
+        Print-Warning "scoop not found. Skipping scoop bucket backup."
+    }
+
+    # Backup scoop packages.
+    # For packages from non-default buckets, prefix with `bucket/` so restore
+    # can resolve them without relying on bucket resolution order.
+    Print-Header "Backing up scoop packages..."
+    if (Get-Command scoop -ErrorAction SilentlyContinue) {
+        if (-not $DryRun) {
+            scoop list | ForEach-Object {
+                if (-not $_.Source -or $_.Source -eq 'main') { $_.Name }
+                else { "$($_.Source)/$($_.Name)" }
+            } | Where-Object { $_ } | Sort-Object -Unique |
+                Out-File -FilePath $ScoopPackagesFile -Encoding utf8
+            Print-Success "Scoop packages backed up to $ScoopPackagesFile."
+        }
+        else {
+            Print-Warning "`[DRY RUN`] Would backup scoop packages to $ScoopPackagesFile"
+        }
+    }
+    else {
+        Print-Warning "scoop not found. Skipping scoop package backup."
     }
 
     # Backup Global NPM Packages
@@ -371,7 +921,7 @@ function Invoke-Backup {
             Print-Success "Global npm packages backed up to $NpmGlobalFile."
         }
         else {
-            Print-Warning "[DRY RUN] Would backup global npm packages to $NpmGlobalFile"
+            Print-Warning "`[DRY RUN`] Would backup global npm packages to $NpmGlobalFile"
         }
     }
     else {
@@ -386,7 +936,7 @@ function Invoke-Backup {
             Print-Success "Pipx packages backed up to $PipxPackagesFile."
         }
         else {
-            Print-Warning "[DRY RUN] Would backup pipx packages to $PipxPackagesFile"
+            Print-Warning "`[DRY RUN`] Would backup pipx packages to $PipxPackagesFile"
         }
     }
     else {
@@ -403,7 +953,7 @@ function Invoke-Backup {
             Print-Success "Bun packages backed up to $BunPackagesFile."
         }
         else {
-            Print-Warning "[DRY RUN] Would backup bun packages to $BunPackagesFile"
+            Print-Warning "`[DRY RUN`] Would backup bun packages to $BunPackagesFile"
         }
     }
     else {
@@ -411,6 +961,11 @@ function Invoke-Backup {
     }
 
     Create-Symlinks
+
+    # Run install.sh backup inside WSL before committing from Windows.
+    # The WSL-side backup may produce its own commit+push in the cloned Linux
+    # repo; the Windows `git pull --rebase` below picks that up.
+    Invoke-WslInstall -Subcommand 'backup'
 
     if (-not $DryRun) {
         $status = git -C $ScriptDir status --porcelain
@@ -440,8 +995,9 @@ function Invoke-Schedule {
     $scriptPath = Join-Path $ScriptDir "install.ps1"
 
     if ($DryRun) {
-        Print-Warning "[DRY RUN] Would create scheduled task '$taskName' running hourly."
-        Print-Warning "[DRY RUN] Command: pwsh -NoProfile -File `"$scriptPath`" backup"
+        $exe = if (Get-Command pwsh -ErrorAction SilentlyContinue) { "pwsh" } else { "powershell.exe" }
+        Print-Warning "`[DRY RUN`] Would create scheduled task '$taskName' running hourly."
+        Print-Warning "`[DRY RUN`] Command: $exe -NoProfile -ExecutionPolicy Bypass -File `"$scriptPath`" backup"
         return
     }
 
@@ -450,7 +1006,9 @@ function Invoke-Schedule {
         Print-Success "Scheduled task '$taskName' already exists."
     }
     else {
-        $action = New-ScheduledTaskAction -Execute "pwsh" -Argument "-NoProfile -File `"$scriptPath`" backup"
+        $exe = if (Get-Command pwsh -ErrorAction SilentlyContinue) { "pwsh" } else { "powershell.exe" }
+        # Use -File for consistency and to avoid ampersand parser errors in scheduled tasks.
+        $action = New-ScheduledTaskAction -Execute "$exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$scriptPath`" backup"
         $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Hours 1)
         $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
         Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Settings $settings -Description "Hourly dotfiles backup" | Out-Null
@@ -480,12 +1038,24 @@ if ($DryRun) {
     Print-Warning "Running in dry-run mode. No changes will be made."
 }
 
-Print-Logo
-Print-Success "Detected platform: Windows (winget)"
-Write-Host ""
+# Only print logo if not bootstrapping (it will be printed by the local script)
+if (Test-IsLocal) {
+    Print-Logo
+    Print-Success "Detected platform: Windows (winget + scoop)"
+    Write-Host ""
+}
 
-switch ($Command) {
-    "restore" { Invoke-Restore }
-    "backup" { Invoke-Backup }
-    "schedule" { Invoke-Schedule }
+try {
+    switch ($Command) {
+        "restore" { Invoke-Restore }
+        "backup" { Invoke-Backup }
+        "schedule" { Invoke-Schedule }
+    }
+}
+catch {
+    Print-Error "Unhandled error: $($_.Exception.Message)"
+    if ($_.ScriptStackTrace) {
+        Write-Host $_.ScriptStackTrace
+    }
+    exit 1
 }
