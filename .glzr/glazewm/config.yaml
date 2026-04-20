@@ -180,16 +180,6 @@ keybindings:
   - commands: ['focus --prev-active-workspace']
     bindings: ['ctrl+alt+left']
 
-  # Join-with
-  - commands: ['set-tiling-direction vertical', 'move --direction left']
-    bindings: ['ctrl+alt+shift+left']
-  - commands: ['set-tiling-direction vertical', 'move --direction right']
-    bindings: ['ctrl+alt+shift+right']
-  - commands: ['set-tiling-direction horizontal', 'move --direction up']
-    bindings: ['ctrl+alt+shift+up']
-  - commands: ['set-tiling-direction horizontal', 'move --direction down']
-    bindings: ['ctrl+alt+shift+down']
-
   # Move
   - commands: ['move --direction left']
     bindings: ['ctrl+shift+left']
