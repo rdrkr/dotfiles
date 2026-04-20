@@ -41,7 +41,8 @@ groups:
           [
             -l,
             -c,
-            'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh" && zinit self-update',
+            'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh"
+              && zinit self-update',
           ]
       - title: Updating zinit plugins
         command: zsh
@@ -49,7 +50,8 @@ groups:
           [
             -l,
             -c,
-            'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh" && zinit update --quiet --all',
+            'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh"
+              && zinit update --quiet --all',
           ]
       - title: Clearing zinit cache
         command: zsh
@@ -57,7 +59,8 @@ groups:
           [
             -l,
             -c,
-            'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh" && zinit cclear',
+            'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh"
+              && zinit cclear',
           ]
 
   - title: Updating LazyVim
@@ -70,7 +73,7 @@ groups:
         args: [--headless, "+Lazy! update", +qa]
       - title: Updating Mason
         command: nvim
-        args: [--headless, +MasonUpdate, +qa]
+        args: [--headless, +MasonUpdateAll, +qa]
       - title: Updating Treesitter
         command: nvim
         args: [--headless, +TSUpdate, +qa]

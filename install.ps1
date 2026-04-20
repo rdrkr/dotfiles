@@ -24,7 +24,6 @@
 
 param(
     [Parameter(Position = 0)]
-    [ValidateSet("restore", "backup", "schedule", "help")]
     [string]$Command,
 
     [Alias("d")]
@@ -35,6 +34,11 @@ param(
 )
 
 # --- Configuration ---
+$ValidCommands = @("restore", "backup", "schedule", "help")
+if ($Command -and $Command -notin $ValidCommands) {
+    Write-Host "`e[38;2;250;179;135m✗ Invalid command: $Command. Valid commands are: $($ValidCommands -join ', ')`e[0m"
+    exit 1
+}
 $DotfilesDir = Join-Path $env:USERPROFILE "dotfiles"
 $DotfilesRepo = "https://github.com/rdrkr/dotfiles.git"
 

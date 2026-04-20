@@ -22,3 +22,6 @@ end, { expr = true, desc = "Jump word forward" })
 vim.keymap.set({ "n", "i", "v" }, "<M-w>", function()
     Snacks.bufdelete()
 end, { desc = "Close Buffer" })
+
+-- Quit Neovim with Alt-q
+vim.keymap.set({ "n", "i", "v" }, "<M-q>", "<cmd>qa<cr>", { desc = "Quit Neovim" })
