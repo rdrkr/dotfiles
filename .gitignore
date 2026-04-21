@@ -65,3 +65,4 @@ node_modules/
 /.gemini/state.json
 /.gemini/user_id
 /.claude/skills/gstack
+/.claude/channels/telegram/bot.pid
