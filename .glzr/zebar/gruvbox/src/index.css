@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme {
+	--ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
+	--duration-250: 250ms;
+	--default-transition-duration: var(--duration-250);
+	--default-transition-timing-function: var(--ease-ios);
+  --color-gruvbox-base:           #1d2021;
+  --color-gruvbox-surface:        #282828;
+  --color-gruvbox-overlay:        #3c3836;
+  --color-gruvbox-muted:          #504945;
+  --color-gruvbox-subtle:         #665c54;
+  --color-gruvbox-text:           #ebdbb2;
+  --color-gruvbox-cherry:         #ebdbb2; /* #fb4934; */
+  --color-gruvbox-peach:          #ebdbb2; /* #fe8019; */
+  --color-gruvbox-raspberry:      #ebdbb2; /* #d3869b; */
+  --color-gruvbox-watermelon:     #ebdbb2; /* #689d6a; */
+  --color-gruvbox-mint:           #ebdbb2; /* #8ec07c; */
+  --color-gruvbox-lavender:       #ebdbb2; /* #83a598; */
+  --color-gruvbox-highlight-low:  #ebdbb2; /* #504945; */
+  --color-gruvbox-highlight-med:  #ebdbb2; /* #665c54; */
+  --color-gruvbox-highlight-high: #ebdbb2; /* #7c6f64; */
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+	*,
+	::after,
+	::before,
+	::backdrop,
+	::file-selector-button {
+		border-color: var(--color-gruvbox-text, currentcolor);
+	}
+}
+
+body {
+	font-family: Hack Nerd Font Mono, ui-monospace, monospace;
+	font-size: 13px;
+}
+
+html,
+body,
+#root {
+	height: 100%;
+	overflow: hidden;
+}

@@ -1,8 +1,6 @@
 general:
   # Commands to run when the WM has started.
-  startup_commands:
-    - 'shell-exec borders active_color=0xffebdbb2 inactive_color=0x00000000
-      width=5.0 style=round hidpi=on blacklist="iPhone Mirroring"'
+  startup_commands: []
 
   shutdown_commands: []
 

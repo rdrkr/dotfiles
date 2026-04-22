@@ -378,6 +378,8 @@ cask "tuist"
 cask "warp"
 # Video communication and virtual meeting platform
 cask "webex"
+# Cross-platform desktop widgets
+cask "glzr-io/tap/zebar"
 # Video communication and virtual meeting platform
 cask "zoom"
 mas "1Password 7", id: 1333542190

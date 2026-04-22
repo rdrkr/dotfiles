@@ -1068,17 +1068,19 @@ function Invoke-Restore {
     }
 
     # 9. Install WSL with the latest Ubuntu.
-    # `wsl --install -d Ubuntu` is idempotent: if WSL and/or Ubuntu are
-    # already present, it no-ops. A reboot may be required on first install
-    # (Windows enables the Virtual Machine Platform + WSL features). The
-    # `Ubuntu` alias always resolves to the latest Ubuntu LTS that Microsoft
-    # ships in the Store. `--no-launch` skips the interactive first-run.
+    # Two-phase install. On a fresh Windows box, `wsl --install -d Ubuntu`
+    # fails with HCS_E_HYPERV_NOT_INSTALLED because distro registration
+    # requires Virtual Machine Platform to be already enabled -- the feature
+    # install kicked off in the same command doesn't finalize until reboot.
+    # So: if VM Platform or the WSL feature isn't already Enabled, run
+    # `wsl --install --no-distribution` (enables features, no distro) and
+    # stop; the user reboots and re-runs to land Ubuntu.
     #
-    # Detect via an execution probe (run `:` inside Ubuntu) rather than
-    # parsing `wsl --list --quiet`. The list output is UTF-16 LE on many
-    # systems even with $env:WSL_UTF8 set, which breaks string matching;
-    # a successful exec proves both "registered" AND "reachable" in one
-    # reliable signal.
+    # Detect "Ubuntu is usable" via an execution probe (run `:` inside
+    # Ubuntu) rather than parsing `wsl --list --quiet`. The list output is
+    # UTF-16 LE on many systems even with $env:WSL_UTF8 set, which breaks
+    # string matching; a successful exec proves both "registered" AND
+    # "reachable" in one reliable signal.
     Print-Header "Installing WSL (with Ubuntu)..."
     $ubuntuReady = $false
     try {
@@ -1092,12 +1094,29 @@ function Invoke-Restore {
         Print-Success "WSL + Ubuntu already installed and ready."
     }
     elseif ($DryRun) {
-        Print-Warning "`[DRY RUN`] Would run: wsl --install -d Ubuntu --no-launch"
+        Print-Warning "`[DRY RUN`] Would ensure VM Platform + WSL features, then run: wsl --install -d Ubuntu --no-launch"
     }
     else {
-        Run-Command "wsl --install -d Ubuntu --no-launch"
-        Print-Success "WSL + Ubuntu install initiated. A reboot may be required to finish setup."
-        $wslFreshInstall = $true
+        $vmPlatform = Get-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform -ErrorAction SilentlyContinue
+        $wslFeature = Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux -ErrorAction SilentlyContinue
+        $platformReady = $vmPlatform -and $vmPlatform.State -eq 'Enabled' -and $wslFeature -and $wslFeature.State -eq 'Enabled'
+
+        if (-not $platformReady) {
+            Print-Warning "Virtual Machine Platform / WSL feature not enabled. Enabling features (distro install deferred until after reboot)..."
+            Run-Command "wsl --install --no-distribution"
+            Print-Success "WSL platform features install initiated. Reboot, then re-run this script to finish Ubuntu setup."
+            $wslFreshInstall = $true
+        }
+        else {
+            Run-Command "wsl --install -d Ubuntu --no-launch"
+            if ($LASTEXITCODE -eq 0) {
+                Print-Success "WSL + Ubuntu install initiated."
+            }
+            else {
+                Print-Error "wsl --install -d Ubuntu failed (exit $LASTEXITCODE). Reboot and re-run, or install Ubuntu manually."
+            }
+            $wslFreshInstall = $true
+        }
     }
 
     # 10. Create symlinks

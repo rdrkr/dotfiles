@@ -66,3 +66,4 @@ node_modules/
 /.gemini/user_id
 /.claude/skills/gstack
 /.claude/channels/telegram/bot.pid
+/.glzr/zebar/gruvbox/dist
