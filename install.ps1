@@ -673,7 +673,13 @@ function Invoke-Restore {
         Print-Warning "scoop not found. Installing from get.scoop.sh..."
         if (-not $DryRun) {
             try {
-                Invoke-RestMethod -Uri "https://get.scoop.sh" | Invoke-Expression
+                # Scoop refuses to install from an elevated shell by default
+                # because it's a per-user package manager. Since this script
+                # runs as admin (required for Developer Mode, WSL, etc.),
+                # pass -RunAsAdmin to bypass the refusal. Scoop still installs
+                # per-user under $env:USERPROFILE\scoop.
+                $scoopInstaller = Invoke-RestMethod -Uri "https://get.scoop.sh"
+                Invoke-Expression "& { $scoopInstaller } -RunAsAdmin"
                 # Refresh PATH so scoop shims are visible in this session
                 $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
                 Print-Success "scoop installed."
@@ -683,7 +689,7 @@ function Invoke-Restore {
             }
         }
         else {
-            Print-Warning "`[DRY RUN`] Would install scoop via get.scoop.sh"
+            Print-Warning "`[DRY RUN`] Would install scoop via get.scoop.sh -RunAsAdmin"
         }
     }
 
