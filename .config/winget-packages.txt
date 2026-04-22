@@ -24,6 +24,8 @@ Microsoft.AppInstaller
 Microsoft.DotNet.DesktopRuntime.8
 Microsoft.Edge
 Microsoft.OneDrive
+Microsoft.OpenJDK.21
+Microsoft.PowerToys
 Microsoft.Teams
 Microsoft.UI.Xaml.2.8
 Microsoft.VCLibs.14
@@ -37,6 +39,7 @@ Microsoft.WindowsAppRuntime.1.6
 Microsoft.WindowsAppRuntime.1.7
 Microsoft.WindowsAppRuntime.1.8
 Microsoft.WindowsTerminal
+Microsoft.WSL
 Neovim.Neovim
 Nushell.Nushell
 OpenJS.NodeJS
@@ -50,5 +53,3 @@ SublimeHQ.SublimeText.4
 sxyazi.yazi
 Tailscale.Tailscale
 Warp.Warp
-Microsoft.OpenJDK.21
-

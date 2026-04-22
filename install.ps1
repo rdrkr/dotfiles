@@ -222,6 +222,8 @@ $ScoopPackagesFile = Join-Path $ScriptDir ".config\scoop-packages.txt"
 $NpmGlobalFile = Join-Path $ScriptDir ".config\npm-global-packages.txt"
 $PipxPackagesFile = Join-Path $ScriptDir ".config\pipx-packages.txt"
 $BunPackagesFile = Join-Path $ScriptDir ".config\bun-packages.txt"
+$PersonalizationRegFile = Join-Path $ScriptDir ".config\windows-personalization.reg"
+$WallpapersDir = Join-Path $ScriptDir ".wallpapers"
 $DotfilesTarget = $env:USERPROFILE
 
 # --- Colors (ANSI escape sequences) ---
@@ -556,6 +558,288 @@ public class _DotfilesWallpaper {
     }
 }
 
+# --- Windows Personalization (Registry) ---
+# Registry subtrees captured for modern (Win10/11) Personalization state.
+# `.deskthemepack` handles classic theme bits (wallpaper, named colors,
+# cursors, sounds) but NOT accent/DWM colorization, light/dark mode,
+# transparency, taskbar alignment, etc. Those live in HKCU and round-trip
+# cleanly through reg export/import.
+$PersonalizationKeys = @(
+    "HKCU\Control Panel\Colors",
+    "HKCU\Control Panel\Cursors",
+    "HKCU\Control Panel\Desktop\WindowMetrics",
+    "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize",
+    "HKCU\SOFTWARE\Microsoft\Windows\DWM",
+    "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Accent",
+    "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+)
+
+function Backup-WindowsPersonalization {
+    <#
+    .SYNOPSIS
+        Exports HKCU subtrees that hold modern Personalization state (accent
+        color, light/dark mode, transparency, cursors, classic colors,
+        window metrics, Explorer UI tweaks) into a single .reg file.
+
+    .DESCRIPTION
+        `reg export` emits UTF-16 LE with a
+        "Windows Registry Editor Version 5.00" header per file. We export
+        each key to a temp file, then concatenate by keeping the header
+        from the first file and stripping it from the rest so the combined
+        file is still a valid single .reg document for `reg import`.
+    #>
+    Print-Header "Backing up Windows personalization (registry)..."
+
+    if ($DryRun) {
+        foreach ($k in $PersonalizationKeys) {
+            Print-Warning "`[DRY RUN`] Would export: $k"
+        }
+        Print-Warning "`[DRY RUN`] Would write combined file: $PersonalizationRegFile"
+        return
+    }
+
+    $tmpFiles = @()
+    try {
+        foreach ($k in $PersonalizationKeys) {
+            $tmp = [System.IO.Path]::GetTempFileName()
+            & reg export $k $tmp /y *> $null
+            if ($LASTEXITCODE -eq 0 -and (Test-Path $tmp) -and (Get-Item $tmp).Length -gt 0) {
+                $tmpFiles += $tmp
+            }
+            else {
+                Print-Warning "Could not export (may not exist on this machine): $k"
+                if (Test-Path $tmp) { Remove-Item $tmp -Force -ErrorAction SilentlyContinue }
+            }
+        }
+
+        if ($tmpFiles.Count -eq 0) {
+            Print-Warning "No registry subtrees exported. Skipping."
+            return
+        }
+
+        # Keep the first file's header; drop the duplicate header from the rest.
+        $combined = Get-Content -Path $tmpFiles[0] -Raw -Encoding Unicode
+        for ($i = 1; $i -lt $tmpFiles.Count; $i++) {
+            $body = Get-Content -Path $tmpFiles[$i] -Raw -Encoding Unicode
+            $body = $body -replace '^Windows Registry Editor Version 5\.00\r?\n\r?\n', ''
+            $combined += $body
+        }
+
+        $parent = Split-Path -Parent $PersonalizationRegFile
+        if (-not (Test-Path $parent)) {
+            New-Item -ItemType Directory -Path $parent -Force | Out-Null
+        }
+        # Unicode encoding = UTF-16 LE with BOM, which is what `reg import` expects.
+        Set-Content -Path $PersonalizationRegFile -Value $combined -Encoding Unicode -NoNewline
+        Print-Success "Personalization registry backed up to $PersonalizationRegFile."
+    }
+    finally {
+        foreach ($tmp in $tmpFiles) {
+            if (Test-Path $tmp) { Remove-Item $tmp -Force -ErrorAction SilentlyContinue }
+        }
+    }
+}
+
+function Restore-WindowsPersonalization {
+    <#
+    .SYNOPSIS
+        Imports the personalization .reg file so accent color, light/dark
+        mode, transparency, cursors, and other modern Personalization
+        settings match the backed-up state.
+
+    .NOTES
+        DWM accent and Explorer UI pick up some keys live; others (title
+        bar tint, Start/taskbar accent) take effect on next sign-in.
+    #>
+    Print-Header "Restoring Windows personalization (registry)..."
+
+    if (-not (Test-Path $PersonalizationRegFile)) {
+        Print-Warning "$PersonalizationRegFile not found. Skipping."
+        return
+    }
+
+    if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would run: reg import $PersonalizationRegFile"
+        return
+    }
+
+    & reg import $PersonalizationRegFile *> $null
+    if ($LASTEXITCODE -eq 0) {
+        Print-Success "Personalization registry imported."
+        Print-Warning "Some settings (accent color, title bar tint) may need a sign-out to fully apply."
+    }
+    else {
+        Print-Error "reg import exited with code $LASTEXITCODE."
+    }
+}
+
+function Backup-WindowsLockScreen {
+    <#
+    .SYNOPSIS
+        Copies the currently configured lock screen image into
+        .wallpapers\lockscreen.<ext> so `restore` can pin the same image
+        via PersonalizationCSP policy on another machine.
+
+    .DESCRIPTION
+        Source precedence:
+          1. HKLM PersonalizationCSP\LockScreenImagePath (set by a prior
+             `restore` or group policy).
+          2. Newest image under the user's Microsoft.LockApp LocalState.
+        If neither resolves, leaves the wallpapers dir alone and warns.
+    #>
+    Print-Header "Backing up lock screen image..."
+
+    if (-not (Test-Path $WallpapersDir)) {
+        if ($DryRun) {
+            Print-Warning "`[DRY RUN`] Would create $WallpapersDir"
+        }
+        else {
+            New-Item -ItemType Directory -Path $WallpapersDir -Force | Out-Null
+        }
+    }
+
+    $source = $null
+
+    # 1. PersonalizationCSP (policy-managed)
+    $cspKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP"
+    try {
+        $cspPath = (Get-ItemProperty -Path $cspKey -Name "LockScreenImagePath" -ErrorAction Stop).LockScreenImagePath
+        if ($cspPath -and (Test-Path $cspPath)) {
+            $source = $cspPath
+        }
+    } catch { }
+
+    # 2. Fallback: newest image in LockApp LocalState
+    if (-not $source) {
+        $lockAppDir = Join-Path $env:LOCALAPPDATA "Packages\Microsoft.LockApp_cw5n1h2txyewy\LocalState"
+        if (Test-Path $lockAppDir) {
+            $candidate = Get-ChildItem -Path $lockAppDir -Recurse -Include *.jpg, *.jpeg, *.png -ErrorAction SilentlyContinue |
+                Sort-Object LastWriteTime -Descending | Select-Object -First 1
+            if ($candidate) { $source = $candidate.FullName }
+        }
+    }
+
+    if (-not $source) {
+        Print-Warning "Could not detect a lock screen image. Drop one at .wallpapers\lockscreen.<ext> to set it on restore."
+        return
+    }
+
+    $ext = [System.IO.Path]::GetExtension($source).ToLowerInvariant()
+    if (-not $ext) { $ext = ".jpg" }
+    $dest = Join-Path $WallpapersDir ("lockscreen" + $ext)
+
+    if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would copy $source -> $dest"
+        return
+    }
+
+    # Remove any stale lockscreen.* (different extension) before writing.
+    Get-ChildItem -Path $WallpapersDir -Filter "lockscreen.*" -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -ne $dest } |
+        Remove-Item -Force -ErrorAction SilentlyContinue
+
+    Copy-Item -Path $source -Destination $dest -Force
+    Print-Success "Lock screen image backed up to $dest."
+}
+
+function Apply-WindowsLockScreen {
+    <#
+    .SYNOPSIS
+        Sets the machine-wide lock screen image via PersonalizationCSP
+        policy, pointing at .wallpapers\lockscreen.<ext> from this repo.
+        Falls back to the desktop wallpaper when no dedicated lock-screen
+        asset exists.
+
+    .NOTES
+        PersonalizationCSP requires admin (guaranteed by the admin gate at
+        the top of this script). Setting these keys makes the Settings
+        lock-screen picker read-only; that's the intended behavior for a
+        repo-managed configuration.
+    #>
+    Print-Header "Applying lock screen image..."
+
+    $lockImage = $null
+    if (Test-Path $WallpapersDir) {
+        $lockImage = Get-ChildItem -Path $WallpapersDir -Filter "lockscreen.*" -ErrorAction SilentlyContinue |
+            Select-Object -First 1
+    }
+
+    if ($lockImage) {
+        $imagePath = $lockImage.FullName
+    }
+    else {
+        $fallback = Join-Path $WallpapersDir "BFD78173-A38C-4F68-BA51-06ED0CFD1B24_1_105_c.jpeg"
+        if (Test-Path $fallback) {
+            $imagePath = $fallback
+            Print-Warning "No .wallpapers\lockscreen.* found; using desktop wallpaper as fallback."
+        }
+        else {
+            Print-Warning "No lock screen or fallback wallpaper found. Skipping."
+            return
+        }
+    }
+
+    if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would set PersonalizationCSP\LockScreenImagePath = $imagePath"
+        return
+    }
+
+    $cspKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP"
+    try {
+        if (-not (Test-Path $cspKey)) {
+            New-Item -Path $cspKey -Force -ErrorAction Stop | Out-Null
+        }
+        New-ItemProperty -Path $cspKey -Name "LockScreenImagePath"   -PropertyType String -Value $imagePath -Force -ErrorAction Stop | Out-Null
+        New-ItemProperty -Path $cspKey -Name "LockScreenImageUrl"    -PropertyType String -Value $imagePath -Force -ErrorAction Stop | Out-Null
+        New-ItemProperty -Path $cspKey -Name "LockScreenImageStatus" -PropertyType DWord  -Value 1          -Force -ErrorAction Stop | Out-Null
+        Print-Success "Lock screen image set: $imagePath"
+    }
+    catch {
+        Print-Error "Failed to set lock screen image: $($_.Exception.Message)"
+    }
+}
+
+function Set-XdgConfigHome {
+    <#
+    .SYNOPSIS
+        Persists XDG_CONFIG_HOME as a user-scope environment variable pointing
+        at %USERPROFILE%\.config (the junction Create-Symlinks points at this
+        repo's `.config`). Ensures non-zsh sessions (PowerShell, GUI apps)
+        resolve XDG lookups to the same location that .zshrc already exports
+        for shell sessions.
+
+    .DESCRIPTION
+        Writes to HKCU\Environment via [Environment]::SetEnvironmentVariable
+        with the "User" scope, which also broadcasts WM_SETTINGCHANGE so newly
+        launched processes pick up the value without a logoff. Also sets the
+        variable in the current session so steps later in this run see it.
+    #>
+    Print-Header "Setting XDG_CONFIG_HOME..."
+
+    $target = Join-Path $env:USERPROFILE ".config"
+    $current = [Environment]::GetEnvironmentVariable("XDG_CONFIG_HOME", "User")
+
+    if ($current -eq $target) {
+        Print-Success "XDG_CONFIG_HOME already set to $target (user scope)."
+        $env:XDG_CONFIG_HOME = $target
+        return
+    }
+
+    if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would set user env XDG_CONFIG_HOME = $target"
+        return
+    }
+
+    try {
+        [Environment]::SetEnvironmentVariable("XDG_CONFIG_HOME", $target, "User")
+        $env:XDG_CONFIG_HOME = $target
+        Print-Success "XDG_CONFIG_HOME set to $target (user scope)."
+    }
+    catch {
+        Print-Error "Failed to set XDG_CONFIG_HOME: $($_.Exception.Message)"
+    }
+}
+
 # --- WSL Bridge ---
 function Invoke-WslInstall {
     <#
@@ -588,30 +872,18 @@ function Invoke-WslInstall {
         return
     }
 
-    # Confirm Ubuntu distro is registered
-    $ubuntuInstalled = $false
-    try {
-        $distros = wsl --list --quiet 2>$null
-        if ($LASTEXITCODE -eq 0 -and ($distros -join "`n") -match '(?im)^\s*Ubuntu') {
-            $ubuntuInstalled = $true
-        }
-    } catch { }
-    if (-not $ubuntuInstalled) {
-        Print-Warning "Ubuntu distro not found in WSL. Skipping WSL $Subcommand."
-        return
-    }
-
     if ($DryRun) {
         Print-Warning "`[DRY RUN`] Would run inside WSL (Ubuntu): install.sh $Subcommand"
         return
     }
 
-    # Preflight: ensure the distro can actually run commands. On the first
-    # install, Ubuntu is registered but exec fails until the VM Platform
-    # reboot is done.
+    # Single reliable probe: can we execute inside Ubuntu? This covers both
+    # "distro not registered" and "registered but not ready after reboot"
+    # in one signal, and avoids parsing `wsl --list` output (UTF-16 LE on
+    # many systems even with WSL_UTF8=1).
     wsl -d Ubuntu -- bash -c ":" 2>$null
     if ($LASTEXITCODE -ne 0) {
-        Print-Warning "Ubuntu is registered but not ready (reboot may be required). Skipping WSL $Subcommand."
+        Print-Warning "Ubuntu is not reachable (not installed, or reboot pending). Skipping WSL $Subcommand."
         return
     }
 
@@ -801,34 +1073,48 @@ function Invoke-Restore {
     # (Windows enables the Virtual Machine Platform + WSL features). The
     # `Ubuntu` alias always resolves to the latest Ubuntu LTS that Microsoft
     # ships in the Store. `--no-launch` skips the interactive first-run.
+    #
+    # Detect via an execution probe (run `:` inside Ubuntu) rather than
+    # parsing `wsl --list --quiet`. The list output is UTF-16 LE on many
+    # systems even with $env:WSL_UTF8 set, which breaks string matching;
+    # a successful exec proves both "registered" AND "reachable" in one
+    # reliable signal.
     Print-Header "Installing WSL (with Ubuntu)..."
-    $ubuntuInstalled = $false
+    $ubuntuReady = $false
     try {
-        $distros = wsl --list --quiet 2>$null
-        if ($LASTEXITCODE -eq 0 -and ($distros -join "`n") -match '(?im)^\s*Ubuntu') {
-            $ubuntuInstalled = $true
-        }
+        wsl -d Ubuntu -- bash -c ":" 2>$null
+        if ($LASTEXITCODE -eq 0) { $ubuntuReady = $true }
     }
     catch { }
 
     $wslFreshInstall = $false
-    if ($ubuntuInstalled) {
-        Print-Success "WSL + Ubuntu already installed."
+    if ($ubuntuReady) {
+        Print-Success "WSL + Ubuntu already installed and ready."
     }
     elseif ($DryRun) {
         Print-Warning "`[DRY RUN`] Would run: wsl --install -d Ubuntu --no-launch"
     }
     else {
         Run-Command "wsl --install -d Ubuntu --no-launch"
-        Print-Success "WSL + Ubuntu install initiated. A reboot is required to finish setup."
+        Print-Success "WSL + Ubuntu install initiated. A reboot may be required to finish setup."
         $wslFreshInstall = $true
     }
 
     # 10. Create symlinks
     Create-Symlinks
 
+    # 10b. Now that %USERPROFILE%\.config exists as a junction, persist
+    # XDG_CONFIG_HOME so non-zsh sessions resolve it too.
+    Set-XdgConfigHome
+
     # 11. Apply Windows theme + wallpaper
     Apply-WindowsTheme
+
+    # 11b. Restore modern Personalization (accent, dark mode, cursors, etc.)
+    # after the theme so its DWM accent overrides theme defaults. Then pin
+    # the lock screen via PersonalizationCSP.
+    Restore-WindowsPersonalization
+    Apply-WindowsLockScreen
 
     # 12. Run install.sh restore inside WSL so Linux-side state (apt, Linuxbrew,
     # stow, zsh) is set up to match. Skip on a fresh install -- the VM Platform
@@ -979,6 +1265,12 @@ function Invoke-Backup {
     else {
         Print-Warning "bun not found. Skipping bun backup."
     }
+
+    # Backup modern Personalization settings and lock screen image before
+    # any symlinks/commits so the new files land in the working tree and
+    # are picked up by Create-Symlinks + the final git commit.
+    Backup-WindowsLockScreen
+    Backup-WindowsPersonalization
 
     Create-Symlinks
 
