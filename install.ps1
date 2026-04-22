@@ -85,6 +85,11 @@ if ($needsAdmin -and -not $Help -and -not $DryRun) {
 $DotfilesDir = Join-Path $env:USERPROFILE "dotfiles"
 $DotfilesRepo = "https://github.com/rdrkr/dotfiles.git"
 
+# Force wsl.exe to emit UTF-8 instead of UTF-16 LE. Without this, commands
+# like `wsl --list --quiet` return strings riddled with NUL bytes that break
+# regex/string comparisons in PowerShell.
+$env:WSL_UTF8 = "1"
+
 # --- Bootstrap ---
 # When invoked remotely (irm ... | iex), $MyInvocation.MyCommand.Definition
 # will not point to a file inside the repo. Detect this and bootstrap.
@@ -806,6 +811,7 @@ function Invoke-Restore {
     }
     catch { }
 
+    $wslFreshInstall = $false
     if ($ubuntuInstalled) {
         Print-Success "WSL + Ubuntu already installed."
     }
@@ -814,7 +820,8 @@ function Invoke-Restore {
     }
     else {
         Run-Command "wsl --install -d Ubuntu --no-launch"
-        Print-Success "WSL + Ubuntu install initiated. A reboot may be required to finish setup."
+        Print-Success "WSL + Ubuntu install initiated. A reboot is required to finish setup."
+        $wslFreshInstall = $true
     }
 
     # 10. Create symlinks
@@ -824,8 +831,15 @@ function Invoke-Restore {
     Apply-WindowsTheme
 
     # 12. Run install.sh restore inside WSL so Linux-side state (apt, Linuxbrew,
-    # stow, zsh) is set up to match.
-    Invoke-WslInstall -Subcommand 'restore'
+    # stow, zsh) is set up to match. Skip on a fresh install -- the VM Platform
+    # feature reboot must complete before Ubuntu can execute commands.
+    if ($wslFreshInstall) {
+        Print-Header "Skipping WSL install.sh restore (reboot required)"
+        Print-Warning "WSL + Ubuntu were just installed. Reboot, then re-run this script to finish the WSL-side setup."
+    }
+    else {
+        Invoke-WslInstall -Subcommand 'restore'
+    }
 
     Write-Host ""
     Write-Host "${C_GREEN}All done! Your dotfiles are set up.${NC}"
