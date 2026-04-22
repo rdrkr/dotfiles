@@ -1,6 +1,7 @@
-copilot
+﻿copilot
 fastify
 lighthouse
 mcporter
 neovim
+pnpm
 tsx
