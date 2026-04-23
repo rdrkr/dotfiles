@@ -2,6 +2,7 @@
 Anthropic.ClaudeCode
 astral-sh.ruff
 astral-sh.uv
+AutoHotkey.AutoHotkey
 Beeper.Beeper
 DEVCOM.JetBrainsMonoNerdFont
 DEVCOM.Lua
@@ -47,6 +48,7 @@ Oven-sh.Bun
 PlayStation.PlayStationAccessories
 Python.Launcher
 Python.Python.3.14
+RandyRants.SharpKeys
 rsteube.Carapace
 Starship.Starship
 SublimeHQ.SublimeText.4
