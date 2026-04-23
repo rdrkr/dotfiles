@@ -7,7 +7,7 @@ export const providers = zebar.createProviderGroup({
   cpu: { type: "cpu" },
   memory: { type: "memory" },
   weather: { type: "weather" },
-  date: { type: "date", formatting: "t" },
+  date: { type: "date", formatting: "EEE d MMM HH:mm" },
   glazewm: { type: "glazewm" },
   keyboard: { type: "keyboard" },
   media: { type: "media" },

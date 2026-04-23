@@ -41,7 +41,7 @@
 }
 
 body {
-	font-family: Hack Nerd Font Mono, ui-monospace, monospace;
+	font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
 	font-size: 13px;
 }
 

@@ -223,6 +223,10 @@ $NpmGlobalFile = Join-Path $ScriptDir ".config\npm-global-packages.txt"
 $PipxPackagesFile = Join-Path $ScriptDir ".config\pipx-packages.txt"
 $BunPackagesFile = Join-Path $ScriptDir ".config\bun-packages.txt"
 $PersonalizationRegFile = Join-Path $ScriptDir ".config\windows-personalization.reg"
+$StartupRegFile = Join-Path $ScriptDir ".config\windows-startup.reg"
+$StartupFolderDir = Join-Path $ScriptDir ".config\windows-startup"
+$WindowsTerminalConfigDir = Join-Path $ScriptDir ".config\windows-terminal"
+$WindowsTerminalLocalState = Join-Path $env:LOCALAPPDATA "Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState"
 $WallpapersDir = Join-Path $ScriptDir ".wallpapers"
 $DotfilesTarget = $env:USERPROFILE
 
@@ -574,6 +578,18 @@ $PersonalizationKeys = @(
     "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 )
 
+# Registry subtrees that define per-user sign-in programs. Mirrors what Task
+# Manager's Startup tab reads:
+#   - Run: the entries themselves (command lines Windows launches at sign-in).
+#   - StartupApproved\Run: enabled/disabled flag for each Run entry.
+#   - StartupApproved\StartupFolder: enabled/disabled flag for shortcuts in
+#     the Startup folder, which are mirrored separately to $StartupFolderDir.
+$StartupKeys = @(
+    "HKCU\Software\Microsoft\Windows\CurrentVersion\Run",
+    "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run",
+    "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\StartupFolder"
+)
+
 function Backup-WindowsPersonalization {
     <#
     .SYNOPSIS
@@ -796,6 +812,281 @@ function Apply-WindowsLockScreen {
     }
     catch {
         Print-Error "Failed to set lock screen image: $($_.Exception.Message)"
+    }
+}
+
+# --- Startup Applications ---
+function Backup-WindowsStartup {
+    <#
+    .SYNOPSIS
+        Exports HKCU Run keys and mirrors the user's Startup folder so
+        sign-in-time programs are part of the dotfiles.
+
+    .DESCRIPTION
+        Two sources define what Windows runs at sign-in on a per-user basis:
+          1. Registry Run entries (where modern apps register themselves).
+          2. `.lnk` shortcuts under %APPDATA%\...\Startup (legacy, manual).
+        StartupApproved subkeys ride along so restored entries keep their
+        enabled/disabled state in Task Manager's Startup tab.
+
+        The repo's Startup folder mirror is rebuilt from scratch on every
+        backup so upstream deletions propagate.
+    #>
+    Print-Header "Backing up Windows startup applications..."
+
+    # Part 1: registry. Same "export each key, stitch into one .reg" pattern
+    # as Backup-WindowsPersonalization -- see its header for the rationale.
+    if ($DryRun) {
+        foreach ($k in $StartupKeys) {
+            Print-Warning "`[DRY RUN`] Would export: $k"
+        }
+        Print-Warning "`[DRY RUN`] Would write combined file: $StartupRegFile"
+    }
+    else {
+        $tmpFiles = @()
+        try {
+            foreach ($k in $StartupKeys) {
+                $tmp = [System.IO.Path]::GetTempFileName()
+                & reg export $k $tmp /y *> $null
+                if ($LASTEXITCODE -eq 0 -and (Test-Path $tmp) -and (Get-Item $tmp).Length -gt 0) {
+                    $tmpFiles += $tmp
+                }
+                else {
+                    Print-Warning "Could not export (may not exist on this machine): $k"
+                    if (Test-Path $tmp) { Remove-Item $tmp -Force -ErrorAction SilentlyContinue }
+                }
+            }
+
+            if ($tmpFiles.Count -gt 0) {
+                $combined = Get-Content -Path $tmpFiles[0] -Raw -Encoding Unicode
+                for ($i = 1; $i -lt $tmpFiles.Count; $i++) {
+                    $body = Get-Content -Path $tmpFiles[$i] -Raw -Encoding Unicode
+                    $body = $body -replace '^Windows Registry Editor Version 5\.00\r?\n\r?\n', ''
+                    $combined += $body
+                }
+
+                $parent = Split-Path -Parent $StartupRegFile
+                if (-not (Test-Path $parent)) {
+                    New-Item -ItemType Directory -Path $parent -Force | Out-Null
+                }
+                Set-Content -Path $StartupRegFile -Value $combined -Encoding Unicode -NoNewline
+                Print-Success "Startup registry backed up to $StartupRegFile."
+            }
+            else {
+                Print-Warning "No startup registry subtrees exported."
+            }
+        }
+        finally {
+            foreach ($tmp in $tmpFiles) {
+                if (Test-Path $tmp) { Remove-Item $tmp -Force -ErrorAction SilentlyContinue }
+            }
+        }
+    }
+
+    # Part 2: Startup folder shortcuts.
+    $startupFolder = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\Startup"
+    if (-not (Test-Path $startupFolder)) {
+        Print-Warning "User Startup folder not found: $startupFolder."
+        return
+    }
+
+    if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would mirror $startupFolder -> $StartupFolderDir"
+        return
+    }
+
+    if (-not (Test-Path $StartupFolderDir)) {
+        New-Item -ItemType Directory -Path $StartupFolderDir -Force | Out-Null
+    }
+
+    # Rebuild the mirror so upstream deletions show up in git diff as removals.
+    Get-ChildItem -Path $StartupFolderDir -Force -ErrorAction SilentlyContinue |
+        Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+
+    $items = Get-ChildItem -Path $startupFolder -Force -ErrorAction SilentlyContinue
+    if ($items) {
+        foreach ($item in $items) {
+            Copy-Item -LiteralPath $item.FullName -Destination $StartupFolderDir -Force
+        }
+        Print-Success "Copied $($items.Count) startup folder item(s) to $StartupFolderDir."
+    }
+    else {
+        Print-Success "Startup folder is empty."
+    }
+}
+
+function Restore-WindowsStartup {
+    <#
+    .SYNOPSIS
+        Imports HKCU Run keys and copies saved Startup folder shortcuts back
+        into the user's Startup folder so sign-in programs match backup.
+
+    .NOTES
+        New Run entries apply on the next sign-in. `.lnk` files are copied
+        additively -- we don't clear the Startup folder, since Windows and
+        some apps drop system items there that aren't ours to manage.
+    #>
+    Print-Header "Restoring Windows startup applications..."
+
+    # Part 1: registry.
+    if (-not (Test-Path $StartupRegFile)) {
+        Print-Warning "$StartupRegFile not found. Skipping registry restore."
+    }
+    elseif ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would run: reg import $StartupRegFile"
+    }
+    else {
+        & reg import $StartupRegFile *> $null
+        if ($LASTEXITCODE -eq 0) {
+            Print-Success "Startup registry imported."
+        }
+        else {
+            Print-Error "reg import exited with code $LASTEXITCODE."
+        }
+    }
+
+    # Part 2: Startup folder shortcuts.
+    if (-not (Test-Path $StartupFolderDir)) {
+        Print-Warning "$StartupFolderDir not found. Skipping startup folder restore."
+        return
+    }
+
+    $startupFolder = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\Startup"
+
+    if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would copy shortcuts from $StartupFolderDir -> $startupFolder"
+        return
+    }
+
+    if (-not (Test-Path $startupFolder)) {
+        New-Item -ItemType Directory -Path $startupFolder -Force | Out-Null
+    }
+
+    $items = Get-ChildItem -Path $StartupFolderDir -Force -ErrorAction SilentlyContinue
+    $count = 0
+    foreach ($item in $items) {
+        $dest = Join-Path $startupFolder $item.Name
+        Copy-Item -LiteralPath $item.FullName -Destination $dest -Force
+        $count++
+    }
+    if ($count -gt 0) {
+        Print-Success "Copied $count startup folder item(s) to $startupFolder."
+    }
+    else {
+        Print-Warning "No startup folder items to restore."
+    }
+}
+
+# --- Windows Terminal ---
+function Link-WindowsTerminalSettings {
+    <#
+    .SYNOPSIS
+        Hardlinks each file in .config/windows-terminal/ into the Windows
+        Terminal LocalState folder so edits to settings.json flow back to
+        the repo automatically.
+
+    .NOTES
+        Same privilege strategy as Create-Symlinks for files: HardLink,
+        which works on NTFS without admin or Developer Mode. Windows
+        Terminal edits settings.json in place, so the two paths continue
+        to share an inode across saves.
+
+        If a file already exists at the target:
+          - Identical content -> delete + relink (guarantees hardlink sharing).
+          - Different content -> move aside as .bak, then link.
+    #>
+    Print-Header "Linking Windows Terminal settings..."
+
+    if (-not (Test-Path $WindowsTerminalConfigDir)) {
+        Print-Warning "$WindowsTerminalConfigDir not found. Skipping terminal settings link."
+        return
+    }
+
+    $sources = Get-ChildItem -Path $WindowsTerminalConfigDir -File -Force -ErrorAction SilentlyContinue
+    if (-not $sources) {
+        Print-Warning "$WindowsTerminalConfigDir is empty. Skipping."
+        return
+    }
+
+    if ($DryRun) {
+        foreach ($src in $sources) {
+            Print-Warning "`[DRY RUN`] Would hardlink $($src.FullName) -> $WindowsTerminalLocalState\$($src.Name)"
+        }
+        return
+    }
+
+    if (-not (Test-Path $WindowsTerminalLocalState)) {
+        New-Item -ItemType Directory -Path $WindowsTerminalLocalState -Force | Out-Null
+    }
+
+    foreach ($src in $sources) {
+        $dest = Join-Path $WindowsTerminalLocalState $src.Name
+        try {
+            if (Test-Path $dest) {
+                $srcHash = (Get-FileHash -LiteralPath $src.FullName).Hash
+                $dstHash = (Get-FileHash -LiteralPath $dest).Hash
+                if ($srcHash -eq $dstHash) {
+                    Remove-Item -LiteralPath $dest -Force
+                }
+                else {
+                    $bak = "$dest.bak"
+                    Move-Item -LiteralPath $dest -Destination $bak -Force
+                    Print-Warning "Existing $dest backed up to $bak."
+                }
+            }
+            New-Item -ItemType HardLink -Path $dest -Target $src.FullName -ErrorAction Stop | Out-Null
+            Print-Success "Linked: $dest -> $($src.FullName)"
+        }
+        catch {
+            Print-Error "Failed to link $($src.Name): $($_.Exception.Message)"
+        }
+    }
+}
+
+function Backup-WindowsTerminalSettings {
+    <#
+    .SYNOPSIS
+        Copies Windows Terminal settings.json from LocalState into
+        .config/windows-terminal/ so the repo owns the source of truth.
+
+    .DESCRIPTION
+        After a restore, settings.json in LocalState is hardlinked to the
+        repo copy -- edits propagate automatically and this is a no-op.
+        Before the first restore (or if the link was ever broken by an
+        atomic rename), the two files diverge; we copy LocalState -> repo
+        only when hashes differ, which preserves the hardlink when intact.
+    #>
+    Print-Header "Backing up Windows Terminal settings..."
+
+    $liveSettings = Join-Path $WindowsTerminalLocalState "settings.json"
+    if (-not (Test-Path $liveSettings)) {
+        Print-Warning "Windows Terminal settings.json not found at $liveSettings. Skipping."
+        return
+    }
+
+    if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would sync $liveSettings -> $WindowsTerminalConfigDir\settings.json (if changed)."
+        return
+    }
+
+    if (-not (Test-Path $WindowsTerminalConfigDir)) {
+        New-Item -ItemType Directory -Path $WindowsTerminalConfigDir -Force | Out-Null
+    }
+
+    $repoSettings = Join-Path $WindowsTerminalConfigDir "settings.json"
+    $needCopy = $true
+    if (Test-Path $repoSettings) {
+        $liveHash = (Get-FileHash -LiteralPath $liveSettings).Hash
+        $repoHash = (Get-FileHash -LiteralPath $repoSettings).Hash
+        if ($liveHash -eq $repoHash) { $needCopy = $false }
+    }
+
+    if ($needCopy) {
+        Copy-Item -LiteralPath $liveSettings -Destination $repoSettings -Force
+        Print-Success "Windows Terminal settings.json synced to $repoSettings."
+    }
+    else {
+        Print-Success "Windows Terminal settings.json already in sync."
     }
 }
 
@@ -1126,14 +1417,20 @@ function Invoke-Restore {
     # XDG_CONFIG_HOME so non-zsh sessions resolve it too.
     Set-XdgConfigHome
 
+    # 10c. Hardlink Windows Terminal settings from the repo into LocalState.
+    # Runs after Create-Symlinks (and therefore after winget installs WT)
+    # so the package's LocalState folder exists (or is creatable).
+    Link-WindowsTerminalSettings
+
     # 11. Apply Windows theme + wallpaper
     Apply-WindowsTheme
 
     # 11b. Restore modern Personalization (accent, dark mode, cursors, etc.)
     # after the theme so its DWM accent overrides theme defaults. Then pin
-    # the lock screen via PersonalizationCSP.
+    # the lock screen via PersonalizationCSP and reapply sign-in programs.
     Restore-WindowsPersonalization
     Apply-WindowsLockScreen
+    Restore-WindowsStartup
 
     # 12. Run install.sh restore inside WSL so Linux-side state (apt, Linuxbrew,
     # stow, zsh) is set up to match. Skip on a fresh install -- the VM Platform
@@ -1285,11 +1582,14 @@ function Invoke-Backup {
         Print-Warning "bun not found. Skipping bun backup."
     }
 
-    # Backup modern Personalization settings and lock screen image before
-    # any symlinks/commits so the new files land in the working tree and
-    # are picked up by Create-Symlinks + the final git commit.
+    # Backup modern Personalization settings, lock screen image, startup
+    # programs, and Windows Terminal settings before any symlinks/commits
+    # so the new files land in the working tree and are picked up by
+    # Create-Symlinks + the final git commit.
     Backup-WindowsLockScreen
     Backup-WindowsPersonalization
+    Backup-WindowsStartup
+    Backup-WindowsTerminalSettings
 
     Create-Symlinks
 

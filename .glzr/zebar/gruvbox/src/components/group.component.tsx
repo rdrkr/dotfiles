@@ -17,7 +17,7 @@ export const Group: ParentComponent<GroupProps> = (props) => {
     <Motion.div
       {...local.animationOptions}
       class={twMerge(
-        "my-3 h-[28px] max-h-[28px] flex flex-row justify-center items-center gap-3 bg-gruvbox-base text-gruvbox-text border-gruvbox-highlight-high border-[2px] w-fit rounded-[1.5rem] border-solid py-0 px-[1.2rem]",
+        "my-3 h-[28px] max-h-[28px] flex flex-row justify-center items-center gap-3 bg-gruvbox-base/80 text-gruvbox-text border-gruvbox-highlight-high border-[1px] w-fit rounded-[1.5rem] border-solid py-0 px-[1.2rem]",
         "hover:border-gruvbox-mint transition-colors",
         props.class,
       )}

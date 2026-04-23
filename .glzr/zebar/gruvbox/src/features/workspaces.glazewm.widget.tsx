@@ -4,7 +4,7 @@ import { GroupItem } from "@components/group.component";
 import { useProviders } from "@providers/index";
 import { createStoredSignal } from "@/components/signal-storage.hook";
 import { WorkspaceDisplayMode } from "@/components/workspaces.types";
-import { FaSolidDesktop } from "solid-icons/fa";
+import { FaBrandsApple } from "solid-icons/fa";
 
 export function WorkspacesGlazewmWidget() {
   const providers = useProviders();
@@ -43,7 +43,7 @@ export function WorkspacesGlazewmWidget() {
         toggleDisplayMode();
       }}
     >
-      <FaSolidDesktop class="mr-2 text-gruvbox-watermelon w-4.5 h-4.5" />
+      <FaBrandsApple class="mr-2 text-gruvbox-watermelon w-4.5 h-4.5" />
       <Index each={providers.glazewm?.currentMonitor.children}>
         {(workspace) => (
           <Presence exitBeforeEnter>
