@@ -8,16 +8,28 @@
     "keybindings": 
     [
         {
+            "id": "Terminal.ClosePane",
+            "keys": "ctrl+w"
+        },
+        {
             "id": "Terminal.CopyToClipboard",
             "keys": "ctrl+c"
         },
         {
-            "id": "Terminal.PasteFromClipboard",
-            "keys": "ctrl+v"
+            "id": "Terminal.OpenNewTab",
+            "keys": "ctrl+t"
+        },
+        {
+            "id": "Terminal.ClearBuffer",
+            "keys": "ctrl+k"
         },
         {
             "id": "Terminal.FindText",
             "keys": "ctrl+shift+f"
+        },
+        {
+            "id": "Terminal.PasteFromClipboard",
+            "keys": "ctrl+v"
         },
         {
             "id": "Terminal.DuplicatePaneAuto",

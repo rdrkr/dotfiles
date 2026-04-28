@@ -140,4 +140,10 @@ if (Get-Module PSReadLine) {
         Set-PSReadLineOption -PredictionViewStyle InlineView -ErrorAction Stop
     } catch { }
     Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
+    
+    # macOS-like keybindings
+    Set-PSReadLineKeyHandler -Key 'Ctrl+d' -Function DeleteCharOrExit
+    Set-PSReadLineKeyHandler -Key Alt+LeftArrow -Function BackwardWord
+    Set-PSReadLineKeyHandler -Key Alt+RightArrow -Function NextWord
+    Set-PSReadLineKeyHandler -Key Alt+Backspace -Function BackwardKillWord
 }
