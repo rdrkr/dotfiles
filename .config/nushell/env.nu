@@ -20,3 +20,20 @@ $env.CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense' # optional
 mkdir $"($nu.cache-dir)"
 carapace _carapace nushell | save --force $"($nu.cache-dir)/carapace.nu"
 
+# starship fake symlink resolution
+let starship_config = ("~/.config/starship/starship.toml" | path expand)
+if ($starship_config | path exists) {
+    let content = (open --raw $starship_config)
+    let contains_bracket = ($content | str contains "[")
+    if $contains_bracket == false and ($content | str length) < 256 {
+        let resolved = ($starship_config | path dirname | path join ($content | str trim))
+        if ($resolved | path exists) {
+            $env.STARSHIP_CONFIG = $resolved
+        } else {
+            $env.STARSHIP_CONFIG = $starship_config
+        }
+    } else {
+        $env.STARSHIP_CONFIG = $starship_config
+    }
+}
+

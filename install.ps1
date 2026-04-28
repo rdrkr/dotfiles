@@ -1154,41 +1154,32 @@ function Backup-WindowsTerminalSettings {
 function Set-XdgConfigHome {
     <#
     .SYNOPSIS
-        Persists XDG_CONFIG_HOME as a user-scope environment variable pointing
-        at %USERPROFILE%\.config (the junction Create-Symlinks points at this
-        repo's `.config`). Ensures non-zsh sessions (PowerShell, GUI apps)
-        resolve XDG lookups to the same location that .zshrc already exports
-        for shell sessions.
-
-    .DESCRIPTION
-        Writes to HKCU\Environment via [Environment]::SetEnvironmentVariable
-        with the "User" scope, which also broadcasts WM_SETTINGCHANGE so newly
-        launched processes pick up the value without a logoff. Also sets the
-        variable in the current session so steps later in this run see it.
+        Persists XDG_CONFIG_HOME and STARSHIP_CONFIG as user-scope environment 
+        variables. Ensures non-zsh sessions (PowerShell, GUI apps, Command Prompt)
+        resolve lookups to the correct locations.
     #>
-    Print-Header "Setting XDG_CONFIG_HOME..."
+    Print-Header "Setting Environment Variables..."
 
-    $target = Join-Path $env:USERPROFILE ".config"
-    $current = [Environment]::GetEnvironmentVariable("XDG_CONFIG_HOME", "User")
-
-    if ($current -eq $target) {
-        Print-Success "XDG_CONFIG_HOME already set to $target (user scope)."
-        $env:XDG_CONFIG_HOME = $target
-        return
-    }
+    $targetXdg = Join-Path $env:USERPROFILE ".config"
+    $targetStarship = Join-Path $targetXdg "starship\starship.toml"
 
     if ($DryRun) {
-        Print-Warning "`[DRY RUN`] Would set user env XDG_CONFIG_HOME = $target"
+        Print-Warning "`[DRY RUN`] Would set user env XDG_CONFIG_HOME = $targetXdg"
+        Print-Warning "`[DRY RUN`] Would set user env STARSHIP_CONFIG = $targetStarship"
         return
     }
 
     try {
-        [Environment]::SetEnvironmentVariable("XDG_CONFIG_HOME", $target, "User")
-        $env:XDG_CONFIG_HOME = $target
-        Print-Success "XDG_CONFIG_HOME set to $target (user scope)."
+        [Environment]::SetEnvironmentVariable("XDG_CONFIG_HOME", $targetXdg, "User")
+        $env:XDG_CONFIG_HOME = $targetXdg
+        Print-Success "XDG_CONFIG_HOME set to $targetXdg (user scope)."
+
+        [Environment]::SetEnvironmentVariable("STARSHIP_CONFIG", $targetStarship, "User")
+        $env:STARSHIP_CONFIG = $targetStarship
+        Print-Success "STARSHIP_CONFIG set to $targetStarship (user scope)."
     }
     catch {
-        Print-Error "Failed to set XDG_CONFIG_HOME: $($_.Exception.Message)"
+        Print-Error "Failed to set environment variables: $($_.Exception.Message)"
     }
 }
 
