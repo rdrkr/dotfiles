@@ -977,6 +977,63 @@ function Restore-WindowsStartup {
     }
 }
 
+# --- PowerShell Profile ---
+function Link-PowerShellProfile {
+    <#
+    .SYNOPSIS
+        Dot-sources the repo's profile.ps1 in the user's PowerShell profiles.
+    #>
+    Print-Header "Linking PowerShell profile..."
+
+    $repoProfile = Join-Path $ScriptDir "profile.ps1"
+    if (-not (Test-Path $repoProfile)) {
+        Print-Warning "profile.ps1 not found at $repoProfile. Skipping profile link."
+        return
+    }
+
+    # Support both Windows PowerShell 5.1 and PowerShell Core 7+
+    $docsPath = [Environment]::GetFolderPath('MyDocuments')
+    $profilePaths = @(
+        (Join-Path $docsPath "WindowsPowerShell\Microsoft.PowerShell_profile.ps1"),
+        (Join-Path $docsPath "PowerShell\Microsoft.PowerShell_profile.ps1")
+    )
+
+    foreach ($dest in $profilePaths) {
+        $destDir = Split-Path -Parent $dest
+        if (-not (Test-Path $destDir)) {
+            if ($DryRun) {
+                Print-Warning "`[DRY RUN`] Would create directory: $destDir"
+            } else {
+                New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+            }
+        }
+
+        if ($DryRun) {
+            Print-Warning "`[DRY RUN`] Would dot-source $repoProfile in $dest"
+            continue
+        }
+
+        try {
+            $sourceLine = ". `"$repoProfile`""
+            if (Test-Path $dest) {
+                $content = Get-Content $dest -Raw
+                if ($content -notmatch [regex]::Escape($sourceLine)) {
+                    Add-Content -Path $dest -Value "`n$sourceLine"
+                    Print-Success "Added dot-source to existing profile: $dest"
+                } else {
+                    Print-Success "Profile already dot-sources repo profile: $dest"
+                }
+            } else {
+                Set-Content -Path $dest -Value $sourceLine
+                Print-Success "Created new profile dot-sourcing repo profile: $dest"
+            }
+        }
+        catch {
+            Print-Error "Failed to set up profile at ${dest}: $($_.Exception.Message)"
+        }
+    }
+}
+
 # --- Windows Terminal ---
 function Link-WindowsTerminalSettings {
     <#
@@ -1422,6 +1479,9 @@ function Invoke-Restore {
     # so the package's LocalState folder exists (or is creatable).
     Link-WindowsTerminalSettings
 
+    # 10d. Link PowerShell Profile.
+    Link-PowerShellProfile
+
     # 11. Apply Windows theme + wallpaper
     Apply-WindowsTheme
 
@@ -1537,8 +1597,11 @@ function Invoke-Backup {
     if (Get-Command npm -ErrorAction SilentlyContinue) {
         if (-not $DryRun) {
             $npmPackages = npm list -g --depth=0 --parseable 2>$null |
-            Split-Path -Leaf |
-            Where-Object { $_ -notin @("npm", "corepack", "lib", "node_modules") }
+            ForEach-Object {
+                if ($_ -match 'node_modules[\\/](.+)$') {
+                    $matches[1] -replace '\\', '/'
+                }
+            } | Where-Object { $_ -notin @("npm", "corepack") }
             $npmPackages | Out-File -FilePath $NpmGlobalFile -Encoding utf8
             Print-Success "Global npm packages backed up to $NpmGlobalFile."
         }

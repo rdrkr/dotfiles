@@ -48,6 +48,7 @@ Oven-sh.Bun
 PlayStation.PlayStationAccessories
 Python.Launcher
 Python.Python.3.14
+RamenSoftware.Windhawk
 RandyRants.SharpKeys
 rsteube.Carapace
 Starship.Starship

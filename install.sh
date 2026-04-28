@@ -640,7 +640,7 @@ backup() {
   print_header "Backing up Global NPM Packages..."
   if command -v npm &>/dev/null; then
     if [ "$DRY_RUN" = false ]; then
-      npm list -g --depth=0 --parseable --silent | awk -F/ '{print $NF}' | grep -vE '^(npm|corepack|lib|node_modules)$' >"$NPM_GLOBAL_FILE"
+      npm list -g --depth=0 --parseable --silent | sed -n 's|.*/node_modules/||p' | grep -vE '^(npm|corepack)$' >"$NPM_GLOBAL_FILE"
       print_success "Global npm packages backed up to $NPM_GLOBAL_FILE."
     else
       print_warning "[DRY RUN] Would backup global npm packages to $NPM_GLOBAL_FILE"
