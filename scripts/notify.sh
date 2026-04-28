@@ -1,8 +1,9 @@
 #!/bin/bash
 # Copyright (c) 2026 by Ronen Druker.
 #
-# Generic macOS notification script using alerter (https://github.com/vjeantet/alerter).
-# Sends native notifications with tmux session/window context and click-to-focus.
+# Generic macOS, Linux, and Windows notification script.
+# Uses alerter on macOS, notify-send on Linux, and PowerShell on Windows/WSL.
+# Sends native notifications with tmux session/window context and click-to-focus (macOS).
 #
 # Usage:
 #   notify.sh [options]
@@ -46,6 +47,21 @@ readonly DEFAULT_TITLE="Notification"
 readonly DEFAULT_SOUND="default"
 readonly DEFAULT_TIMEOUT="0"
 
+# OS Detection
+OS="$(uname -s)"
+case "$OS" in
+  Linux*)
+    if grep -qi microsoft /proc/version 2>/dev/null; then
+      OS_TYPE="WSL"
+    else
+      OS_TYPE="Linux"
+    fi
+    ;;
+  Darwin*)    OS_TYPE="macOS" ;;
+  CYGWIN*|MINGW*|MSYS*) OS_TYPE="Windows" ;;
+  *)          OS_TYPE="Unknown" ;;
+esac
+
 # All options with a value argument
 readonly OPTIONS_WITH_VALUE=(
   --title --subtitle --message --sound --app-icon --sender --group
@@ -64,9 +80,8 @@ show_help() {
   cat <<EOF
 Usage: ${SCRIPT_NAME} [options]
 
-Send macOS notifications with tmux context and click-to-focus.
-Uses alerter (https://github.com/vjeantet/alerter) when available,
-falls back to osascript.
+Send macOS, Linux, or Windows notifications with tmux context.
+Uses alerter on macOS, notify-send on Linux, and PowerShell on Windows.
 
 Options:
   --title <title>             Notification title (default: "${DEFAULT_TITLE}")
@@ -120,8 +135,10 @@ _notify_sh() {
 
     case "$prev" in
         --sound)
-            local sounds
-            sounds=$(find /System/Library/Sounds -name '*.aiff' -exec basename {} .aiff \; 2>/dev/null)
+            local sounds=""
+            if [ -d /System/Library/Sounds ]; then
+                sounds=$(find /System/Library/Sounds -name '*.aiff' -exec basename {} .aiff \; 2>/dev/null)
+            fi
             COMPREPLY=($(compgen -W "$sounds" -- "$cur"))
             return 0
             ;;
@@ -147,7 +164,11 @@ BASH_COMP
 # zsh completion for notify.sh
 _notify_sh() {
     local -a sounds
-    sounds=(${(f)"$(find /System/Library/Sounds -name '*.aiff' -exec basename {} .aiff \; 2>/dev/null)"})
+    if [ -d /System/Library/Sounds ]; then
+        sounds=(${(f)"$(find /System/Library/Sounds -name '*.aiff' -exec basename {} .aiff \; 2>/dev/null)"})
+    else
+        sounds=()
+    fi
 
     _arguments -s \
         '--title[Notification title]:title:' \
@@ -347,12 +368,14 @@ should_suppress_notification() {
     return 1
   else
     # Fallback: check if a terminal app is frontmost (less accurate with multiple instances)
-    local frontmost frontmost_lower
-    frontmost=$(osascript -e 'tell application "System Events" to get name of first application process whose frontmost is true' 2>/dev/null || echo "")
-    frontmost_lower=$(echo "$frontmost" | tr '[:upper:]' '[:lower:]')
-    case "$frontmost_lower" in
-    terminal | iterm2 | alacritty | kitty | wezterm | ghostty) return 0 ;;
-    esac
+    if [ "$OS_TYPE" = "macOS" ]; then
+      local frontmost frontmost_lower
+      frontmost=$(osascript -e 'tell application "System Events" to get name of first application process whose frontmost is true' 2>/dev/null || echo "")
+      frontmost_lower=$(echo "$frontmost" | tr '[:upper:]' '[:lower:]')
+      case "$frontmost_lower" in
+      terminal | iterm2 | alacritty | kitty | wezterm | ghostty) return 0 ;;
+      esac
+    fi
   fi
 
   return 1
@@ -387,6 +410,9 @@ get_tmux_context() {
 ## maps TERM_PROGRAM (resolving through tmux if needed).
 get_terminal_bundle_id() {
   TERM_BUNDLE_ID="${__CFBundleIdentifier:-}"
+  if [ "$OS_TYPE" != "macOS" ]; then
+    return
+  fi
   if [ -z "$TERM_BUNDLE_ID" ]; then
     local term_prog="${TERM_PROGRAM:-}"
     if [ "$term_prog" = "tmux" ] && [ -n "${TMUX:-}" ]; then
@@ -459,38 +485,44 @@ get_terminal_pid() {
 build_click_command() {
   CLICK_CMD=""
 
-  if [ -n "$TERM_PID" ]; then
-    CLICK_CMD="/usr/bin/osascript -e 'tell application \"System Events\"
-        try
-            set p to first process whose unix id is ${TERM_PID}
-            set frontmost of p to true
-            try
-                repeat with w in windows of p
-                    if name of w contains \"${TMUX_SESSION}\" then
-                        perform action \"AXRaise\" of w
-                        exit repeat
-                    end if
-                end repeat
-            end try
-        end try
-    end tell'"
-  fi
+  if [ "$OS_TYPE" = "macOS" ]; then
+    if [ -n "$TERM_PID" ]; then
+      CLICK_CMD="/usr/bin/osascript -e 'tell application \"System Events\"
+          try
+              set p to first process whose unix id is ${TERM_PID}
+              set frontmost of p to true
+              try
+                  repeat with w in windows of p
+                      if name of w contains \"${TMUX_SESSION}\" then
+                          perform action \"AXRaise\" of w
+                          exit repeat
+                      end if
+                  end repeat
+              end try
+          end try
+      end tell'"
+    fi
 
-  if [ -n "$TERM_BUNDLE_ID" ]; then
-    if [ -n "$CLICK_CMD" ]; then
-      CLICK_CMD="${CLICK_CMD} || /usr/bin/open -b '${TERM_BUNDLE_ID}'"
-    else
-      CLICK_CMD="/usr/bin/open -b '${TERM_BUNDLE_ID}'"
+    if [ -n "$TERM_BUNDLE_ID" ]; then
+      if [ -n "$CLICK_CMD" ]; then
+        CLICK_CMD="${CLICK_CMD} || /usr/bin/open -b '${TERM_BUNDLE_ID}'"
+      else
+        CLICK_CMD="/usr/bin/open -b '${TERM_BUNDLE_ID}'"
+      fi
     fi
   fi
 
-  if [ -n "$CLICK_CMD" ]; then
-    local tmux_bin
-    tmux_bin=$(command -v tmux 2>/dev/null || echo "")
-    if [ -n "$tmux_bin" ] && [ -n "${TMUX:-}" ] && [ -n "${TMUX_PANE:-}" ] && [ -n "${TMUX_SESSION:-}" ] && [ -n "${TMUX_WIN_INDEX:-}" ]; then
-      local t_opt=""
-      [ -n "$TARGET_CLIENT" ] && t_opt="-c '${TARGET_CLIENT}'"
-      CLICK_CMD="${CLICK_CMD} && '${tmux_bin}' switch-client ${t_opt} -t '${TMUX_SESSION}' && '${tmux_bin}' select-window -t '${TMUX_SESSION}:${TMUX_WIN_INDEX}' && '${tmux_bin}' select-pane -t '${TMUX_PANE}'"
+  local tmux_bin
+  tmux_bin=$(command -v tmux 2>/dev/null || echo "")
+  if [ -n "$tmux_bin" ] && [ -n "${TMUX:-}" ] && [ -n "${TMUX_PANE:-}" ] && [ -n "${TMUX_SESSION:-}" ] && [ -n "${TMUX_WIN_INDEX:-}" ]; then
+    local t_cmd="'${tmux_bin}' switch-client"
+    [ -n "$TARGET_CLIENT" ] && t_cmd="${t_cmd} -c '${TARGET_CLIENT}'"
+    t_cmd="${t_cmd} -t '${TMUX_SESSION}' && '${tmux_bin}' select-window -t '${TMUX_SESSION}:${TMUX_WIN_INDEX}' && '${tmux_bin}' select-pane -t '${TMUX_PANE}'"
+    
+    if [ -n "$CLICK_CMD" ]; then
+      CLICK_CMD="${CLICK_CMD} && ${t_cmd}"
+    else
+      CLICK_CMD="${t_cmd}"
     fi
   fi
 }
@@ -669,13 +701,83 @@ send_notification_osascript() {
   fi
 }
 
-## play_sound - Plays the notification sound via afplay (routes through system
-## audio, capturable by BlackHole etc.).
-play_sound() {
-  local sound_file="/System/Library/Sounds/${ARG_SOUND}.aiff"
-  if [ -f "$sound_file" ]; then
-    afplay "$sound_file" &
+## send_notification_linux - Sends a notification using notify-send on Linux.
+send_notification_linux() {
+  local title="$ARG_TITLE"
+  if [ -n "$SUBTITLE" ]; then
+    title="$title - $SUBTITLE"
   fi
+  local cmd=(notify-send)
+  [ -n "$ARG_APP_ICON" ] && cmd+=(-i "$ARG_APP_ICON")
+  [ -n "$ARG_TIMEOUT" ] && [ "$ARG_TIMEOUT" != "0" ] && cmd+=(-t "$((ARG_TIMEOUT * 1000))")
+  cmd+=("$title" "$ARG_MESSAGE")
+  
+  "${cmd[@]}" 2>/dev/null || true
+}
+
+## send_notification_windows - Sends a notification using PowerShell on Windows/WSL.
+send_notification_windows() {
+  local title="$ARG_TITLE"
+  if [ -n "$SUBTITLE" ]; then
+    title="$title - $SUBTITLE"
+  fi
+  # Escape single quotes for PowerShell
+  local safe_title="${title//\'/\'\'}"
+  local safe_message="${ARG_MESSAGE//\'/\'\'}"
+  
+  if command -v powershell.exe >/dev/null; then
+    local ps_script="
+      \$ErrorActionPreference = 'Stop'
+      try {
+        if (Get-Module -ListAvailable -Name BurntToast) {
+          New-BurntToastNotification -Text '$safe_title', '$safe_message'
+        } else {
+          [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+          [Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null
+          \$xml = @\"
+<toast><visual><binding template=\"ToastText02\"><text id=\"1\">$safe_title</text><text id=\"2\">$safe_message</text></binding></visual></toast>
+\"@
+          \$doc = New-Object Windows.Data.Xml.Dom.XmlDocument
+          \$doc.LoadXml(\$xml)
+          \$toast = New-Object Windows.UI.Notifications.ToastNotification(\$doc)
+          [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('PowerShell').Show(\$toast)
+        }
+      } catch {
+        [reflection.assembly]::loadwithpartialname('System.Windows.Forms') | Out-Null
+        \$notify = new-object system.windows.forms.notifyicon
+        \$notify.icon = [System.Drawing.SystemIcons]::Information
+        \$notify.visible = \$true
+        \$notify.showballoontip(10000, '$safe_title', '$safe_message', [system.windows.forms.tooltipicon]::None)
+        Start-Sleep -Seconds 3
+        \$notify.Dispose()
+      }
+    "
+    powershell.exe -NoProfile -Command "$ps_script" >/dev/null 2>&1 &
+  fi
+}
+
+## play_sound - Plays the notification sound depending on the OS.
+play_sound() {
+  case "$OS_TYPE" in
+    macOS)
+      local sound_file="/System/Library/Sounds/${ARG_SOUND}.aiff"
+      if [ -f "$sound_file" ]; then
+        afplay "$sound_file" &
+      fi
+      ;;
+    Linux)
+      if command -v paplay >/dev/null; then
+        paplay /usr/share/sounds/freedesktop/stereo/message.oga >/dev/null 2>&1 &
+      elif command -v aplay >/dev/null; then
+        aplay /usr/share/sounds/alsa/Front_Center.wav >/dev/null 2>&1 &
+      fi
+      ;;
+    WSL|Windows)
+      if command -v powershell.exe >/dev/null; then
+        powershell.exe -NoProfile -Command "[System.Media.SystemSounds]::Asterisk.Play()" >/dev/null 2>&1 &
+      fi
+      ;;
+  esac
 }
 
 # =============================================================================
@@ -713,8 +815,21 @@ main() {
   build_click_command
   build_subtitle
 
-  # Send notification
-  send_notification_alerter
+  # Send notification based on OS
+  case "$OS_TYPE" in
+    macOS)
+      send_notification_alerter
+      ;;
+    Linux)
+      send_notification_linux
+      ;;
+    WSL|Windows)
+      send_notification_windows
+      ;;
+    *)
+      send_notification_linux
+      ;;
+  esac
 
   # Play sound via system audio
   play_sound

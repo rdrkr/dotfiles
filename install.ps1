@@ -1346,6 +1346,12 @@ function Invoke-Restore {
                 }
             }
             Print-Success "Scoop packages installed."
+
+            # Automatically setup clink autorun if installed
+            if (Get-Command clink -ErrorAction SilentlyContinue) {
+                Run-Command "clink autorun install"
+                Run-Command "clink installscripts $env:USERPROFILE\.config\clink"
+            }
         }
         else {
             Print-Warning "scoop not found. Skipping scoop package installation."
