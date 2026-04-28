@@ -62,8 +62,6 @@ brew "fd"
 brew "ffmpeg-full"
 # Command-line fuzzy finder written in Go
 brew "fzf"
-# Interact with Google Gemini AI models from the command-line
-brew "gemini-cli"
 # GitHub command-line tool
 brew "gh"
 # Interpreter for PostScript and PDF
