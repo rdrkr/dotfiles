@@ -754,8 +754,12 @@ function Backup-WindowsLockScreen {
         Where-Object { $_.FullName -ne $dest } |
         Remove-Item -Force -ErrorAction SilentlyContinue
 
-    Copy-Item -Path $source -Destination $dest -Force
-    Print-Success "Lock screen image backed up to $dest."
+    if ($source -ne $dest) {
+        Copy-Item -Path $source -Destination $dest -Force
+        Print-Success "Lock screen image backed up to $dest."
+    } else {
+        Print-Success "Lock screen image already backed up."
+    }
 }
 
 function Apply-WindowsLockScreen {

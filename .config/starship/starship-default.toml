@@ -22,7 +22,8 @@ zsh_indicator = ""
 nu_indicator = "󰅂"
 
 [username]
-disabled = true
+disabled = false
+aliases = { "Administrator" = "rdrkr" }
 
 [aws]
 symbol = " "
