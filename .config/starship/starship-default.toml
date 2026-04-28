@@ -1,13 +1,28 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
 # Hide empty line when no modules are active
-format = """$all$fill$time$line_break\
+format = """$all$fill$shell$time$line_break\
 $character"""
 
 add_newline = false
 
 [line_break]
 disabled = false
+
+[fill]
+symbol = " "
+
+[shell]
+disabled = false
+bash_indicator = ""
+cmd_indicator = ""
+fish_indicator = "󰈺"
+powershell_indicator = ""
+zsh_indicator = ""
+nu_indicator = "󰅂"
+
+[username]
+disabled = true
 
 [aws]
 symbol = " "
@@ -216,7 +231,7 @@ symbol = " "
 [time]
 disabled = false
 time_format = "%R"
-format = " $time "
+format = "$time "
 
 [character]
 disabled = false

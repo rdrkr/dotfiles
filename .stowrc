@@ -1,7 +1,9 @@
 --ignore=.stowrc
 --ignore=install.sh
 --ignore=install.ps1
+--ignore=profile.ps1
 --ignore=DS_Store
 --ignore=.markdownlint-cli2.yaml
 --ignore=.pre-commit-config.yaml
+--ignore=.gitattributes
 
