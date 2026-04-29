@@ -515,7 +515,6 @@ restore() {
     fi
 
     print_header "Setting up default macOS applications..."
-    run_command "source \"${HOME}/.zshrc\""
     if command -v infat &>/dev/null; then
       run_command "infat --config ~/.config/infat/config.toml"
       if [ $? -ne 0 ] && [ "$DRY_RUN" = false ]; then
