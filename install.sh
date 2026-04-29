@@ -618,6 +618,16 @@ restore() {
     fi
   fi
 
+  # 7. Initialize pre-commit
+  print_header "Setting up pre-commit..."
+  if command -v pre-commit &>/dev/null; then
+    run_command "pre-commit install"
+    run_command "pre-commit run --all-files"
+    print_success "pre-commit installed and run."
+  else
+    print_warning "pre-commit not found. Skipping pre-commit setup."
+  fi
+
   echo -e "
 ${C_GREEN}All done! Your dotfiles are set up.${NC}
 "

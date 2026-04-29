@@ -194,7 +194,7 @@ alias v='nvim'
 alias lg='lazygit'
 alias ld='lazydocker'
 alias c='clear'
-alias ua='npx tsx ~/dotfiles/scripts/run-tasks/run-tasks.ts ~/dotfiles/scripts/run-tasks/update-all.yaml'
+alias ua='npx tsx ~/dotfiles/scripts/run-tasks/run-tasks.ts ~/dotfiles/scripts/run-tasks/update-${_OS}.yaml'
 
 ## claude code aliases
 alias cc='claude --dangerously-skip-permissions --channels plugin:telegram@claude-plugins-official'

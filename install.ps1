@@ -1504,6 +1504,17 @@ function Invoke-Restore {
         Invoke-WslInstall -Subcommand 'restore'
     }
 
+    # 13. Initialize pre-commit
+    Print-Header "Setting up pre-commit..."
+    if (Get-Command pre-commit -ErrorAction SilentlyContinue) {
+        Run-Command "pre-commit install"
+        Run-Command "pre-commit run --all-files"
+        Print-Success "pre-commit installed and run."
+    }
+    else {
+        Print-Warning "pre-commit not found. Skipping pre-commit setup."
+    }
+
     Write-Host ""
     Write-Host "${C_GREEN}All done! Your dotfiles are set up.${NC}"
     Write-Host ""

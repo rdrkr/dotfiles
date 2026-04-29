@@ -1,0 +1,64 @@
+# Copyright (c) 2026, Ronen Druker. All rights reserved.
+
+name: update-windows
+description: Update all system tools and packages on Windows
+usage: ua [options]
+
+groups:
+  - title: Updating winget packages
+    tasks:
+      - title: Upgrading winget packages
+        command: powershell
+        args: [-NoProfile, -Command, "winget upgrade --all --include-unknown --accept-package-agreements --accept-source-agreements"]
+        verbose: true
+
+  - title: Updating scoop packages
+    tasks:
+      - title: Updating scoop
+        command: powershell
+        args: [-NoProfile, -Command, "scoop update"]
+        verbose: true
+      - title: Upgrading scoop packages
+        command: powershell
+        args: [-NoProfile, -Command, "scoop update *"]
+
+  - title: Updating global npm packages
+    tasks:
+      - title: Upgrading global npm packages
+        command: powershell
+        args: [-NoProfile, -Command, "$pkgs = Get-Content ~/dotfiles/.config/npm-global-packages.txt | Select-String -Pattern '^\\s*(#|$)' -NotMatch | Select-Object -ExpandProperty Line; if ($pkgs) { npm install -g $pkgs }"]
+        verbose: true
+
+  - title: Updating pipx packages
+    tasks:
+      - title: Upgrading pipx packages
+        command: powershell
+        args: [-NoProfile, -Command, "pipx upgrade-all"]
+
+  - title: Updating bun packages
+    tasks:
+      - title: Upgrading bun
+        command: powershell
+        args: [-NoProfile, -Command, "bun upgrade"]
+
+  - title: Updating LazyVim
+    tasks:
+      - title: Syncing LazyVim
+        command: powershell
+        args: [-NoProfile, -Command, "nvim --headless '+Lazy! sync' +qa"]
+      - title: Updating LazyVim
+        command: powershell
+        args: [-NoProfile, -Command, "nvim --headless '+Lazy! update' +qa"]
+      - title: Updating Mason
+        command: powershell
+        args: [-NoProfile, -Command, "nvim --headless +MasonUpdateAll +qa"]
+      - title: Updating Treesitter
+        command: powershell
+        args: [-NoProfile, -Command, "nvim --headless +TSUpdate +qa"]
+
+  - title: Updating pre-commit
+    tasks:
+      - title: Upgrading pre-commit hooks
+        command: powershell
+        args: [-NoProfile, -Command, "pre-commit autoupdate"]
+        cwd: ~/dotfiles

@@ -1,37 +1,52 @@
 # Copyright (c) 2026, Ronen Druker. All rights reserved.
 
-name: update-all
-description: Update all system tools and packages
+name: update-linux
+description: Update all system tools and packages on Linux
 usage: ua [options]
 
 groups:
+  - title: Updating System Packages
+    tasks:
+      - title: Upgrading system packages
+        command: bash
+        args:
+          [
+            -c,
+            'if command -v apt-get >/dev/null; then sudo apt-get update && sudo apt-get upgrade -y; elif command -v dnf >/dev/null; then sudo dnf upgrade -y; elif command -v pacman >/dev/null; then sudo pacman -Syu --noconfirm; elif command -v zypper >/dev/null; then sudo zypper update -y; else echo "No supported package manager found"; exit 1; fi'
+          ]
+        verbose: true
+
   - title: Updating Homebrew
     tasks:
       - title: Updating Homebrew
-        command: brew
-        args: [update]
+        command: bash
+        args: [-c, 'if command -v brew >/dev/null; then brew update; else echo "brew not found"; fi']
         verbose: true
       - title: Upgrading Homebrew packages
-        command: brew
-        args: [upgrade]
-      - title: Upgrading App Store apps
-        command: mas
-        args: [upgrade]
+        command: bash
+        args: [-c, 'if command -v brew >/dev/null; then brew upgrade; else echo "brew not found"; fi']
       - title: Cleaning up Homebrew
-        command: brew
-        args: [cleanup, "--prune=all"]
+        command: bash
+        args: [-c, 'if command -v brew >/dev/null; then brew cleanup --prune=all; else echo "brew not found"; fi']
 
   - title: Updating global npm packages
     tasks:
       - title: Upgrading global npm packages
-        command: npm
-        args: [upgrade, "--global"]
+        command: bash
+        args: [-c, 'pkgs=$(grep -v "^#" ~/dotfiles/.config/npm-global-packages.txt | xargs); if [ -n "$pkgs" ]; then npm install -g $pkgs; fi']
+        verbose: true
 
   - title: Updating pipx packages
     tasks:
       - title: Upgrading pipx packages
-        command: pipx
-        args: [upgrade-all]
+        command: bash
+        args: [-c, 'if command -v pipx >/dev/null; then pipx upgrade-all; else echo "pipx not found"; fi']
+
+  - title: Updating bun packages
+    tasks:
+      - title: Upgrading bun
+        command: bash
+        args: [-c, 'if command -v bun >/dev/null; then bun upgrade; else echo "bun not found"; fi']
 
   - title: Updating zinit
     tasks:

@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "tsx run-tasks.ts update-all.yaml"
+    "start": "tsx run-tasks.ts update-macos.yaml"
   },
   "dependencies": {
     "tasuku": "^3.0.0-beta.5",

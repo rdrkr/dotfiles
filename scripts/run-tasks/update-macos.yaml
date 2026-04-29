@@ -1,0 +1,93 @@
+# Copyright (c) 2026, Ronen Druker. All rights reserved.
+
+name: update-macos
+description: Update all system tools and packages on macOS
+usage: ua [options]
+
+groups:
+  - title: Updating Homebrew
+    tasks:
+      - title: Updating Homebrew
+        command: brew
+        args: [update]
+        verbose: true
+      - title: Upgrading Homebrew packages
+        command: brew
+        args: [upgrade]
+      - title: Upgrading App Store apps
+        command: mas
+        args: [upgrade]
+      - title: Cleaning up Homebrew
+        command: brew
+        args: [cleanup, "--prune=all"]
+
+  - title: Updating global npm packages
+    tasks:
+      - title: Upgrading global npm packages
+        command: bash
+        args: [-c, 'pkgs=$(grep -v "^#" ~/dotfiles/.config/npm-global-packages.txt | xargs); if [ -n "$pkgs" ]; then npm install -g $pkgs; fi']
+        verbose: true
+
+  - title: Updating pipx packages
+    tasks:
+      - title: Upgrading pipx packages
+        command: pipx
+        args: [upgrade-all]
+
+  - title: Updating bun packages
+    tasks:
+      - title: Upgrading bun
+        command: bun
+        args: [upgrade]
+
+  - title: Updating zinit
+    tasks:
+      - title: Updating zinit
+        command: zsh
+        args:
+          [
+            -l,
+            -c,
+            'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh"
+              && zinit self-update',
+          ]
+      - title: Updating zinit plugins
+        command: zsh
+        args:
+          [
+            -l,
+            -c,
+            'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh"
+              && zinit update --quiet --all',
+          ]
+      - title: Clearing zinit cache
+        command: zsh
+        args:
+          [
+            -l,
+            -c,
+            'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh"
+              && zinit cclear',
+          ]
+
+  - title: Updating LazyVim
+    tasks:
+      - title: Syncing LazyVim
+        command: nvim
+        args: [--headless, "+Lazy! sync", +qa]
+      - title: Updating LazyVim
+        command: nvim
+        args: [--headless, "+Lazy! update", +qa]
+      - title: Updating Mason
+        command: nvim
+        args: [--headless, +MasonUpdateAll, +qa]
+      - title: Updating Treesitter
+        command: nvim
+        args: [--headless, +TSUpdate, +qa]
+
+  - title: Updating pre-commit
+    tasks:
+      - title: Upgrading pre-commit hooks
+        command: pre-commit
+        args: [autoupdate]
+        cwd: ~/dotfiles

@@ -80,7 +80,7 @@ function lg { lazygit @args }
 function ld { lazydocker @args }
 function c { Clear-Host }
 
-function ua { npx tsx "$env:USERPROFILE\dotfiles\scripts\run-tasks\run-tasks.ts" "$env:USERPROFILE\dotfiles\scripts\run-tasks\update-all.yaml" }
+function ua { npx tsx "$env:USERPROFILE\dotfiles\scripts\run-tasks\run-tasks.ts" "$env:USERPROFILE\dotfiles\scripts\run-tasks\update-$($global:_OS).yaml" }
 
 # claude code aliases
 function cc { claude --dangerously-skip-permissions --channels plugin:telegram@claude-plugins-official @args }
