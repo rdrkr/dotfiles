@@ -4,6 +4,7 @@ astral-sh.ruff
 astral-sh.uv
 AutoHotkey.AutoHotkey
 Beeper.Beeper
+BrechtSanders.WinLibs.POSIX.UCRT
 DEVCOM.JetBrainsMonoNerdFont
 DEVCOM.Lua
 Docker.Buildx
@@ -12,6 +13,7 @@ Git.Git
 GitHub.cli
 Gitleaks.Gitleaks
 glzr-io.glazewm
+GoLang.Go
 Google.AndroidStudio
 Google.Chrome
 Inkscape.Inkscape
@@ -23,6 +25,7 @@ JetBrains.IntelliJIDEA
 junegunn.fzf
 Microsoft.AppInstaller
 Microsoft.DotNet.DesktopRuntime.8
+Microsoft.DotNet.SDK.10
 Microsoft.Edge
 Microsoft.OneDrive
 Microsoft.OpenJDK.21
@@ -50,6 +53,7 @@ Python.Launcher
 Python.Python.3.14
 RamenSoftware.Windhawk
 RandyRants.SharpKeys
+relmer.MatrixRain
 rsteube.Carapace
 Starship.Starship
 SublimeHQ.SublimeText.4
