@@ -13,6 +13,10 @@
     },
     {
       "id": "Terminal.CopyToClipboard",
+      "keys": "win+c"
+    },
+    {
+      "id": "Terminal.CopyToClipboard",
       "keys": "ctrl+c"
     },
     {
@@ -26,6 +30,10 @@
     {
       "id": "Terminal.FindText",
       "keys": "ctrl+shift+f"
+    },
+    {
+      "id": "Terminal.PasteFromClipboard",
+      "keys": "win+v"
     },
     {
       "id": "Terminal.PasteFromClipboard",

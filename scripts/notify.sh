@@ -752,7 +752,7 @@ send_notification_windows() {
         \$notify.Dispose()
       }
     "
-    powershell.exe -NoProfile -Command "$ps_script" >/dev/null 2>&1 &
+    powershell.exe -WindowStyle Hidden -NoProfile -NonInteractive -Command "$ps_script" >/dev/null 2>&1 &
   fi
 }
 
@@ -774,7 +774,7 @@ play_sound() {
       ;;
     WSL|Windows)
       if command -v powershell.exe >/dev/null; then
-        powershell.exe -NoProfile -Command "[System.Media.SystemSounds]::Asterisk.Play()" >/dev/null 2>&1 &
+        powershell.exe -WindowStyle Hidden -NoProfile -NonInteractive -Command "[System.Media.SystemSounds]::Asterisk.Play()" >/dev/null 2>&1 &
       fi
       ;;
   esac

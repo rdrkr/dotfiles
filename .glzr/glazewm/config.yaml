@@ -175,33 +175,13 @@ keybindings:
     bindings: ['ctrl+alt+left']
 
   # Join
-  - commands: [
-      'focus --direction left',
-      'set-tiling-direction vertical',
-      'focus --direction right',
-      'move --direction left'
-    ]
+  - commands: ['shell-exec wscript "%USERPROFILE%\\.glzr\\glazewm\\scripts\\run-silent.vbs" node "%USERPROFILE%\\.glzr\\glazewm\\scripts\\join.mjs" left']
     bindings: ['ctrl+shift+alt+left']
-  - commands: [
-      'focus --direction down',
-      'set-tiling-direction horizontal',
-      'focus --direction up',
-      'move --direction down'
-    ]
+  - commands: ['shell-exec wscript "%USERPROFILE%\\.glzr\\glazewm\\scripts\\run-silent.vbs" node "%USERPROFILE%\\.glzr\\glazewm\\scripts\\join.mjs" down']
     bindings: ['ctrl+shift+alt+down']
-  - commands: [
-      'focus --direction up',
-      'set-tiling-direction horizontal',
-      'focus --direction down',
-      'move --direction up'
-    ]
+  - commands: ['shell-exec wscript "%USERPROFILE%\\.glzr\\glazewm\\scripts\\run-silent.vbs" node "%USERPROFILE%\\.glzr\\glazewm\\scripts\\join.mjs" up']
     bindings: ['ctrl+shift+alt+up']
-  - commands: [
-      'focus --direction right',
-      'set-tiling-direction vertical',
-      'focus --direction left',
-      'move --direction right'
-    ]
+  - commands: ['shell-exec wscript "%USERPROFILE%\\.glzr\\glazewm\\scripts\\run-silent.vbs" node "%USERPROFILE%\\.glzr\\glazewm\\scripts\\join.mjs" right']
     bindings: ['ctrl+shift+alt+right']
 
   # Move
