@@ -72,7 +72,7 @@
   "py-requirements.nvim": { "branch": "main", "commit": "025ba677503d2332b722ebefb10e82871ac8ef96" },
   "refactoring.nvim": { "branch": "master", "commit": "bcd819d06d88fa78e14f49a40f91c849bdf866bf" },
   "render-markdown.nvim": { "branch": "main", "commit": "3f3eea97b80839f629c951ca660ffd125bfa5b34" },
-  "rustaceanvim": { "branch": "main", "commit": "a5cb886005eaea18ada94cfc6f3a349c298274f7" },
+  "rustaceanvim": { "branch": "master", "commit": "b25d186481624964523fee34f44c529b101c7435" },
   "snacks.nvim": { "branch": "main", "commit": "ad9ede6a9cddf16cedbd31b8932d6dcdee9b716e" },
   "sqlite.lua": { "branch": "master", "commit": "50092d60feb242602d7578398c6eb53b4a8ffe7b" },
   "store.nvim": { "branch": "main", "commit": "bd894bd538c013c04d2b5bdae4eb5c83d3d38758" },
