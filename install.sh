@@ -506,6 +506,14 @@ restore() {
 
   # 2. macOS-only: Setup default applications with infat
   if [ "$OS_TYPE" = "macos" ]; then
+    print_header "Installing custom scripts..."
+    if [ -d "scripts/Nvim.app" ]; then
+      run_command "cp -R scripts/Nvim.app /Applications/"
+      print_success "Nvim.app copied to /Applications."
+    else
+      print_warning "scripts/Nvim.app not found. Skipping."
+    fi
+
     print_header "Setting up default macOS applications..."
     run_command "source \"${HOME}/.zshrc\""
     if command -v infat &>/dev/null; then

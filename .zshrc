@@ -20,7 +20,7 @@ if command -v brew &>/dev/null; then
   export FPATH="$(brew --prefix)/share/zsh-completions:${FPATH}"
 fi
 
-if [[ -f "${HOME}/.env" ]] then
+if [[ -f "${HOME}/.env" ]]; then
   source "${HOME}/.env"
 fi
 
