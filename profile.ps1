@@ -78,6 +78,7 @@ function vim { nvim @args }
 function v { nvim @args }
 function lg { lazygit @args }
 function ld { lazydocker @args }
+function open { start @args }
 function c { Clear-Host }
 
 function ua { npx tsx "$env:USERPROFILE\dotfiles\scripts\run-tasks\run-tasks.ts" "$env:USERPROFILE\dotfiles\scripts\run-tasks\update-$($global:_OS).yaml" }

@@ -364,7 +364,7 @@ function Create-Symlinks {
 
     # Helper: create a junction at $dest pointing to $src.
     function New-JunctionLink($dest, $src, $label) {
-        if (Test-Path $dest) {
+        if (Test-Path -LiteralPath $dest) {
             Print-Warning "Already exists, skipping: $dest"
             $script:skipped++
             return
@@ -374,7 +374,9 @@ function Create-Symlinks {
             return
         }
         try {
-            New-Item -ItemType Junction -Path $dest -Target $src -ErrorAction Stop | Out-Null
+            $escDest = [Management.Automation.WildcardPattern]::Escape($dest)
+            $escSrc = [Management.Automation.WildcardPattern]::Escape($src)
+            New-Item -ItemType Junction -Path $escDest -Target $escSrc -ErrorAction Stop | Out-Null
             Print-Success "Linked: $dest -> $src"
             $script:linked++
         }
@@ -386,7 +388,7 @@ function Create-Symlinks {
 
     # Helper: create a hardlink at $dest pointing to $src.
     function New-FileLink($dest, $src, $label) {
-        if (Test-Path $dest) {
+        if (Test-Path -LiteralPath $dest) {
             Print-Warning "Already exists, skipping: $dest"
             $script:skipped++
             return
@@ -396,7 +398,9 @@ function Create-Symlinks {
             return
         }
         try {
-            New-Item -ItemType HardLink -Path $dest -Target $src -ErrorAction Stop | Out-Null
+            $escDest = [Management.Automation.WildcardPattern]::Escape($dest)
+            $escSrc = [Management.Automation.WildcardPattern]::Escape($src)
+            New-Item -ItemType HardLink -Path $escDest -Target $escSrc -ErrorAction Stop | Out-Null
             Print-Success "Linked: $dest -> $src"
             $script:linked++
         }
@@ -490,6 +494,66 @@ function Enable-DeveloperMode {
     }
     catch {
         Print-Error "Failed to enable Developer Mode: $($_.Exception.Message)"
+    }
+}
+
+# --- Fonts ---
+function Install-Fonts {
+    <#
+    .SYNOPSIS
+        Installs all fonts from .config\fonts and applies the SF Pro Display registry tweak.
+    #>
+    Print-Header "Installing fonts..."
+
+    $fontsDir = Join-Path $ScriptDir ".config\fonts"
+    if (-not (Test-Path $fontsDir)) {
+        Print-Warning "Fonts directory not found: $fontsDir. Skipping."
+        return
+    }
+
+    if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would install fonts from $fontsDir"
+        Print-Warning "`[DRY RUN`] Would apply font registry tweaks."
+        return
+    }
+
+    try {
+        $fontFiles = Get-ChildItem -Path $fontsDir -Include *.ttf,*.otf -Recurse -File
+        $systemFontsDir = [Environment]::GetFolderPath('Fonts')
+        $regKey = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"
+        $installed = 0
+
+        foreach ($font in $fontFiles) {
+            $destPath = Join-Path $systemFontsDir $font.Name
+            if (-not (Test-Path -LiteralPath $destPath)) {
+                Copy-Item -LiteralPath $font.FullName -Destination $destPath -Force
+                $fontName = $font.BaseName
+                if ($font.Extension -match '\.ttf') { $fontName += " (TrueType)" }
+                elseif ($font.Extension -match '\.otf') { $fontName += " (OpenType)" }
+                New-ItemProperty -Path $regKey -Name $fontName -Value $font.Name -PropertyType String -Force -ErrorAction SilentlyContinue | Out-Null
+                $installed++
+            }
+        }
+        
+        if ($installed -gt 0) {
+            Print-Success "Installed $installed new font(s)."
+        } else {
+            Print-Success "All fonts already installed."
+        }
+
+        # Apply the registry file
+        $regFile = Join-Path $fontsDir "SF Pro Display.reg"
+        if (Test-Path $regFile) {
+            & reg import $regFile *> $null
+            if ($LASTEXITCODE -eq 0) {
+                Print-Success "Applied font registry tweaks ($($regFile | Split-Path -Leaf))."
+            } else {
+                Print-Error "Failed to apply font registry tweaks (exit $LASTEXITCODE)."
+            }
+        }
+    }
+    catch {
+        Print-Error "Failed to install fonts: $($_.Exception.Message)"
     }
 }
 
@@ -910,9 +974,10 @@ function Backup-WindowsStartup {
     $items = Get-ChildItem -Path $startupFolder -Force -ErrorAction SilentlyContinue
     if ($items) {
         foreach ($item in $items) {
+            if ($item.Name -eq "KeyboardLayout.lnk") { continue }
             Copy-Item -LiteralPath $item.FullName -Destination $StartupFolderDir -Force
         }
-        Print-Success "Copied $($items.Count) startup folder item(s) to $StartupFolderDir."
+        Print-Success "Copied startup folder item(s) to $StartupFolderDir."
     }
     else {
         Print-Success "Startup folder is empty."
@@ -1083,7 +1148,7 @@ function Link-WindowsTerminalSettings {
     foreach ($src in $sources) {
         $dest = Join-Path $WindowsTerminalLocalState $src.Name
         try {
-            if (Test-Path $dest) {
+            if (Test-Path -LiteralPath $dest) {
                 $srcHash = (Get-FileHash -LiteralPath $src.FullName).Hash
                 $dstHash = (Get-FileHash -LiteralPath $dest).Hash
                 if ($srcHash -eq $dstHash) {
@@ -1095,7 +1160,9 @@ function Link-WindowsTerminalSettings {
                     Print-Warning "Existing $dest backed up to $bak."
                 }
             }
-            New-Item -ItemType HardLink -Path $dest -Target $src.FullName -ErrorAction Stop | Out-Null
+            $escDest = [Management.Automation.WildcardPattern]::Escape($dest)
+            $escSrc = [Management.Automation.WildcardPattern]::Escape($src.FullName)
+            New-Item -ItemType HardLink -Path $escDest -Target $escSrc -ErrorAction Stop | Out-Null
             Print-Success "Linked: $dest -> $($src.FullName)"
         }
         catch {
@@ -1243,6 +1310,64 @@ function Invoke-WslInstall {
     }
     catch {
         Print-Error "WSL $Subcommand failed: $($_.Exception.Message)"
+    }
+}
+
+function Link-KeyboardScript {
+    <#
+    .SYNOPSIS
+        Detects if an Apple keyboard is connected and creates a shortcut in the
+        Startup folder to the appropriate AutoHotkey script.
+    #>
+    Print-Header "Linking keyboard AutoHotkey script..."
+
+    $startupFolder = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\Startup"
+    if (-not (Test-Path $startupFolder)) {
+        if ($DryRun) {
+            Print-Warning "`[DRY RUN`] Would create directory: $startupFolder"
+        } else {
+            New-Item -ItemType Directory -Path $startupFolder -Force | Out-Null
+        }
+    }
+
+    # Detect Apple keyboard (Vendor ID 05AC)
+    $isApple = $false
+    try {
+        $appleKeyboards = Get-CimInstance Win32_Keyboard -ErrorAction Stop | Where-Object { $_.PNPDeviceID -match 'VID_05AC' }
+        if ($appleKeyboards) {
+            $isApple = $true
+        }
+    }
+    catch {
+        Print-Warning "Failed to query keyboards: $($_.Exception.Message). Defaulting to Windows layout."
+    }
+
+    $scriptName = if ($isApple) { "mac-keyboard.ahk" } else { "windows-keyboard.ahk" }
+    $sourcePath = Join-Path $ScriptDir ".config\autohotkey\$scriptName"
+
+    if (-not (Test-Path $sourcePath)) {
+        Print-Warning "AutoHotkey script not found: $sourcePath. Skipping."
+        return
+    }
+
+    $shortcutPath = Join-Path $startupFolder "KeyboardLayout.lnk"
+
+    if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would link $scriptName to $shortcutPath"
+        return
+    }
+
+    try {
+        $WshShell = New-Object -ComObject WScript.Shell
+        $Shortcut = $WshShell.CreateShortcut($shortcutPath)
+        $Shortcut.TargetPath = $sourcePath
+        $Shortcut.WorkingDirectory = Split-Path -Parent $sourcePath
+        $Shortcut.Description = "Remaps keys for $scriptName"
+        $Shortcut.Save()
+        Print-Success "Linked $scriptName to Startup folder as $shortcutPath"
+    }
+    catch {
+        Print-Error "Failed to create shortcut: $($_.Exception.Message)"
     }
 }
 
@@ -1483,6 +1608,9 @@ function Invoke-Restore {
     # 10d. Link PowerShell Profile.
     Link-PowerShellProfile
 
+    # 10e. Install Fonts
+    Install-Fonts
+
     # 11. Apply Windows theme + wallpaper
     Apply-WindowsTheme
 
@@ -1492,6 +1620,7 @@ function Invoke-Restore {
     Restore-WindowsPersonalization
     Apply-WindowsLockScreen
     Restore-WindowsStartup
+    Link-KeyboardScript
 
     # 12. Run install.sh restore inside WSL so Linux-side state (apt, Linuxbrew,
     # stow, zsh) is set up to match. Skip on a fresh install -- the VM Platform

@@ -77,25 +77,20 @@ window_rules:
       - window_title: {regex: '[Pp]icture.in.[Pp]icture'}
         window_class: {regex: 'Chrome_WidgetWin_1|MozillaDialogClass'}
 
-  # Safari -> 1
+  # Browsers -> 1
   - commands: ['move --workspace 1']
     match:
-      - window_process: {regex: '(?i)safari'}
+      - window_process: {regex: '(?i)safari|chrome'}
 
-  # Warp -> 2
+  # Terminals -> 2
   - commands: ['move --workspace 2']
     match:
-      - window_process: {regex: '(?i)warp'}
+      - window_process: {regex: '(?i)terminal|warp'}
 
-  # IntelliJ, Xcode -> 3
+  # IDEs -> 3
   - commands: ['move --workspace 3']
     match:
-      - window_process: {regex: '(?i)intellij|idea|xcode'}
-
-  # Chrome -> 4
-  - commands: ['move --workspace 4']
-    match:
-      - window_process: {regex: '(?i)chrome'}
+      - window_process: {regex: '(?i)intellij|idea|xcode|visual|android'}      
 
   # Messages, WhatsApp, Beeper -> 5
   - commands: ['move --workspace 5']
@@ -178,6 +173,36 @@ keybindings:
     bindings: ['ctrl+alt+right']
   - commands: ['focus --prev-active-workspace']
     bindings: ['ctrl+alt+left']
+
+  # Join
+  - commands: [
+      'focus --direction left',
+      'set-tiling-direction vertical',
+      'focus --direction right',
+      'move --direction left'
+    ]
+    bindings: ['ctrl+shift+alt+left']
+  - commands: [
+      'focus --direction down',
+      'set-tiling-direction horizontal',
+      'focus --direction up',
+      'move --direction down'
+    ]
+    bindings: ['ctrl+shift+alt+down']
+  - commands: [
+      'focus --direction up',
+      'set-tiling-direction horizontal',
+      'focus --direction down',
+      'move --direction up'
+    ]
+    bindings: ['ctrl+shift+alt+up']
+  - commands: [
+      'focus --direction right',
+      'set-tiling-direction vertical',
+      'focus --direction left',
+      'move --direction right'
+    ]
+    bindings: ['ctrl+shift+alt+right']
 
   # Move
   - commands: ['move --direction left']
