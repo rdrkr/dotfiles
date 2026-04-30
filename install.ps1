@@ -1471,6 +1471,11 @@ function Link-KeyboardScript {
 
     $shortcutPath = Join-Path $startupFolder "KeyboardLayout.lnk"
 
+    if (Test-Path $shortcutPath) {
+        Print-Warning "Keyboard shortcut already exists: $shortcutPath. Skipping."
+        return
+    }
+
     if ($DryRun) {
         Print-Warning "`[DRY RUN`] Would link $scriptName to $shortcutPath"
         return

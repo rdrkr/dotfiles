@@ -73,7 +73,6 @@ window_rules:
   - commands: ['ignore']
     match:
       - window_process: {equals: 'zebar'}
-      # - window_process: {equals: 'explorer'}
       - window_title: {regex: '[Pp]icture.in.[Pp]icture'}
         window_class: {regex: 'Chrome_WidgetWin_1|MozillaDialogClass'}
 
@@ -90,7 +89,7 @@ window_rules:
   # IDEs -> 3
   - commands: ['move --workspace 3']
     match:
-      - window_process: {regex: '(?i)intellij|idea|xcode|visual|android'}      
+      - window_process: {regex: '(?i)intellij|idea|xcode|visual|android'}
 
   # Messages, WhatsApp, Beeper -> 5
   - commands: ['move --workspace 5']
@@ -146,13 +145,13 @@ binding_modes:
 keybindings:
   # Focus
   - commands: ['focus --direction left']
-    bindings: ['ctrl+left']
+    bindings: ['alt+ctrl+lwin+left']
   - commands: ['focus --direction down']
-    bindings: ['ctrl+down']
+    bindings: ['alt+ctrl+lwin+down']
   - commands: ['focus --direction up']
-    bindings: ['ctrl+up']
+    bindings: ['alt+ctrl+lwin+up']
   - commands: ['focus --direction right']
-    bindings: ['ctrl+right']
+    bindings: ['alt+ctrl+lwin+right']
 
   # Workspaces
   - commands: ['focus --workspace 1']
@@ -175,24 +174,44 @@ keybindings:
     bindings: ['ctrl+alt+left']
 
   # Join
-  - commands: ['shell-exec wscript "%USERPROFILE%\\.glzr\\glazewm\\scripts\\run-silent.vbs" node "%USERPROFILE%\\.glzr\\glazewm\\scripts\\join.mjs" left']
+  - commands:
+      [
+        'shell-exec wscript
+          "%USERPROFILE%\\.glzr\\glazewm\\scripts\\run-silent.vbs" node
+          "%USERPROFILE%\\.glzr\\glazewm\\scripts\\join.mjs" left',
+      ]
     bindings: ['ctrl+shift+alt+left']
-  - commands: ['shell-exec wscript "%USERPROFILE%\\.glzr\\glazewm\\scripts\\run-silent.vbs" node "%USERPROFILE%\\.glzr\\glazewm\\scripts\\join.mjs" down']
+  - commands:
+      [
+        'shell-exec wscript
+          "%USERPROFILE%\\.glzr\\glazewm\\scripts\\run-silent.vbs" node
+          "%USERPROFILE%\\.glzr\\glazewm\\scripts\\join.mjs" down',
+      ]
     bindings: ['ctrl+shift+alt+down']
-  - commands: ['shell-exec wscript "%USERPROFILE%\\.glzr\\glazewm\\scripts\\run-silent.vbs" node "%USERPROFILE%\\.glzr\\glazewm\\scripts\\join.mjs" up']
+  - commands:
+      [
+        'shell-exec wscript
+          "%USERPROFILE%\\.glzr\\glazewm\\scripts\\run-silent.vbs" node
+          "%USERPROFILE%\\.glzr\\glazewm\\scripts\\join.mjs" up',
+      ]
     bindings: ['ctrl+shift+alt+up']
-  - commands: ['shell-exec wscript "%USERPROFILE%\\.glzr\\glazewm\\scripts\\run-silent.vbs" node "%USERPROFILE%\\.glzr\\glazewm\\scripts\\join.mjs" right']
+  - commands:
+      [
+        'shell-exec wscript
+          "%USERPROFILE%\\.glzr\\glazewm\\scripts\\run-silent.vbs" node
+          "%USERPROFILE%\\.glzr\\glazewm\\scripts\\join.mjs" right',
+      ]
     bindings: ['ctrl+shift+alt+right']
 
   # Move
   - commands: ['move --direction left']
-    bindings: ['ctrl+shift+left']
+    bindings: ['ctrl+alt+shift+lwin+left']
   - commands: ['move --direction down']
-    bindings: ['ctrl+shift+down']
+    bindings: ['ctrl+alt+shift+lwin+down']
   - commands: ['move --direction up']
-    bindings: ['ctrl+shift+up']
+    bindings: ['ctrl+alt+shift+lwin+up']
   - commands: ['move --direction right']
-    bindings: ['ctrl+shift+right']
+    bindings: ['ctrl+alt+shift+lwin+right']
 
   - commands: ['move --workspace 1']
     bindings: ['ctrl+shift+1']
