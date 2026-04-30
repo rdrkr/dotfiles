@@ -6,19 +6,23 @@
       "warningAcknowledged": true,
       "enabled": true,
       "maxAge": "30d"
-    }
+    },
+    "enableNotifications": true
   },
   "security": {
     "auth": {
       "selectedType": "oauth-personal"
-    }
+    },
+    "enablePermanentToolApproval": true
   },
   "ui": {
     "theme": "GitHub",
     "footer": {
       "hideContextPercentage": false
     },
-    "showLineNumbers": true
+    "showLineNumbers": true,
+    "inlineThinkingMode": "full",
+    "terminalBuffer": true
   },
   "model": {
     "name": "gemini-3.1-pro-preview"
@@ -72,5 +76,11 @@
         ]
       }
     ]
+  },
+  "ide": {
+    "enabled": true
+  },
+  "experimental": {
+    "worktrees": true
   }
 }

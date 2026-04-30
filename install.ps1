@@ -227,6 +227,8 @@ $StartupRegFile = Join-Path $ScriptDir ".config\windows-startup.reg"
 $StartupFolderDir = Join-Path $ScriptDir ".config\windows-startup"
 $WindowsTerminalConfigDir = Join-Path $ScriptDir ".config\windows-terminal"
 $WindowsTerminalLocalState = Join-Path $env:LOCALAPPDATA "Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState"
+$WarpConfigDir = Join-Path $ScriptDir ".warp"
+$WarpLocalState = Join-Path $env:LOCALAPPDATA "warp\Warp\config"
 $WallpapersDir = Join-Path $ScriptDir ".wallpapers"
 $DotfilesTarget = $env:USERPROFILE
 
@@ -1218,6 +1220,123 @@ function Backup-WindowsTerminalSettings {
     }
 }
 
+function Link-WarpSettings {
+    <#
+    .SYNOPSIS
+        Hardlinks files and junctions directories from .warp/ into the Warp
+        config folder so edits flow back to the repo automatically.
+    #>
+    Print-Header "Linking Warp settings..."
+
+    if (-not (Test-Path $WarpConfigDir)) {
+        Print-Warning "$WarpConfigDir not found. Skipping Warp settings link."
+        return
+    }
+
+    $sources = Get-ChildItem -Path $WarpConfigDir -Force -ErrorAction SilentlyContinue
+    if (-not $sources) {
+        Print-Warning "$WarpConfigDir is empty. Skipping."
+        return
+    }
+
+    if ($DryRun) {
+        foreach ($src in $sources) {
+            if ($src.PSIsContainer) {
+                Print-Warning "`[DRY RUN`] Would junction $($src.FullName) -> $WarpLocalState\$($src.Name)"
+            } else {
+                Print-Warning "`[DRY RUN`] Would hardlink $($src.FullName) -> $WarpLocalState\$($src.Name)"
+            }
+        }
+        return
+    }
+
+    if (-not (Test-Path $WarpLocalState)) {
+        New-Item -ItemType Directory -Path $WarpLocalState -Force | Out-Null
+    }
+
+    foreach ($src in $sources) {
+        $dest = Join-Path $WarpLocalState $src.Name
+        if ($src.PSIsContainer) {
+            if (Test-Path -LiteralPath $dest) {
+                Print-Warning "Already exists, skipping: $dest"
+                continue
+            }
+            try {
+                $escDest = [Management.Automation.WildcardPattern]::Escape($dest)
+                $escSrc = [Management.Automation.WildcardPattern]::Escape($src.FullName)
+                New-Item -ItemType Junction -Path $escDest -Target $escSrc -ErrorAction Stop | Out-Null
+                Print-Success "Linked: $dest -> $($src.FullName)"
+            }
+            catch {
+                Print-Error "Failed to link $($src.Name): $($_.Exception.Message)"
+            }
+        }
+        else {
+            try {
+                if (Test-Path -LiteralPath $dest) {
+                    $srcHash = (Get-FileHash -LiteralPath $src.FullName).Hash
+                    $dstHash = (Get-FileHash -LiteralPath $dest).Hash
+                    if ($srcHash -eq $dstHash) {
+                        Remove-Item -LiteralPath $dest -Force
+                    }
+                    else {
+                        $bak = "$dest.bak"
+                        Move-Item -LiteralPath $dest -Destination $bak -Force
+                        Print-Warning "Existing $dest backed up to $bak."
+                    }
+                }
+                $escDest = [Management.Automation.WildcardPattern]::Escape($dest)
+                $escSrc = [Management.Automation.WildcardPattern]::Escape($src.FullName)
+                New-Item -ItemType HardLink -Path $escDest -Target $escSrc -ErrorAction Stop | Out-Null
+                Print-Success "Linked: $dest -> $($src.FullName)"
+            }
+            catch {
+                Print-Error "Failed to link $($src.Name): $($_.Exception.Message)"
+            }
+        }
+    }
+}
+
+function Backup-WarpSettings {
+    <#
+    .SYNOPSIS
+        Copies Warp settings.toml from LocalAppData into
+        .warp/ so the repo owns the source of truth.
+    #>
+    Print-Header "Backing up Warp settings..."
+
+    $liveSettings = Join-Path $WarpLocalState "settings.toml"
+    if (-not (Test-Path $liveSettings)) {
+        Print-Warning "Warp settings.toml not found at $liveSettings. Skipping."
+        return
+    }
+
+    if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would sync $liveSettings -> $WarpConfigDir\settings.toml (if changed)."
+        return
+    }
+
+    if (-not (Test-Path $WarpConfigDir)) {
+        New-Item -ItemType Directory -Path $WarpConfigDir -Force | Out-Null
+    }
+
+    $repoSettings = Join-Path $WarpConfigDir "settings.toml"
+    $needCopy = $true
+    if (Test-Path $repoSettings) {
+        $liveHash = (Get-FileHash -LiteralPath $liveSettings).Hash
+        $repoHash = (Get-FileHash -LiteralPath $repoSettings).Hash
+        if ($liveHash -eq $repoHash) { $needCopy = $false }
+    }
+
+    if ($needCopy) {
+        Copy-Item -LiteralPath $liveSettings -Destination $repoSettings -Force
+        Print-Success "Warp settings.toml synced to $repoSettings."
+    }
+    else {
+        Print-Success "Warp settings.toml already in sync."
+    }
+}
+
 function Set-XdgConfigHome {
     <#
     .SYNOPSIS
@@ -1605,6 +1724,8 @@ function Invoke-Restore {
     # so the package's LocalState folder exists (or is creatable).
     Link-WindowsTerminalSettings
 
+    Link-WarpSettings
+
     # 10d. Link PowerShell Profile.
     Link-PowerShellProfile
 
@@ -1642,6 +1763,16 @@ function Invoke-Restore {
     }
     else {
         Print-Warning "pre-commit not found. Skipping pre-commit setup."
+    }
+
+    # 14. Install Screen Saver
+    Print-Header "Installing Screen Saver..."
+    if (Get-Command MatrixRain.exe -ErrorAction SilentlyContinue) {
+        Run-Command "MatrixRain.exe /install"
+        Print-Success "MatrixRain screen saver installed."
+    }
+    else {
+        Print-Warning "MatrixRain.exe not found in PATH. Skipping screen saver install."
     }
 
     Write-Host ""
@@ -1794,6 +1925,7 @@ function Invoke-Backup {
     Backup-WindowsPersonalization
     Backup-WindowsStartup
     Backup-WindowsTerminalSettings
+    Backup-WarpSettings
 
     Create-Symlinks
 

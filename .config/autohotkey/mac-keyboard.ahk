@@ -6,99 +6,47 @@ SetWorkingDir(A_ScriptDir)
 
 ; App switching (Cmd+Tab -> Alt+Tab)
 LWin & Tab::AltTab
+!Tab::return
++!Tab::return
+
+; Window tabs
+#!Left::Send("^+{Tab}")
+#!Right::Send("^{Tab}")
++#[::Send("^+{Tab}")
++#]::Send("^{Tab}")
 
 ; Quit the active app (Cmd+Q -> Alt+F4)
 #q::Send("!{f4}")
 
-; Insertion point movement (Cmd+Arrows -> Home/End)
-#Left::
-{
-    Suspend(true)
-    Send("{Home}")
-    Suspend(false)
-    return
-}
-#Right::
-{
-    Suspend(true)
-    Send("{End}")
-    Suspend(false)
-    return
-}
-#Up::
-{
-    Suspend(true)
-    Send("^{Home}")
-    Suspend(false)
-    return
-}
-#Down::
-{
-    Suspend(true)
-    Send("^{End}")
-    Suspend(false)
-    return
-}
+; Page navigation (Cmd+Arrows -> Back/Forward)
+#Left::Send("{Browser_Back}")
+#Right::Send("{Browser_Forward}")
+#Up::Send("^{Home}")
+#Down::Send("^{End}")
 
 ; Shift + Cmd + Arrows
-+#Left::
-{
-    Suspend(true)
-    Send("+{Home}")
-    Suspend(false)
-    return
-}
-+#Right::
-{
-    Suspend(true)
-    Send("+{End}")
-    Suspend(false)
-    return
-}
-+#Up::
-{
-    Suspend(true)
-    Send("+^{Home}")
-    Suspend(false)
-    return
-}
-+#Down::
-{
-    Suspend(true)
-    Send("+^{End}")
-    Suspend(false)
-    return
-}
++#Left::Send("+{Home}")
++#Right::Send("+{End}")
++#Up::Send("+^{Home}")
++#Down::Send("+^{End}")
 
 ; Option + Arrows -> Ctrl + Arrows (Jump word)
-!Left::
-{
-    Suspend(true)
-    Send("^{Left}")
-    Suspend(false)
-    return
-}
-!Right::
-{
-    Suspend(true)
-    Send("^{Right}")
-    Suspend(false)
-    return
-}
-+!Left::
-{
-    Suspend(true)
-    Send("+^{Left}")
-    Suspend(false)
-    return
-}
-+!Right::
-{
-    Suspend(true)
-    Send("+^{Right}")
-    Suspend(false)
-    return
-}
+!Left::Send("^{Left}")
+!Right::Send("^{Right}")
++!Left::Send("+^{Left}")
++!Right::Send("+^{Right}")
+
+; Windows Terminal specific Overrides
+#HotIf WinActive("ahk_exe WindowsTerminal.exe")
+!Enter::Send("^j")
+#c::Send("^+c")
+#v::Send("^+v")
+#x::Send("^+x")
+#t::Send("^+t")
+#w::Send("^+w")
+#f::Send("^+f")
+#n::Send("^+n")
+#HotIf
 
 ; Essential Mac shortcuts (Cmd+C, Cmd+V, etc.) mapped from Win (#)
 #c::Send("^c")
@@ -111,3 +59,4 @@ LWin & Tab::AltTab
 #w::Send("^w")
 #t::Send("^t")
 #d::Send("^d")
+#n::Send("^n")

@@ -9,6 +9,10 @@
   "keybindings": [
     {
       "id": "Terminal.ClosePane",
+      "keys": "ctrl+i"
+    },
+    {
+      "id": "Terminal.ClosePane",
       "keys": "ctrl+w"
     },
     {
