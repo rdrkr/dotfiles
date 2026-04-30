@@ -1,4 +1,5 @@
-﻿@google/gemini-cli
+@github/copilot
+@google/gemini-cli
 fastify
 lighthouse
 mcporter
