@@ -35,10 +35,7 @@ workspace_decoration_visibility = "on_hover"
 show_indicators_button = true
 
 [appearance.themes]
-system_theme = false
-theme = {
-  custom = { name = "Gruvbox Dark", path = "/Users/ronendruker/.warp/themes/warp_bundled/gruvbox_dark.yaml" },
-}
+theme = "gruvbox_dark"
 
 [code]
 

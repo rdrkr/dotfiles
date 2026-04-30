@@ -1,7 +1,14 @@
 {
   "$help": "https://aka.ms/terminal-documentation",
   "$schema": "https://aka.ms/terminal-profiles-schema",
-  "actions": [],
+  "actions": [
+    {
+      "command": {
+        "action": "newWindow"
+      },
+      "id": "User.newWindow.5DEADB41"
+    }
+  ],
   "alwaysShowTabs": true,
   "copyFormatting": "none",
   "copyOnSelect": true,
@@ -9,15 +16,7 @@
   "keybindings": [
     {
       "id": "Terminal.ClosePane",
-      "keys": "ctrl+i"
-    },
-    {
-      "id": "Terminal.ClosePane",
       "keys": "ctrl+w"
-    },
-    {
-      "id": "Terminal.CopyToClipboard",
-      "keys": "win+c"
     },
     {
       "id": "Terminal.CopyToClipboard",
@@ -32,6 +31,10 @@
       "keys": "ctrl+k"
     },
     {
+      "id": "Terminal.PasteFromClipboard",
+      "keys": "ctrl+v"
+    },
+    {
       "id": "Terminal.FindText",
       "keys": "ctrl+shift+f"
     },
@@ -40,12 +43,12 @@
       "keys": "win+v"
     },
     {
-      "id": "Terminal.PasteFromClipboard",
-      "keys": "ctrl+v"
-    },
-    {
       "id": "Terminal.DuplicatePaneAuto",
       "keys": "alt+shift+d"
+    },
+    {
+      "id": "User.newWindow.5DEADB41",
+      "keys": "ctrl+n"
     }
   ],
   "newTabMenu": [

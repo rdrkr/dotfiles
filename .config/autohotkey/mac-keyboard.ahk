@@ -61,4 +61,4 @@ LWin & Tab::AltTab
 #w:: Send("^w")
 #t:: Send("^t")
 #d:: Send("^d")
-#n:: Send("+^n")
+#n:: Send("^n")
