@@ -23,6 +23,7 @@ JesseDuffield.Lazydocker
 JesseDuffield.lazygit
 JetBrains.IntelliJIDEA
 junegunn.fzf
+LGUG2Z.komorebi
 Microsoft.AppInstaller
 Microsoft.DotNet.DesktopRuntime.8
 Microsoft.DotNet.SDK.10

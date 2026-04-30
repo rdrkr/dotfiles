@@ -68,3 +68,5 @@ node_modules/
 /.claude/channels/telegram/bot.pid
 /.glzr/zebar/gruvbox/dist
 /.claude/.credentials.json
+/.config/raycast-x/extensions
+/.config/scoop

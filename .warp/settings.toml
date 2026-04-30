@@ -76,6 +76,7 @@ play_notification_sound = true
 
 [general]
 show_warning_before_quitting = false
+login_item = false
 
 [account]
 is_settings_sync_enabled = true
