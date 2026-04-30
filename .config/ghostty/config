@@ -37,25 +37,28 @@
 # # Just for example:
 # resize-overlay-duration = 4s 200ms
 
-theme = Gruvbox Dark
+auto-update-channel = tip
 # background-blur = macos-glass-regular
+background-opacity = 1.00
+bell-features = attention,title
 cursor-style = block
 cursor-style-blink = true
-shell-integration-features = no-cursor
 custom-shader = ~/.config/ghostty/shaders/cursor-smear.glsl
 custom-shader-animation = true
 font-family = "JetBrainsMono Nerd Font Mono"
 font-size = 12
+keybind = alt+shift+j=write_scrollback_file:open
+keybind = cmd+alt+left=text:\x1b[1;11D
+keybind = cmd+alt+right=text:\x1b[1;11C
+keybind = ctrl+shift+tab=esc:[27;6;9~
+keybind = ctrl+tab=esc:[27;5;9~
+keybind = shift+enter=text:\x1b\r
+keybind = super+alt+left=text:\x1b[1;11D
+keybind = super+alt+right=text:\x1b[1;11C
+macos-option-as-alt = left
 macos-titlebar-style = "hidden"
+quit-after-last-window-closed = true
+shell-integration-features = no-cursor
+theme = Gruvbox Dark
 window-padding-x = 16
 window-padding-y = 16
-quit-after-last-window-closed = true
-auto-update-channel = tip
-bell-features = attention,title
-keybind = shift+enter=text:\x1b\r
-keybind = alt+shift+j=write_scrollback_file:open
-keybind = ctrl+tab=esc:[27;5;9~
-keybind = ctrl+shift+tab=esc:[27;6;9~
-
-
-background-opacity = 1.00

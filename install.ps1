@@ -1464,69 +1464,6 @@ function Invoke-WslInstall {
     }
 }
 
-function Link-KeyboardScript {
-    <#
-    .SYNOPSIS
-        Detects if an Apple keyboard is connected and creates a shortcut in the
-        Startup folder to the appropriate AutoHotkey script.
-    #>
-    Print-Header "Linking keyboard AutoHotkey script..."
-
-    $startupFolder = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\Startup"
-    if (-not (Test-Path $startupFolder)) {
-        if ($DryRun) {
-            Print-Warning "`[DRY RUN`] Would create directory: $startupFolder"
-        } else {
-            New-Item -ItemType Directory -Path $startupFolder -Force | Out-Null
-        }
-    }
-
-    # Detect Apple keyboard (Vendor ID 05AC)
-    $isApple = $false
-    try {
-        $appleKeyboards = Get-CimInstance Win32_Keyboard -ErrorAction Stop | Where-Object { $_.PNPDeviceID -match 'VID_05AC' }
-        if ($appleKeyboards) {
-            $isApple = $true
-        }
-    }
-    catch {
-        Print-Warning "Failed to query keyboards: $($_.Exception.Message). Defaulting to Windows layout."
-    }
-
-    $scriptName = if ($isApple) { "mac-keyboard.ahk" } else { "windows-keyboard.ahk" }
-    $sourcePath = Join-Path $ScriptDir ".config\autohotkey\$scriptName"
-
-    if (-not (Test-Path $sourcePath)) {
-        Print-Warning "AutoHotkey script not found: $sourcePath. Skipping."
-        return
-    }
-
-    $shortcutPath = Join-Path $startupFolder "KeyboardLayout.lnk"
-
-    if (Test-Path $shortcutPath) {
-        Print-Warning "Keyboard shortcut already exists: $shortcutPath. Skipping."
-        return
-    }
-
-    if ($DryRun) {
-        Print-Warning "`[DRY RUN`] Would link $scriptName to $shortcutPath"
-        return
-    }
-
-    try {
-        $WshShell = New-Object -ComObject WScript.Shell
-        $Shortcut = $WshShell.CreateShortcut($shortcutPath)
-        $Shortcut.TargetPath = $sourcePath
-        $Shortcut.WorkingDirectory = Split-Path -Parent $sourcePath
-        $Shortcut.Description = "Remaps keys for $scriptName"
-        $Shortcut.Save()
-        Print-Success "Linked $scriptName to Startup folder as $shortcutPath"
-    }
-    catch {
-        Print-Error "Failed to create shortcut: $($_.Exception.Message)"
-    }
-}
-
 # --- Restore ---
 function Invoke-Restore {
     <#
@@ -1779,7 +1716,6 @@ function Invoke-Restore {
     Restore-WindowsPersonalization
     Apply-WindowsLockScreen
     Restore-WindowsStartup
-    Link-KeyboardScript
 
     # 12. Run install.sh restore inside WSL so Linux-side state (apt, Linuxbrew,
     # stow, zsh) is set up to match. Skip on a fresh install -- the VM Platform
