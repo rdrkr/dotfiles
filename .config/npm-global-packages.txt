@@ -1,4 +1,3 @@
-@github/copilot
 @google/gemini-cli
 fastify
 lighthouse
