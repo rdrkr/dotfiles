@@ -418,29 +418,23 @@ function Create-Symlinks {
 
     $topLevel = Get-ChildItem -Path $ScriptDir -Force | Where-Object { -not (Test-IsIgnored $_.Name) }
 
-    foreach ($item in $topLevel) {
-        if ($item.Name -eq ".config" -and $item.PSIsContainer) {
-            # Special: iterate children of .config so ~/.config can host links
-            # from this repo alongside directories created by other tools.
-            #   - Subdirectories (e.g. .config/glazewm)  -> Junction
-            #   - Loose files    (e.g. .config/Brewfile, *.txt) -> HardLink
-            $configTarget = Join-Path $DotfilesTarget ".config"
-            if (-not $DryRun -and -not (Test-Path $configTarget)) {
-                New-Item -ItemType Directory -Path $configTarget -Force | Out-Null
+    $configTarget = Join-Path $DotfilesTarget ".config"
+    if (Test-Path -LiteralPath $configTarget) {
+        $configItem = Get-Item -LiteralPath $configTarget -Force -ErrorAction SilentlyContinue
+        if ($configItem -and -not $configItem.LinkType) {
+            if ($DryRun) {
+                Print-Warning "`[DRY RUN`] Would remove existing directory to replace with symlink: $configTarget"
             }
-            foreach ($child in Get-ChildItem -Path $item.FullName -Force) {
-                if (Test-IsIgnored $child.Name) { continue }
-                $dest = Join-Path $configTarget $child.Name
-                if ($child.PSIsContainer) {
-                    New-JunctionLink $dest $child.FullName $child.Name
-                }
-                else {
-                    New-FileLink $dest $child.FullName $child.Name
-                }
+            else {
+                Print-Warning "Removing existing directory to replace with symlink: $configTarget"
+                Remove-Item -Path $configTarget -Recurse -Force
             }
         }
-        elseif ($item.PSIsContainer) {
-            # Other top-level directory: junction whole thing into $HOME
+    }
+
+    foreach ($item in $topLevel) {
+        if ($item.PSIsContainer) {
+            # Top-level directory: junction whole thing into $HOME
             New-JunctionLink (Join-Path $DotfilesTarget $item.Name) $item.FullName $item.Name
         }
         else {
@@ -496,6 +490,38 @@ function Enable-DeveloperMode {
     }
     catch {
         Print-Error "Failed to enable Developer Mode: $($_.Exception.Message)"
+    }
+}
+
+function Enable-LongPaths {
+    <#
+    .SYNOPSIS
+        Enables long path support in Windows by setting the LongPathsEnabled flag.
+    #>
+    Print-Header "Enabling Long Path Support..."
+    $regPath = "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem"
+    $valueName = "LongPathsEnabled"
+
+    $current = Get-ItemProperty -Path $regPath -Name $valueName -ErrorAction SilentlyContinue
+    if ($current -and $current.$valueName -eq 1) {
+        Print-Success "Long Path support is already enabled."
+        return
+    }
+
+    if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would set $regPath\$valueName = 1 (enables Long Paths)."
+        return
+    }
+
+    try {
+        if (-not (Test-Path $regPath)) {
+            New-Item -Path $regPath -Force -ErrorAction Stop | Out-Null
+        }
+        New-ItemProperty -Path $regPath -Name $valueName -PropertyType DWord -Value 1 -Force -ErrorAction Stop | Out-Null
+        Print-Success "Long Path support enabled."
+    }
+    catch {
+        Print-Error "Failed to enable Long Path support: $($_.Exception.Message)"
     }
 }
 
@@ -1348,10 +1374,12 @@ function Set-XdgConfigHome {
 
     $targetXdg = Join-Path $env:USERPROFILE ".config"
     $targetStarship = Join-Path $targetXdg "starship\starship.toml"
+    $targetKomorebi = Join-Path $targetXdg "komorebi"
 
     if ($DryRun) {
         Print-Warning "`[DRY RUN`] Would set user env XDG_CONFIG_HOME = $targetXdg"
         Print-Warning "`[DRY RUN`] Would set user env STARSHIP_CONFIG = $targetStarship"
+        Print-Warning "`[DRY RUN`] Would set user env KOMOREBI_CONFIG_HOME = $targetKomorebi"
         return
     }
 
@@ -1363,6 +1391,10 @@ function Set-XdgConfigHome {
         [Environment]::SetEnvironmentVariable("STARSHIP_CONFIG", $targetStarship, "User")
         $env:STARSHIP_CONFIG = $targetStarship
         Print-Success "STARSHIP_CONFIG set to $targetStarship (user scope)."
+
+        [Environment]::SetEnvironmentVariable("KOMOREBI_CONFIG_HOME", $targetKomorebi, "User")
+        $env:KOMOREBI_CONFIG_HOME = $targetKomorebi
+        Print-Success "KOMOREBI_CONFIG_HOME set to $targetKomorebi (user scope)."
     }
     catch {
         Print-Error "Failed to set environment variables: $($_.Exception.Message)"
@@ -1503,8 +1535,9 @@ function Invoke-Restore {
     #>
     Print-Header "Starting Restore... (platform: Windows, pkg managers: winget + scoop)"
 
-    # 0. Enable Developer Mode (best-effort; requires admin)
+    # 0. Enable Developer Mode and Long Paths (best-effort; requires admin)
     Enable-DeveloperMode
+    Enable-LongPaths
 
     # 1. Check for winget
     Print-Header "Checking for winget..."

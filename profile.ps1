@@ -137,7 +137,11 @@ foreach ($p in $pathDirs) {
 Import-Module PSReadLine -ErrorAction SilentlyContinue
 if (Get-Module PSReadLine) {
     try {
-        Set-PSReadLineOption -PredictionSource History -ErrorAction Stop
+        try {
+            Set-PSReadLineOption -PredictionSource HistoryAndPlugin -ErrorAction Stop
+        } catch {
+            Set-PSReadLineOption -PredictionSource History -ErrorAction Stop
+        }
         Set-PSReadLineOption -PredictionViewStyle InlineView -ErrorAction Stop
     } catch { }
     Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
@@ -145,6 +149,12 @@ if (Get-Module PSReadLine) {
     # macOS-like keybindings
     Set-PSReadLineKeyHandler -Key 'Ctrl+d' -Function DeleteCharOrExit
     Set-PSReadLineKeyHandler -Key Alt+LeftArrow -Function BackwardWord
-    Set-PSReadLineKeyHandler -Key Alt+RightArrow -Function NextWord
+    Set-PSReadLineKeyHandler -Key Alt+RightArrow -Function ForwardWord
     Set-PSReadLineKeyHandler -Key Alt+Backspace -Function BackwardKillWord
+
+    # History search
+    Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward
+    Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward
+    Set-PSReadLineKeyHandler -Key 'Ctrl+r' -Function ReverseSearchHistory
+    Set-PSReadLineKeyHandler -Key 'Ctrl+s' -Function ForwardSearchHistory
 }

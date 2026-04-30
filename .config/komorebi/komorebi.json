@@ -1,51 +1,44 @@
 {
   "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/v0.1.40/schema.json",
-  "app_specific_configuration_path": "$Env:USERPROFILE/applications.json",
+  "app_specific_configuration_path": "$Env:KOMOREBI_CONFIG_HOME/applications.json",
   "window_hiding_behaviour": "Cloak",
   "cross_monitor_move_behaviour": "Insert",
-  "default_workspace_padding": 20,
-  "default_container_padding": 20,
+  "default_workspace_padding": 14,
+  "default_container_padding": 7,
   "border": true,
-  "border_width": 8,
+  "border_width": 2,
   "border_offset": -1,
-  "theme": {
-    "palette": "Base16",
-    "name": "Ashes",
-    "unfocused_border": "Base03",
-    "bar_accent": "Base0D"
+  "active_window_border_colours": {
+    "single": "#ebdbb2",
+    "stack": "#ebdbb2",
+    "monocle": "#ebdbb2"
+  },
+  "unfocused_window_border_colours": {
+    "single": "#000000",
+    "stack": "#000000",
+    "monocle": "#000000"
   },
   "monitors": [
     {
       "workspaces": [
-        {
-          "name": "I",
-          "layout": "BSP"
-        },
-        {
-          "name": "II",
-          "layout": "VerticalStack"
-        },
-        {
-          "name": "III",
-          "layout": "HorizontalStack"
-        },
-        {
-          "name": "IV",
-          "layout": "UltrawideVerticalStack"
-        },
-        {
-          "name": "V",
-          "layout": "Rows"
-        },
-        {
-          "name": "VI",
-          "layout": "Grid"
-        },
-        {
-          "name": "VII",
-          "layout": "RightMainVerticalStack"
-        }
+        { "name": "1", "layout": "BSP" },
+        { "name": "2", "layout": "BSP" },
+        { "name": "3", "layout": "BSP" },
+        { "name": "4", "layout": "BSP" },
+        { "name": "5", "layout": "BSP" },
+        { "name": "6", "layout": "BSP" }
       ]
     }
+  ],
+  "workspace_rules": [
+    { "id": "safari|chrome", "kind": "Exe", "matching_strategy": "Regex", "workspace": "1" },
+    { "id": "terminal|warp", "kind": "Exe", "matching_strategy": "Regex", "workspace": "2" },
+    { "id": "intellij|idea|xcode|visual|android|studio64", "kind": "Exe", "matching_strategy": "Regex", "workspace": "3" },
+    { "id": "messages|whatsapp|beeper", "kind": "Exe", "matching_strategy": "Regex", "workspace": "5" }
+  ],
+  "float_rules": [
+    { "id": "mail|contacts|phone|facetime|quicktime|finder|ollama|calendar|activity|gpt|chatgpt|preview|photos|podcasts|perplexity|store|java|passwords|pearcleaner|reminders|sf symbols|teamviewer", "kind": "Exe", "matching_strategy": "Regex" },
+    { "id": "zebar.exe", "kind": "Exe", "matching_strategy": "Equals" },
+    { "id": "[Pp]icture.in.[Pp]icture", "kind": "Title", "matching_strategy": "Regex" }
   ]
 }
