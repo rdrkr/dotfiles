@@ -172,7 +172,7 @@ zstyle ':fzf-tab:*' popup-smart-tab yes
 zstyle ':fzf-tab:*' popup-min-size 40 20
 #zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 
-# bind keyos
+# bind keys
 bindkey -e                            # disable vi mode
 #bindkey -v                           # enable vi mode
 bindkey "^[[1;3C" forward-word        # autosuggest next word

@@ -111,9 +111,10 @@ if (Get-Command mole -ErrorAction SilentlyContinue) {
 }
 if (Get-Command carapace -ErrorAction SilentlyContinue) {
     try {
-        $env:CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense'
-        $out = & carapace _carapace powershell 2>$null | Out-String
-        if (-not [string]::IsNullOrWhiteSpace($out)) { Invoke-Expression $out }
+        $env:CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense' # optional
+        Set-PSReadLineOption -Colors @{ "Selection" = "`e[7m" }
+        Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete
+        carapace _carapace powershell | Out-String | Invoke-Expression
     } catch { }
 }
 
