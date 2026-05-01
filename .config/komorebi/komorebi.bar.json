@@ -2,10 +2,10 @@
   "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/v0.1.40/schema.bar.json",
   "font_family": "JetBrains Mono",
   "theme": {
-    "palette": "Custom",
-    "name": "GruvboxMaterialDarkMedium",
-    "background": "#282828",
-    "accent": "#ebdbb2"
+    "palette": "Base16",
+    "name": "GruvboxDarkMedium",
+    "background": "Base00",
+    "accent": "Base0B"
   },
   "left_widgets": [
     {

@@ -1749,6 +1749,27 @@ function Invoke-Restore {
         Print-Warning "MatrixRain.exe not found in PATH. Skipping screen saver install."
     }
 
+    # 15. Setup Komorebi Hotkeys Startup
+    Print-Header "Setting up Komorebi Hotkeys on Startup..."
+    $startupFolder = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\Startup"
+    $ahkScript = Join-Path $DotfilesTarget ".config\komorebi\komorebic-hotkeys.ahk"
+    $shortcutPath = Join-Path $startupFolder "komorebic-hotkeys.lnk"
+    
+    if (-not $DryRun) {
+        try {
+            $WshShell = New-Object -ComObject WScript.Shell
+            $Shortcut = $WshShell.CreateShortcut($shortcutPath)
+            $Shortcut.TargetPath = $ahkScript
+            $Shortcut.WorkingDirectory = Split-Path $ahkScript
+            $Shortcut.Save()
+            Print-Success "Created startup shortcut for komorebic-hotkeys.ahk."
+        } catch {
+            Print-Error "Failed to create startup shortcut: $($_.Exception.Message)"
+        }
+    } else {
+        Print-Warning "`[DRY RUN`] Would create startup shortcut for komorebic-hotkeys.ahk"
+    }
+
     Write-Host ""
     Write-Host "${C_GREEN}All done! Your dotfiles are set up.${NC}"
     Write-Host ""
