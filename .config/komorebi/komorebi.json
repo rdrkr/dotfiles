@@ -5,8 +5,10 @@
   "cross_monitor_move_behaviour": "Insert",
   "default_workspace_padding": 16,
   "default_container_padding": 16,
+  "unmanaged_window_operation_behaviour": "Op",
+  "resize_delta": 100,
   "animation": {
-    "enabled": true
+    "enabled": false
   },
   "border": true,
   "border_width": 5,
@@ -18,84 +20,87 @@
   },
   "border_implementation": "Windows",
   "border_style": "Rounded",
-  "unfocused_window_border_colours": {
-    "single": "#000000",
-    "stack": "#000000",
-    "monocle": "#000000"
-  },
   "monitors": [
     {
       "workspaces": [
         {
           "name": "1",
-          "layout": "Columns"
+          "layout_rules": {
+            "1": "BSP",
+            "4": "Grid"
+          },
+          "workspace_rules": [
+            {
+              "id": "(?i)safari|chrome",
+              "kind": "Exe",
+              "matching_strategy": "Regex"
+            }
+          ]
         },
         {
           "name": "2",
-          "layout": "Columns"
+          "layout_rules": {
+            "1": "BSP",
+            "4": "Grid"
+          },
+          "workspace_rules": [
+            {
+              "id": "(?i)warp",
+              "kind": "Exe",
+              "matching_strategy": "Regex"
+            }
+          ]
         },
         {
           "name": "3",
-          "layout": "Columns"
+          "layout_rules": {
+            "1": "BSP",
+            "4": "Grid"
+          },
+          "workspace_rules": [
+            {
+              "id": "(?i)intellij|idea|xcode|visual|android|studio64",
+              "kind": "Exe",
+              "matching_strategy": "Regex"
+            }
+          ]
         },
         {
           "name": "4",
-          "layout": "Columns"
+          "layout_rules": {
+            "1": "BSP",
+            "4": "Grid"
+          },
+          "workspace_rules": []
         },
         {
           "name": "5",
-          "layout": "Columns"
+          "layout_rules": {
+            "1": "BSP",
+            "4": "Grid"
+          },
+          "workspace_rules": [
+            {
+              "id": "(?i)messages|whatsapp|beeper",
+              "kind": "Exe",
+              "matching_strategy": "Regex"
+            }
+          ]
         },
         {
           "name": "6",
-          "layout": "Columns"
+          "layout_rules": {
+            "1": "BSP",
+            "4": "Grid"
+          },
+          "workspace_rules": []
         }
       ]
     }
   ],
-  "workspace_rules": [
+  "floating_applications": [
     {
-      "id": "(?i)safari|chrome",
-      "kind": "Exe",
-      "matching_strategy": "Regex",
-      "workspace": "1"
-    },
-    {
-      "id": "(?i)terminal|warp",
-      "kind": "Exe",
-      "matching_strategy": "Regex",
-      "workspace": "2"
-    },
-    {
-      "id": "(?i)intellij|idea|xcode|visual|android|studio64",
-      "kind": "Exe",
-      "matching_strategy": "Regex",
-      "workspace": "3"
-    },
-    {
-      "id": "(?i)messages|whatsapp|beeper",
-      "kind": "Exe",
-      "matching_strategy": "Regex",
-      "workspace": "5"
-    }
-  ],
-  "manage_rules": [
-    {
-      "id": "(?i)terminal|warp",
-      "kind": "Exe",
-      "matching_strategy": "Regex"
-    }
-  ],
-  "layered_applications": [
-    {
-      "id": "(?i)terminal|warp",
-      "kind": "Exe",
-      "matching_strategy": "Regex"
-    }
-  ],
-  "ignore_rules": [
-    {
-      "id": "(?i)mail|contacts|phone|facetime|quicktime|finder|ollama|calendar|activity|gpt|chatgpt|preview|photos|podcasts|perplexity|store|java|passwords|pearcleaner|reminders|sf symbols|teamviewer",
+      "id": "(?i)mail|contacts|phone|facetime|quicktime|finder|ollama|calendar|activity|gpt|chatgpt|preview|photos|podcasts|perplexity|store|java|passwords|pearcleaner|reminders|sf symbols|teamviewer|git-bash|msys2",
       "kind": "Exe",
       "matching_strategy": "Regex"
     },

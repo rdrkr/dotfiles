@@ -1,18 +1,24 @@
 #Requires AutoHotkey v2.0.2
 #SingleInstance Force
 
+if not A_IsAdmin {
+	Run "*RunAs " A_AhkPath ' "' A_ScriptFullPath '"'
+	ExitApp
+}
+
 Komorebic(cmd) {
-	RunWait(format("komorebic.exe {}", cmd), , "Hide")
+	RunWait(format("*RunAs komorebic.exe {}", cmd), , "Hide")
 }
 
 ; Start Komorebi
-RunWait("komorebic.exe start", , "Hide")
+Komorebic("start")
 
 ; Start Komorebi Bar or Zebar
-Run("komorebi-bar.exe", , "Hide", &BarPID)
+Run("*RunAs komorebi-bar.exe", , "Hide", &BarPID)
 Sleep(1000)
 if !ProcessExist(BarPID) {
-    Run("zebar.exe", , "Hide")
+	RunWait(A_ComSpec ' /c cd /d "' EnvGet("USERPROFILE") '\.glzr\zebar\gruvbox" && pnpm build', , "Hide")
+	Run("*RunAs zebar.exe", , "Hide")
 }
 
 ; App switching (Cmd+Tab -> Alt+Tab)
@@ -61,7 +67,7 @@ LWin & Tab::AltTab
 +^Down:: Komorebic("move down")
 
 ; Essential Mac shortcuts (Cmd+C, Cmd+V, etc.) mapped from Win (#)
-!Enter:: Send("^j")
++Enter:: Send("^j")
 #c:: Send("^c")
 #x:: Send("^x")
 #v:: Send("^v")
@@ -92,13 +98,6 @@ LWin & Tab::AltTab
 ^!Right:: Komorebic("cycle-workspace next")
 ^!Left:: Komorebic("cycle-workspace previous")
 
-; Join (Stack)
-^!+Left:: Komorebic("stack left")
-^!+Down:: Komorebic("stack down")
-^!+Up:: Komorebic("stack up")
-^!+Right:: Komorebic("stack right")
-^!+;:: Komorebic("unstack")
-
 ; Move
 ^!+#Left:: Komorebic("move left")
 ^!+#Down:: Komorebic("move down")
@@ -116,6 +115,8 @@ LWin & Tab::AltTab
 ; Resize
 ^-:: Komorebic("resize-axis horizontal decrease")
 ^=:: Komorebic("resize-axis horizontal increase")
++^-:: Komorebic("resize-axis vertical decrease")
++^=:: Komorebic("resize-axis vertical increase")
 
 ; Layout
 !/:: Komorebic("toggle-float")
@@ -126,24 +127,19 @@ LWin & Tab::AltTab
 
 ; WM Exit
 !+e:: {
-    Komorebic("stop")
-    if ProcessExist("komorebi-bar.exe")
-        ProcessClose("komorebi-bar.exe")
-    if ProcessExist("zebar.exe")
-        ProcessClose("zebar.exe")
+	Komorebic("stop")
+	if ProcessExist("komorebi-bar.exe")
+		ProcessClose("komorebi-bar.exe")
+	if ProcessExist("zebar.exe")
+		ProcessClose("zebar.exe")
 }
 
 ; Restart WM and Bars (Stop and start itself)
 !+;:: {
-    Komorebic("stop")
-    if ProcessExist("komorebi-bar.exe")
-        ProcessClose("komorebi-bar.exe")
-    if ProcessExist("zebar.exe")
-        ProcessClose("zebar.exe")
-    Reload()
+	Komorebic("stop")
+	if ProcessExist("komorebi-bar.exe")
+		ProcessClose("komorebi-bar.exe")
+	if ProcessExist("zebar.exe")
+		ProcessClose("zebar.exe")
+	Reload()
 }
-
-; Shift+Enter for new line in terminals (Gemini CLI / Claude Code)
-#HotIf WinActive("ahk_exe WindowsTerminal.exe") or WinActive("ahk_exe warp.exe")
-+Enter::Send("!{Enter}")
-#HotIf
