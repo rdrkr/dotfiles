@@ -1,4 +1,4 @@
-﻿@google/gemini-cli
+@google/gemini-cli
 fastify
 lighthouse
 mcporter
