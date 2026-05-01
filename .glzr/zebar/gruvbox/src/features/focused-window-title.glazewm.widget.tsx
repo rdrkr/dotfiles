@@ -2,34 +2,36 @@ import { createMemo } from "solid-js";
 import { GroupItem } from "@components/group.component";
 import { useProviders } from "@providers/index";
 
-const MAX_DEPTH = 20;
-
 export function FocusedWindowTitleGlazewmWidget() {
   const providers = useProviders();
   const isCurrentMonitor = createMemo(
     () =>
-      providers.glazewm?.focusedMonitor.id ===
-      providers.glazewm?.currentMonitor.id,
+      providers.komorebi?.focusedMonitor.id ===
+      providers.komorebi?.currentMonitor.id,
   );
 
   const title = createMemo(() => {
-    let focusedWindow = providers.glazewm?.focusedWorkspace.children.find(
-      (w) => w.hasFocus,
-    );
-
-    if (!focusedWindow) {
-      return "-";
+    const workspace = providers.komorebi?.focusedWorkspace;
+    if (!workspace) return "-";
+    
+    if (workspace.maximizedWindow) {
+      return workspace.maximizedWindow.title ?? "-";
     }
-
-    let depth = 0;
-
-    while (focusedWindow?.type !== "window" && depth < MAX_DEPTH) {
-      focusedWindow = focusedWindow?.children.find((w) => w.hasFocus);
-      depth++;
+    
+    if (workspace.monocleContainer && workspace.monocleContainer.windows.length > 0) {
+      return workspace.monocleContainer.windows[workspace.monocleContainer.windows.length - 1]?.title ?? "-";
     }
-
-    if (focusedWindow?.type === "window") {
-      return focusedWindow.title;
+    
+    const containerIndex = workspace.focusedContainerIndex;
+    if (workspace.tilingContainers && workspace.tilingContainers.length > containerIndex) {
+       const container = workspace.tilingContainers[containerIndex];
+       if (container && container.windows.length > 0) {
+           return container.windows[0]?.title ?? "-";
+       }
+    }
+    
+    if (workspace.floatingWindows && workspace.floatingWindows.length > 0) {
+       return workspace.floatingWindows[workspace.floatingWindows.length - 1]?.title ?? "-";
     }
 
     return "-";

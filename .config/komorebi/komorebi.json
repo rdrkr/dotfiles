@@ -28,27 +28,27 @@
       "workspaces": [
         {
           "name": "1",
-          "layout": "BSP"
+          "layout": "Columns"
         },
         {
           "name": "2",
-          "layout": "BSP"
+          "layout": "Columns"
         },
         {
           "name": "3",
-          "layout": "BSP"
+          "layout": "Columns"
         },
         {
           "name": "4",
-          "layout": "BSP"
+          "layout": "Columns"
         },
         {
           "name": "5",
-          "layout": "BSP"
+          "layout": "Columns"
         },
         {
           "name": "6",
-          "layout": "BSP"
+          "layout": "Columns"
         }
       ]
     }
@@ -81,24 +81,14 @@
   ],
   "manage_rules": [
     {
-      "id": "WindowsTerminal.exe",
-      "kind": "Exe",
-      "matching_strategy": "Equals"
-    },
-    {
-      "id": "(?i)warp.exe",
+      "id": "(?i)terminal|warp",
       "kind": "Exe",
       "matching_strategy": "Regex"
     }
   ],
   "layered_applications": [
     {
-      "id": "WindowsTerminal.exe",
-      "kind": "Exe",
-      "matching_strategy": "Equals"
-    },
-    {
-      "id": "(?i)warp.exe",
+      "id": "(?i)terminal|warp",
       "kind": "Exe",
       "matching_strategy": "Regex"
     }

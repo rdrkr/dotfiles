@@ -1762,7 +1762,13 @@ function Invoke-Restore {
             $Shortcut.TargetPath = $ahkScript
             $Shortcut.WorkingDirectory = Split-Path $ahkScript
             $Shortcut.Save()
-            Print-Success "Created startup shortcut for komorebic-hotkeys.ahk."
+
+            # Set 'Run as Administrator' flag (byte 21, bit 5)
+            $bytes = [System.IO.File]::ReadAllBytes($shortcutPath)
+            $bytes[21] = $bytes[21] -bor 0x20
+            [System.IO.File]::WriteAllBytes($shortcutPath, $bytes)
+
+            Print-Success "Created startup shortcut for komorebic-hotkeys.ahk (Run as Admin)."
         } catch {
             Print-Error "Failed to create startup shortcut: $($_.Exception.Message)"
         }

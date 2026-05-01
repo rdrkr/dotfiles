@@ -5,12 +5,13 @@ import { useProviders } from "@providers/index";
 import { createStoredSignal } from "@/components/signal-storage.hook";
 import { WorkspaceDisplayMode } from "@/components/workspaces.types";
 import { FaBrandsApple } from "solid-icons/fa";
+import { shellExec } from "zebar";
 
 export function WorkspacesGlazewmWidget() {
   const providers = useProviders();
 
   const displayModeStorageKey = createMemo(() => {
-    const deviceId = providers.glazewm?.currentMonitor.deviceName;
+    const deviceId = providers.komorebi?.currentMonitor.deviceId;
     if (!deviceId) {
       return undefined;
     }
@@ -31,8 +32,8 @@ export function WorkspacesGlazewmWidget() {
     );
   };
 
-  const focusWrokspace = async (workspaceId: string) => {
-    await providers.glazewm?.runCommand(`focus --workspace ${workspaceId}`);
+  const focusWorkspace = async (workspaceIndex: number) => {
+    await shellExec(`komorebic focus-workspace ${workspaceIndex}`);
   };
 
   return (
@@ -44,11 +45,11 @@ export function WorkspacesGlazewmWidget() {
       }}
     >
       <FaBrandsApple class="mr-2 text-gruvbox-watermelon w-4.5 h-4.5" />
-      <Index each={providers.glazewm?.currentMonitor.children}>
-        {(workspace) => (
+      <Index each={providers.komorebi?.currentMonitor.workspaces}>
+        {(workspace, index) => (
           <Presence exitBeforeEnter>
             <Show
-              when={workspace().children.length > 0 || workspace().isDisplayed}
+              when={(workspace().tilingContainers && workspace().tilingContainers.length > 0) || (workspace().floatingWindows && workspace().floatingWindows.length > 0) || index === providers.komorebi?.currentMonitor.focusedWorkspaceIndex}
             >
               <Motion.span
                 class="origin-left inline-flex items-center justify-center h-full w-full py-1"
@@ -65,18 +66,18 @@ export function WorkspacesGlazewmWidget() {
                 <Motion.button
                   class="origin-left transition-colors h-[90%] px-2 py-2 rounded-full overflow-visible hover:bg-gruvbox-mint hover:text-gruvbox-base border-solid border-t-1 border-transparent inline-flex items-center justify-center"
                   classList={{
-                    "text-gruvbox-base font-bold bg-gruvbox-watermelon": workspace().isDisplayed,
+                    "text-gruvbox-base font-bold bg-gruvbox-watermelon": index === providers.komorebi?.currentMonitor.focusedWorkspaceIndex,
                     "px-2":
                       displayMode() === WorkspaceDisplayMode.icons &&
-                      !workspace().isDisplayed,
+                      index !== providers.komorebi?.currentMonitor.focusedWorkspaceIndex,
                   }}
                   onClick={() => {
-                    focusWrokspace(workspace().name);
+                    focusWorkspace(index);
                   }}
                   animate={{
                     fontSize:
                       displayMode() === WorkspaceDisplayMode.icons &&
-                        !workspace().isDisplayed
+                        index !== providers.komorebi?.currentMonitor.focusedWorkspaceIndex
                         ? "1.5rem"
                         : "13px",
                   }}
@@ -86,22 +87,22 @@ export function WorkspacesGlazewmWidget() {
                 >
                   <Switch>
                     <Match when={displayMode() === WorkspaceDisplayMode.normal}>
-                      {workspace().displayName ?? workspace().name}
+                      {workspace().name ?? (index + 1).toString()}
                     </Match>
                     <Match when={displayMode() === WorkspaceDisplayMode.icons}>
                       <Show
-                        when={workspace().isDisplayed}
+                        when={index === providers.komorebi?.currentMonitor.focusedWorkspaceIndex}
                         fallback={
-                          (workspace().displayName ?? workspace().name)?.split(
+                          (workspace().name ?? (index + 1).toString())?.split(
                             " ",
                           )[0]
                         }
                       >
-                        {(workspace().displayName ?? workspace().name)?.split(
+                        {(workspace().name ?? (index + 1).toString())?.split(
                           " ",
                         )?.[1] ??
-                          workspace().displayName ??
-                          workspace().name}
+                          workspace().name ??
+                          (index + 1).toString()}
                       </Show>
                     </Match>
                   </Switch>
