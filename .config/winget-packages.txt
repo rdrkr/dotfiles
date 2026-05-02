@@ -26,6 +26,7 @@ junegunn.fzf
 LGUG2Z.komorebi
 Microsoft.AppInstaller
 Microsoft.DotNet.DesktopRuntime.8
+Microsoft.DotNet.Native.Runtime
 Microsoft.DotNet.SDK.10
 Microsoft.Edge
 Microsoft.OneDrive
@@ -45,6 +46,7 @@ Microsoft.WindowsAppRuntime.1.7
 Microsoft.WindowsAppRuntime.1.8
 Microsoft.WindowsTerminal
 Microsoft.WSL
+MSYS2.MSYS2
 Neovim.Neovim
 Nushell.Nushell
 OpenJS.NodeJS

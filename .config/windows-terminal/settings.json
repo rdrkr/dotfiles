@@ -15,7 +15,7 @@
     "alwaysShowTabs": true,
     "copyFormatting": "none",
     "copyOnSelect": true,
-    "defaultProfile": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+    "defaultProfile": "{507f783f-9554-4b54-a3a4-33d3f833796d}",
     "keybindings": 
     [
         {
@@ -27,24 +27,24 @@
             "keys": "ctrl+w"
         },
         {
-            "id": "Terminal.OpenNewTab",
-            "keys": "ctrl+t"
-        },
-        {
             "id": "Terminal.CopyToClipboard",
             "keys": "ctrl+c"
+        },
+        {
+            "id": "Terminal.OpenNewTab",
+            "keys": "ctrl+t"
         },
         {
             "id": "Terminal.ClearBuffer",
             "keys": "ctrl+k"
         },
         {
-            "id": "Terminal.FindText",
-            "keys": "ctrl+shift+f"
-        },
-        {
             "id": "Terminal.PasteFromClipboard",
             "keys": "ctrl+v"
+        },
+        {
+            "id": "Terminal.FindText",
+            "keys": "ctrl+shift+f"
         },
         {
             "id": "Terminal.PasteFromClipboard",
@@ -73,6 +73,11 @@
     {
         "defaults": 
         {
+            "bellStyle": 
+            [
+                "window",
+                "taskbar"
+            ],
             "colorScheme": "Gruvbox",
             "cursorShape": "filledBox",
             "elevate": true,
@@ -114,12 +119,12 @@
                 "altGrAliasing": true,
                 "antialiasingMode": "grayscale",
                 "closeOnExit": "automatic",
-                "commandline": "C:\\Program Files\\Git\\bin\\bash.exe",
+                "commandline": "C:/msys64/msys2_shell.cmd -defterm -here -no-start -clangarm64 -full-path -shell zsh",
                 "guid": "{507f783f-9554-4b54-a3a4-33d3f833796d}",
                 "hidden": false,
                 "historySize": 9001,
-                "icon": "\ue756",
-                "name": "Git Bash",
+                "icon": "C:\\msys64\\clangarm64.ico",
+                "name": "zsh",
                 "padding": "8, 8, 8, 8",
                 "snapOnInput": true,
                 "startingDirectory": "%USERPROFILE%",

@@ -1635,6 +1635,34 @@ function Invoke-Restore {
         Print-Warning "$BunPackagesFile not found. Skipping."
     }
 
+    # 8b. Configure MSYS2
+    Print-Header "Configuring MSYS2..."
+    $msysNsswitch = "C:\msys64\etc\nsswitch.conf"
+    if (Test-Path $msysNsswitch) {
+        if ($DryRun) {
+            Print-Warning "`[DRY RUN`] Would set db_home: windows in $msysNsswitch"
+        } else {
+            try {
+                $content = Get-Content $msysNsswitch -Raw
+                if ($content -notmatch '(?m)^db_home:\s*windows\s*$') {
+                    if ($content -match '(?m)^db_home:.*$') {
+                        $content = $content -replace '(?m)^db_home:.*$', 'db_home: windows'
+                    } else {
+                        $content += "`ndb_home: windows`n"
+                    }
+                    Set-Content -Path $msysNsswitch -Value $content -NoNewline
+                    Print-Success "Configured db_home: windows in $msysNsswitch."
+                } else {
+                    Print-Success "db_home is already configured to windows in $msysNsswitch."
+                }
+            } catch {
+                Print-Error "Failed to configure MSYS2: $($_.Exception.Message)"
+            }
+        }
+    } else {
+        Print-Warning "MSYS2 nsswitch.conf not found at $msysNsswitch. Skipping."
+    }
+
     # 9. Install WSL with the latest Ubuntu.
     # Two-phase install. On a fresh Windows box, `wsl --install -d Ubuntu`
     # fails with HCS_E_HYPERV_NOT_INSTALLED because distro registration

@@ -1,6 +1,11 @@
 # initialization
 export XDG_CONFIG_HOME="${HOME}/.config"
 
+# ensure MSYS2 standard paths are available (for non-login shells)
+if [[ -d "/usr/bin" ]] && [[ ":$PATH:" != *":/usr/bin:"* ]]; then
+  export PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
+fi
+
 # platform detection
 case "$(uname -s)" in
   Darwin) _OS="macos" ;;
@@ -67,7 +72,12 @@ zinit cdreplay -q
 export STARSHIP_CONFIG=~/.config/starship/starship.toml
 
 if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
-  eval "$(starship init zsh)"
+  # Workaround for starship init zsh quoting bug when the path contains spaces
+  if [[ "$_OS" == "unknown" && -x /usr/bin/sed ]]; then
+    eval "$(starship init zsh | /usr/bin/sed -E "s|'[^']*[/\\\\]starship(\.exe)?'|starship|g")"
+  else
+    eval "$(starship init zsh)"
+  fi
 fi
 
 # fzf
@@ -208,7 +218,7 @@ command -v fzf      &>/dev/null && eval "$(fzf --zsh)"
 command -v zoxide   &>/dev/null && eval "$(zoxide init zsh)"
 [[ -x ~/scripts/notify.sh ]]   && eval "$(~/scripts/notify.sh --completions zsh)"
 if output="$(mole completion zsh 2>/dev/null)"; then eval "$output"; fi
-command -v carapace &>/dev/null && source <(carapace _carapace)
+command -v carapace &>/dev/null && source <(carapace _carapace zsh)
 
 # paths
 path_dirs=()
