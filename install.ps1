@@ -1464,6 +1464,33 @@ function Invoke-WslInstall {
     }
 }
 
+function Set-WindowsLanguageHotkey {
+    <#
+    .SYNOPSIS
+        Sets the Windows keyboard input language toggle hotkey to the Grave Accent (`).
+    #>
+    Print-Header "Setting Windows keyboard language hotkey..."
+    
+    $regPath = "HKCU:\Keyboard Layout\Toggle"
+    if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would set Language Hotkey to 4 (Grave Accent) in $regPath"
+        return
+    }
+
+    try {
+        if (-not (Test-Path $regPath)) {
+            New-Item -Path $regPath -Force -ErrorAction Stop | Out-Null
+        }
+        New-ItemProperty -Path $regPath -Name "Hotkey" -PropertyType String -Value "4" -Force -ErrorAction Stop | Out-Null
+        New-ItemProperty -Path $regPath -Name "Language Hotkey" -PropertyType String -Value "4" -Force -ErrorAction Stop | Out-Null
+        New-ItemProperty -Path $regPath -Name "Layout Hotkey" -PropertyType String -Value "3" -Force -ErrorAction Stop | Out-Null
+        Print-Success "Keyboard language hotkey set to Grave Accent."
+    }
+    catch {
+        Print-Error "Failed to set keyboard language hotkey: $($_.Exception.Message)"
+    }
+}
+
 # --- Restore ---
 function Invoke-Restore {
     <#
@@ -1663,6 +1690,14 @@ function Invoke-Restore {
         Print-Warning "MSYS2 nsswitch.conf not found at $msysNsswitch. Skipping."
     }
 
+    $pacmanExe = "C:\msys64\usr\bin\pacman.exe"
+    if (Test-Path $pacmanExe) {
+        Run-Command "C:\msys64\usr\bin\pacman.exe -S --noconfirm tmux"
+        Print-Success "tmux installed via MSYS2 pacman."
+    } else {
+        Print-Warning "MSYS2 pacman not found at $pacmanExe. Skipping tmux installation."
+    }
+
     # 9. Install WSL with the latest Ubuntu.
     # Two-phase install. On a fresh Windows box, `wsl --install -d Ubuntu`
     # fails with HCS_E_HYPERV_NOT_INSTALLED because distro registration
@@ -1744,6 +1779,7 @@ function Invoke-Restore {
     Restore-WindowsPersonalization
     Apply-WindowsLockScreen
     Restore-WindowsStartup
+    Set-WindowsLanguageHotkey
 
     # 12. Run install.sh restore inside WSL so Linux-side state (apt, Linuxbrew,
     # stow, zsh) is set up to match. Skip on a fresh install -- the VM Platform
