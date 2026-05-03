@@ -22,7 +22,7 @@ if !ProcessExist(BarPID) {
 }
 
 ; Language switching (Alt+Space -> Grave Accent)
-!Space:: Send("``")
+!Space:: Send("{vkC0}")
 
 ; App switching (Cmd+Tab -> Alt+Tab)
 LWin & Tab::AltTab

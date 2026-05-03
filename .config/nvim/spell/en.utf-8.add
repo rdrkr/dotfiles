@@ -430,3 +430,6 @@ autoload
 pluginsclangarm64
 exe
 ePtmux
+sed
+b8bb26
+MSYS2
