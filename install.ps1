@@ -682,6 +682,102 @@ $StartupKeys = @(
     "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\StartupFolder"
 )
 
+function Configure-Desktop {
+    <#
+    .SYNOPSIS
+        Configures desktop settings (hides icons and auto-hides taskbar).
+    #>
+    Print-Header "Configuring Windows desktop..."
+
+    $needsExplorerRestart = $false
+
+    # 1. Hide All Desktop Icons
+    $advancedKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+    if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would set HideIcons = 1 in $advancedKey"
+    } else {
+        try {
+            if (-not (Test-Path $advancedKey)) {
+                New-Item -Path $advancedKey -Force -ErrorAction Stop | Out-Null
+            }
+            $currentHideIcons = Get-ItemProperty -Path $advancedKey -Name "HideIcons" -ErrorAction SilentlyContinue
+            if (-not $currentHideIcons -or $currentHideIcons.HideIcons -ne 1) {
+                New-ItemProperty -Path $advancedKey -Name "HideIcons" -PropertyType DWord -Value 1 -Force -ErrorAction Stop | Out-Null
+                Print-Success "Desktop icons hidden."
+                $needsExplorerRestart = $true
+            } else {
+                Print-Success "Desktop icons already hidden."
+            }
+        } catch {
+            Print-Error "Failed to hide desktop icons: $($_.Exception.Message)"
+        }
+    }
+
+    # 1b. Hide Recycle Bin specifically (NewStartPanel & ClassicStartMenu)
+    $hideDesktopIconsKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
+    $hideDesktopIconsKeyClassic = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu"
+    $recycleBinGuid = "{645FF040-5081-101B-9F08-00AA002F954E}"
+    if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would hide Recycle Bin in $hideDesktopIconsKey"
+    } else {
+        try {
+            if (-not (Test-Path $hideDesktopIconsKey)) { New-Item -Path $hideDesktopIconsKey -Force -ErrorAction Stop | Out-Null }
+            if (-not (Test-Path $hideDesktopIconsKeyClassic)) { New-Item -Path $hideDesktopIconsKeyClassic -Force -ErrorAction Stop | Out-Null }
+            
+            $currentRb = Get-ItemProperty -Path $hideDesktopIconsKey -Name $recycleBinGuid -ErrorAction SilentlyContinue
+            $currentRbClassic = Get-ItemProperty -Path $hideDesktopIconsKeyClassic -Name $recycleBinGuid -ErrorAction SilentlyContinue
+            
+            if (-not $currentRb -or $currentRb.$recycleBinGuid -ne 1 -or -not $currentRbClassic -or $currentRbClassic.$recycleBinGuid -ne 1) {
+                New-ItemProperty -Path $hideDesktopIconsKey -Name $recycleBinGuid -PropertyType DWord -Value 1 -Force -ErrorAction Stop | Out-Null
+                New-ItemProperty -Path $hideDesktopIconsKeyClassic -Name $recycleBinGuid -PropertyType DWord -Value 1 -Force -ErrorAction Stop | Out-Null
+                Print-Success "Recycle Bin icon hidden."
+                $needsExplorerRestart = $true
+            } else {
+                Print-Success "Recycle Bin icon already hidden."
+            }
+        } catch {
+            Print-Error "Failed to hide Recycle Bin: $($_.Exception.Message)"
+        }
+    }
+
+    # 2. Auto-hide Taskbar
+    $stuckRectsKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3"
+    if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would set taskbar to auto-hide in $stuckRectsKey"
+    } else {
+        try {
+            if (Test-Path $stuckRectsKey) {
+                $settings = (Get-ItemProperty -Path $stuckRectsKey -Name "Settings" -ErrorAction Stop).Settings
+                if ($settings.Length -ge 9 -and $settings[8] -ne 3) {
+                    $settings[8] = 3
+                    Set-ItemProperty -Path $stuckRectsKey -Name "Settings" -Value ([byte[]]$settings) -Force -ErrorAction Stop
+                    Print-Success "Taskbar auto-hide enabled."
+                    $needsExplorerRestart = $true
+                } elseif ($settings.Length -ge 9 -and $settings[8] -eq 3) {
+                    Print-Success "Taskbar auto-hide already enabled."
+                } else {
+                    Print-Warning "Taskbar settings data is invalid or missing."
+                }
+            } else {
+                Print-Warning "Taskbar settings key not found: $stuckRectsKey"
+            }
+        } catch {
+            Print-Error "Failed to enable taskbar auto-hide: $($_.Exception.Message)"
+        }
+    }
+
+    # 3. Restart Explorer to apply changes (prevents Explorer from overwriting them on exit)
+    if ($needsExplorerRestart -and -not $DryRun) {
+        Print-Header "Restarting Windows Explorer to apply desktop/taskbar changes..."
+        try {
+            Stop-Process -Name explorer -Force -ErrorAction Stop
+            Print-Success "Explorer restarted."
+        } catch {
+            Print-Warning "Failed to restart Explorer. Changes may require a manual sign out/in."
+        }
+    }
+}
+
 function Backup-WindowsPersonalization {
     <#
     .SYNOPSIS
@@ -1002,7 +1098,7 @@ function Backup-WindowsStartup {
     $items = Get-ChildItem -Path $startupFolder -Force -ErrorAction SilentlyContinue
     if ($items) {
         foreach ($item in $items) {
-            if ($item.Name -eq "KeyboardLayout.lnk") { continue }
+            if ($item.Name -eq "KeyboardLayout.lnk" -or $item.Name -eq "desktop.ini") { continue }
             Copy-Item -LiteralPath $item.FullName -Destination $StartupFolderDir -Force
         }
         Print-Success "Copied startup folder item(s) to $StartupFolderDir."
@@ -1062,6 +1158,7 @@ function Restore-WindowsStartup {
     $items = Get-ChildItem -Path $StartupFolderDir -Force -ErrorAction SilentlyContinue
     $count = 0
     foreach ($item in $items) {
+        if ($item.Name -eq "desktop.ini") { continue }
         $dest = Join-Path $startupFolder $item.Name
         Copy-Item -LiteralPath $item.FullName -Destination $dest -Force
         $count++
@@ -1491,6 +1588,31 @@ function Set-WindowsLanguageHotkey {
     }
 }
 
+function Disable-SmartAppControl {
+    <#
+    .SYNOPSIS
+        Disables Smart App Control via registry.
+    #>
+    Print-Header "Disabling Smart App Control..."
+    
+    $regPath = "HKLM:\SYSTEM\CurrentControlSet\Control\CI\Policy"
+    if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would set VerifiedAndReputablePolicyState to 0 in $regPath"
+        return
+    }
+
+    try {
+        if (-not (Test-Path $regPath)) {
+            New-Item -Path $regPath -Force -ErrorAction Stop | Out-Null
+        }
+        New-ItemProperty -Path $regPath -Name "VerifiedAndReputablePolicyState" -PropertyType DWord -Value 0 -Force -ErrorAction Stop | Out-Null
+        Print-Success "Smart App Control disabled."
+    }
+    catch {
+        Print-Error "Failed to disable Smart App Control: $($_.Exception.Message)"
+    }
+}
+
 # --- Restore ---
 function Invoke-Restore {
     <#
@@ -1512,6 +1634,8 @@ function Invoke-Restore {
         Print-Error "winget not found. Please install App Installer from the Microsoft Store."
         exit 1
     }
+
+    Disable-SmartAppControl
 
     # 2. Install packages from winget-packages.txt
     Print-Header "Installing winget packages..."
@@ -1692,10 +1816,10 @@ function Invoke-Restore {
 
     $pacmanExe = "C:\msys64\usr\bin\pacman.exe"
     if (Test-Path $pacmanExe) {
-        Run-Command "C:\msys64\usr\bin\pacman.exe -S --noconfirm tmux"
-        Print-Success "tmux installed via MSYS2 pacman."
+        Run-Command "C:\msys64\usr\bin\pacman.exe -S --noconfirm tmux zsh"
+        Print-Success "tmux and zsh installed via MSYS2 pacman."
     } else {
-        Print-Warning "MSYS2 pacman not found at $pacmanExe. Skipping tmux installation."
+        Print-Warning "MSYS2 pacman not found at $pacmanExe. Skipping tmux and zsh installation."
     }
 
     # 9. Install WSL with the latest Ubuntu.
@@ -1776,6 +1900,7 @@ function Invoke-Restore {
     # 11b. Restore modern Personalization (accent, dark mode, cursors, etc.)
     # after the theme so its DWM accent overrides theme defaults. Then pin
     # the lock screen via PersonalizationCSP and reapply sign-in programs.
+    Configure-Desktop
     Restore-WindowsPersonalization
     Apply-WindowsLockScreen
     Restore-WindowsStartup
@@ -1827,12 +1952,7 @@ function Invoke-Restore {
             $Shortcut.WorkingDirectory = Split-Path $ahkScript
             $Shortcut.Save()
 
-            # Set 'Run as Administrator' flag (byte 21, bit 5)
-            $bytes = [System.IO.File]::ReadAllBytes($shortcutPath)
-            $bytes[21] = $bytes[21] -bor 0x20
-            [System.IO.File]::WriteAllBytes($shortcutPath, $bytes)
-
-            Print-Success "Created startup shortcut for komorebic-hotkeys.ahk (Run as Admin)."
+            Print-Success "Created startup shortcut for komorebic-hotkeys.ahk."
         } catch {
             Print-Error "Failed to create startup shortcut: $($_.Exception.Message)"
         }

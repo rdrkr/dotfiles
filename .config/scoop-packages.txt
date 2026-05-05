@@ -1,2 +1,4 @@
-﻿clink
+﻿7zip
+clink
+extras/psreadline
 pipx
