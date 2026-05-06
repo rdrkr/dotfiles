@@ -1,4 +1,4 @@
-﻿ajeetdsouza.zoxide
+ajeetdsouza.zoxide
 Anthropic.ClaudeCode
 astral-sh.ruff
 astral-sh.uv
@@ -31,8 +31,10 @@ Microsoft.DotNet.SDK.10
 Microsoft.Edge
 Microsoft.OneDrive
 Microsoft.OpenJDK.21
+Microsoft.PowerShell
 Microsoft.PowerToys
 Microsoft.Teams
+Microsoft.UI.Xaml.2.7
 Microsoft.UI.Xaml.2.8
 Microsoft.VCLibs.14
 Microsoft.VCLibs.Desktop.14

@@ -1,4 +1,4 @@
-﻿7zip
+7zip
 clink
 extras/psreadline
 pipx
