@@ -242,6 +242,7 @@ path_dirs+=(
   "$HOME/.npm-global/bin"
   "$HOME/.antigravity/antigravity/bin"
   "$HOME/.bun/bin"
+  "$HOME/.cargo/bin"
 )
 
 for p in "${path_dirs[@]}"; do
