@@ -1852,8 +1852,12 @@ function Invoke-Restore {
         Print-Warning "`[DRY RUN`] Would ensure VM Platform + WSL features, then run: wsl --install -d Ubuntu --no-launch"
     }
     else {
-        $vmPlatform = Get-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform -ErrorAction SilentlyContinue
-        $wslFeature = Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux -ErrorAction SilentlyContinue
+        $vmPlatform = $null
+        $wslFeature = $null
+        try {
+            $vmPlatform = Get-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform -ErrorAction SilentlyContinue
+            $wslFeature = Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux -ErrorAction SilentlyContinue
+        } catch { }
         $platformReady = $vmPlatform -and $vmPlatform.State -eq 'Enabled' -and $wslFeature -and $wslFeature.State -eq 'Enabled'
 
         if (-not $platformReady) {
