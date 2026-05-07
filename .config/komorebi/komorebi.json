@@ -107,9 +107,14 @@
   ],
   "floating_applications": [
     {
-      "id": "(?i)mail|contacts|phone|facetime|quicktime|finder|ollama|calendar|activity|gpt|chatgpt|preview|photos|podcasts|perplexity|store|java|passwords|pearcleaner|reminders|sf symbols|teamviewer|git-bash|msys2",
+      "id": "(?i)mail|contacts|phone|facetime|quicktime|finder|ollama|calendar|activity|gpt|chatgpt|preview|photos|podcasts|perplexity|store|java|passwords|pearcleaner|reminders|sf symbols|teamviewer",
       "kind": "Exe",
       "matching_strategy": "Regex"
+    },
+    {
+      "id": "mintty.exe",
+      "kind": "Exe",
+      "matching_strategy": "Equals"
     },
     {
       "id": "[Pp]icture.in.[Pp]icture",
