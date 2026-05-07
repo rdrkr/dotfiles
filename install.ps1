@@ -1564,13 +1564,13 @@ function Invoke-WslInstall {
 function Set-WindowsLanguageHotkey {
     <#
     .SYNOPSIS
-        Sets the Windows keyboard input language toggle hotkey to the Grave Accent (`).
+        Sets the Windows keyboard input language toggle hotkey to Ctrl+Shift.
     #>
     Print-Header "Setting Windows keyboard language hotkey..."
     
     $regPath = "HKCU:\Keyboard Layout\Toggle"
     if ($DryRun) {
-        Print-Warning "`[DRY RUN`] Would set Language Hotkey to 4 (Grave Accent) in $regPath"
+        Print-Warning "`[DRY RUN`] Would set Language Hotkey to 2 (Ctrl+Shift) in $regPath"
         return
     }
 
@@ -1578,10 +1578,10 @@ function Set-WindowsLanguageHotkey {
         if (-not (Test-Path $regPath)) {
             New-Item -Path $regPath -Force -ErrorAction Stop | Out-Null
         }
-        New-ItemProperty -Path $regPath -Name "Hotkey" -PropertyType String -Value "4" -Force -ErrorAction Stop | Out-Null
-        New-ItemProperty -Path $regPath -Name "Language Hotkey" -PropertyType String -Value "4" -Force -ErrorAction Stop | Out-Null
+        New-ItemProperty -Path $regPath -Name "Hotkey" -PropertyType String -Value "2" -Force -ErrorAction Stop | Out-Null
+        New-ItemProperty -Path $regPath -Name "Language Hotkey" -PropertyType String -Value "2" -Force -ErrorAction Stop | Out-Null
         New-ItemProperty -Path $regPath -Name "Layout Hotkey" -PropertyType String -Value "3" -Force -ErrorAction Stop | Out-Null
-        Print-Success "Keyboard language hotkey set to Grave Accent."
+        Print-Success "Keyboard language hotkey set to Ctrl+Shift."
     }
     catch {
         Print-Error "Failed to set keyboard language hotkey: $($_.Exception.Message)"

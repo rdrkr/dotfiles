@@ -10,14 +10,21 @@
   "animation": {
     "enabled": false
   },
+  "theme": {
+    "palette": "Base16",
+    "name": "GruvboxDarkMedium",
+    "bar_accent": "Base06",
+    "floating_border": "Base06",
+    "monocle_border": "Base06",
+    "single_border": "Base06",
+    "unfocused_border": "Base00"
+  },
+  "stackbar": {
+    "mode": "Never"
+  },
   "border": true,
   "border_width": 5,
   "border_offset": -1,
-  "border_colours": {
-    "single": "#ebdbb2",
-    "stack": "#ebdbb2",
-    "monocle": "#ebdbb2"
-  },
   "border_implementation": "Windows",
   "border_style": "Rounded",
   "monitors": [

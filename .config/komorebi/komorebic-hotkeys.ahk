@@ -21,8 +21,8 @@ if !ProcessExist(BarPID) {
 	Run("*RunAs zebar.exe", , "Hide")
 }
 
-; Language switching (Alt+Space -> Grave Accent)
-!Space:: Send("{vkC0}")
+; Language switching (Alt+Space -> Ctrl+Shift)
+!Space:: Send("{Ctrl Down}{Shift}{Ctrl Up}")
 
 ; App switching (Cmd+Tab -> Alt+Tab)
 LWin & Tab::AltTab
