@@ -36,6 +36,7 @@ show_indicators_button = true
 
 [appearance.themes]
 theme = "gruvbox_dark"
+system_theme = false
 
 [code]
 
