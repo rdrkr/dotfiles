@@ -250,12 +250,22 @@ brew "vjeantet/tap/alerter"
 cask "nikitabobko/tap/aerospace"
 # Modern macOS menu bar application for managing AeroSpace window manager
 cask "rdrkr/tap/aerospacebar"
+# Enable Windows-like alt-tab
+cask "alt-tab"
 # iOS App Store alternative
 cask "altserver"
+# Tools for building Android applications
+cask "android-studio"
 # AI Coding Agent IDE
 cask "antigravity"
+# Inspect application bundles
+cask "apparency"
 # Universal chat app powered by Matrix
 cask "beeper"
+# Display management tool
+cask "betterdisplay"
+# Compare files and folders
+cask "beyond-compare@4"
 # Browserino is a tiny browser selector for MacOS written in SwiftUI
 cask "alexstrnik/browserino/browserino"
 # OpenAI's official ChatGPT desktop app
@@ -268,15 +278,24 @@ cask "claude-code"
 cask "hamed-elfayome/claude-usage/claude-usage-tracker"
 # Write, edit, and chat about your code with AI
 cask "cursor"
+# Server and cloud storage browser
+cask "cyberduck"
+# Voice and text chat software
+cask "discord"
+# Client for the Dropbox cloud storage service
+cask "dropbox"
 # Utility for customizing which browser to start
 cask "finicky"
 cask "font-fira-code-nerd-font"
 cask "font-hack-nerd-font"
 cask "font-jetbrains-mono-nerd-font"
+cask "font-sf-pro"
 cask "font-sketchybar-app-font"
 cask "font-symbols-only-nerd-font"
 # Terminal emulator that uses platform-native UI and GPU acceleration
 cask "ghostty@tip"
+# Free and open-source image editor
+cask "gimp"
 # A tiling window manager for macOS and Windows
 cask "glzr-io/tap/glazewm"
 # Tiling window manager with tree layouts
@@ -287,16 +306,34 @@ cask "google-chrome"
 cask "google-drive"
 # Desktop automation application
 cask "hammerspoon"
+# Open-source video transcoder
+cask "handbrake-app"
 # Keyboard shortcuts for every button on your screen
 cask "homerow"
+# Free and open-source media player
+cask "iina"
 # Tool to optimise images to a smaller size
 cask "imageoptim"
 # Vector graphics editor
 cask "inkscape"
 # HTTP and GraphQL Client
 cask "insomnia"
+# IntelliJ IDEA Early Access Program
+cask "intellij-idea@eap"
+# Download manager
+cask "jdownloader"
 # Menu bar manager
 cask "jordanbaird-ice"
+# Keyboard customiser
+cask "karabiner-elements"
+# Open-source keystroke visualiser
+cask "keycastr"
+# Audio tagger focusing on efficiency
+cask "kid3"
+# Find and download song lyrics
+cask "lyricsfinder"
+# Mouse utility to add gesture functions and smooth scrolling to 3rd party mice
+cask "mac-mouse-fix"
 # Provides updates to various Microsoft products
 cask "microsoft-auto-update"
 # Meet, chat, call, and collaborate in just one place
@@ -305,24 +342,42 @@ cask "microsoft-teams"
 cask "obs"
 # Get up and running with large language models locally
 cask "ollama-app"
+# Finds large, unwanted files and deletes them
+cask "omnidisksweeper"
 # Tiling window manager for macOS with Niri-inspired column-based layout
 cask "barutsrb/tap/omniwm"
 # Utility to uninstall apps and remove leftover files from old/uninstalled apps
 cask "pearcleaner"
+# Home media server
+cask "plex-media-server"
 # VPN client focusing on security
 cask "protonvpn"
 # Control your tools with a few keystrokes
 cask "raycast"
+# Rust IDE
+cask "rustrover"
 # Tool that provides consistent, highly configurable symbols for apps
 cask "sf-symbols"
+# Software modeller
+cask "staruml"
+# Text editor for code, markup and prose
+cask "sublime-text"
 # SwipeAeroSpace is a tool to switch AeroSpace worksapces by swiping.
 cask "mediosz/tap/swipeaerospace"
+# Remote access and connectivity software focused on security
+cask "teamviewer"
+# Macro remote control
+cask "touch-portal"
+# Create, maintain, and interact with Xcode projects at scale
+cask "tuist"
 # Rust-based terminal
 cask "warp"
 # Video communication and virtual meeting platform
 cask "webex"
 # Cross-platform desktop widgets
 cask "glzr-io/tap/zebar"
+# Video communication and virtual meeting platform
+cask "zoom"
 mas "1Password 7", id: 1333542190
 mas "Actions", id: 1586435171
 mas "Amphetamine", id: 937984704
