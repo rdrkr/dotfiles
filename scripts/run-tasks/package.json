@@ -8,10 +8,10 @@
   },
   "dependencies": {
     "tasuku": "^3.0.0-beta.5",
-    "yaml": "^2.8.2"
+    "yaml": "^2.8.4"
   },
   "devDependencies": {
-    "@types/node": "^25.4.0",
+    "@types/node": "^25.6.2",
     "tsx": "^4.21.0"
   }
 }
