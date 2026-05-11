@@ -1,3 +1,7 @@
+# Config version for compatibility and deprecations
+# Fallback value (if you omit the key): config-version = 1
+config-version = 2
+
 on-focus-changed = [
   'exec-and-forget osascript -e " tell application \"System Events\" to     if (get name of every process) contains \"AeroSpaceBar\" then         tell application \"AeroSpaceBar\" to «event ascrpsbr» \"updateOnFocusChanged\" "',
 ]
@@ -50,6 +54,17 @@ default-root-container-orientation = 'auto'
 # Useful if you don't use this macOS feature, but accidentally hit cmd-h or cmd-alt-h key
 # Also see: https://nikitabobko.github.io/AeroSpace/goodies#disable-hide-app
 automatically-unhide-macos-hidden-apps = true
+
+# List of workspaces that should stay alive even when they contain no windows,
+# even when they are invisible.
+# This config version is only available since 'config-version = 2'
+# Fallback value (if you omit the key): persistent-workspaces = []
+persistent-workspaces = ["1", "2", "3", "4", "5", "6", "H"]
+
+# A callback that runs every time binding mode changes
+# See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
+# See: https://nikitabobko.github.io/AeroSpace/commands#mode
+on-mode-changed = []
 
 # Possible values: (qwerty|dvorak|colemak)
 # See https://nikitabobko.github.io/AeroSpace/guide#key-mapping
@@ -118,11 +133,12 @@ alt-3 = 'workspace 3'
 alt-4 = 'workspace 4'
 alt-5 = 'workspace 5'
 alt-6 = 'workspace 6'
+alt-shift-h = 'workspace H'
 
 # 'workspace --wrap-around next'
-ctrl-alt-right = 'exec-and-forget aerospace list-workspaces --monitor focused --empty no | aerospace workspace --stdin --wrap-around next'
+ctrl-alt-right = 'exec-and-forget aerospace list-workspaces --monitor focused --empty no | grep -v "^H$" | aerospace workspace --stdin --wrap-around next'
 # 'workspace --wrap-around prev'
-ctrl-alt-left = 'exec-and-forget aerospace list-workspaces --monitor focused --empty no | aerospace workspace --stdin --wrap-around prev'
+ctrl-alt-left = 'exec-and-forget aerospace list-workspaces --monitor focused --empty no | grep -v "^H$" | aerospace workspace --stdin --wrap-around prev'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move
 ctrl-shift-left = 'move left'
