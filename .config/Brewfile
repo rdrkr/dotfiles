@@ -328,8 +328,6 @@ cask "jordanbaird-ice"
 cask "karabiner-elements"
 # Open-source keystroke visualiser
 cask "keycastr"
-# Audio tagger focusing on efficiency
-cask "kid3"
 # Find and download song lyrics
 cask "lyricsfinder"
 # Mouse utility to add gesture functions and smooth scrolling to 3rd party mice
