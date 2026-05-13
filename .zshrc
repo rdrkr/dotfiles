@@ -334,3 +334,6 @@ if [[ ("${TERM_PROGRAM}" == "ghostty" || -n "${SSH_CONNECTION}") && -z "$TMUX" &
   fi
 fi
 
+
+# bun completions
+[ -s "/Users/ronendruker/.bun/_bun" ] && source "/Users/ronendruker/.bun/_bun"
