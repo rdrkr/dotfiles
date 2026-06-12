@@ -5,10 +5,10 @@
 
 [advanced]
 enable-optimized-performance = true
-enable-performance-metrics = true
+enable-performance-metrics = false
 focus-window-on-click = true
 # Supported values: "debug", "info", "warning", "error", "fault"
-log-level = 'debug'
+log-level = 'info'
 
 [general]
 aerospace-path = '/opt/homebrew/bin/aerospace'
@@ -99,6 +99,7 @@ red = 0.0
 appearance-mode = 'all-spaces'
 effect-config = []
 geometric-config = []
+hidden-spaces = [ 'H' ]
 show-apple-button-as-space = true
 show-empty-spaces = false
 visual-config = []

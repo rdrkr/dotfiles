@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE QtCreatorDebuggers>
+<!-- Written by QtCreator 19.0.2, 2026-05-26T11:36:32. -->
+<qtcreator>
+ <data>
+  <variable>DebuggerItem.0</variable>
+  <valuemap type="QVariantMap">
+   <valuelist type="QVariantList" key="Abis">
+    <value type="QString">x86-darwin-generic-mach_o-64bit</value>
+    <value type="QString">arm-darwin-generic-mach_o-64bit</value>
+   </valuelist>
+   <value type="bool" key="AutoDetected">true</value>
+   <value type="QString" key="Binary">/Applications/Xcode.app/Contents/Developer/usr/bin/lldb</value>
+   <value type="QString" key="DetectionSource"></value>
+   <value type="QString" key="DisplayName">System LLDB at /Applications/Xcode.app/Contents/Developer/usr/bin/lldb</value>
+   <value type="int" key="EngineType">256</value>
+   <value type="QString" key="Id">{a37aaa07-c05a-41e5-80c6-0a2fb7335da8}</value>
+   <value type="QDateTime" key="LastModified">2026-04-30T15:08:00.000</value>
+   <value type="QString" key="Version">2100.0.17.108</value>
+   <value type="QString" key="WorkingDirectory"></value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>DebuggerItem.1</variable>
+  <valuemap type="QVariantMap">
+   <valuelist type="QVariantList" key="Abis">
+    <value type="QString">x86-darwin-generic-mach_o-64bit</value>
+    <value type="QString">arm-darwin-generic-mach_o-64bit</value>
+   </valuelist>
+   <value type="bool" key="AutoDetected">true</value>
+   <value type="QString" key="Binary">/usr/bin/lldb</value>
+   <value type="QString" key="DetectionSource"></value>
+   <value type="QString" key="DisplayName">System LLDB at /usr/bin/lldb</value>
+   <value type="int" key="EngineType">256</value>
+   <value type="QString" key="Id">{e34b6101-c066-4df5-9825-c88d0edfdfed}</value>
+   <value type="QDateTime" key="LastModified">2026-04-30T21:33:17.000</value>
+   <value type="QString" key="Version">2100.0.17.108</value>
+   <value type="QString" key="WorkingDirectory"></value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>DebuggerItem.Count</variable>
+  <value type="int">2</value>
+ </data>
+ <data>
+  <variable>Version</variable>
+  <value type="int">1</value>
+ </data>
+</qtcreator>

@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE QtCreatorToolChains>
+<!-- Written by QtCreator 19.0.2, 2026-05-26T11:36:32. -->
+<qtcreator>
+ <data>
+  <variable>ToolChain.0</variable>
+  <valuemap type="QVariantMap">
+   <value type="QString" key="ExplicitCodeModelTargetTriple"></value>
+   <value type="bool" key="ManuallyProvidedCxxPath">false</value>
+   <value type="QByteArray" key="ProjectExplorer.ClangToolChain.ParentToolChainId"></value>
+   <value type="int" key="ProjectExplorer.ClangToolChain.Priority">10</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.OriginalTargetTriple">arm64-apple-darwin25.5.0</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.Path">/usr/bin/clang++</value>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformCodeGenFlags"/>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformLinkerFlags"/>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.SupportedAbis">
+    <value type="QString">arm-darwin-generic-mach_o-64bit</value>
+    <value type="QString">arm-darwin-generic-mach_o-32bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-32bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-64bit</value>
+   </valuelist>
+   <value type="QString" key="ProjectExplorer.GccToolChain.TargetAbi">arm-darwin-generic-mach_o-64bit</value>
+   <value type="bool" key="ProjectExplorer.ToolChain.Autodetect">true</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.BundleId">{d5a6e05e-b7ca-4772-81a7-24165b4659bc}</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DetectionSource"></value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DisplayName">Clang (arm 64bit at &quot;/usr/bin/clang++&quot;)</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.Id">ProjectExplorer.ToolChain.Clang:{31a29d99-1b19-4e4e-83e6-7a6ba7d7533a}</value>
+   <value type="int" key="ProjectExplorer.ToolChain.Language">2</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.LanguageV2">Cxx</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>ToolChain.1</variable>
+  <valuemap type="QVariantMap">
+   <value type="QString" key="ExplicitCodeModelTargetTriple"></value>
+   <value type="bool" key="ManuallyProvidedCxxPath">false</value>
+   <value type="QByteArray" key="ProjectExplorer.ClangToolChain.ParentToolChainId"></value>
+   <value type="int" key="ProjectExplorer.ClangToolChain.Priority">10</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.OriginalTargetTriple">arm64-apple-darwin25.5.0</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.Path">/usr/bin/clang++</value>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformCodeGenFlags"/>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformLinkerFlags"/>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.SupportedAbis">
+    <value type="QString">arm-darwin-generic-mach_o-64bit</value>
+    <value type="QString">arm-darwin-generic-mach_o-32bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-32bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-64bit</value>
+   </valuelist>
+   <value type="QString" key="ProjectExplorer.GccToolChain.TargetAbi">arm-darwin-generic-mach_o-32bit</value>
+   <value type="bool" key="ProjectExplorer.ToolChain.Autodetect">true</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.BundleId">{fa7824c6-ed3b-4e2f-bd14-88ae27e60dba}</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DetectionSource"></value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DisplayName">Clang (arm 32bit at &quot;/usr/bin/clang++&quot;)</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.Id">ProjectExplorer.ToolChain.Clang:{84536338-0ec1-4aec-b3a5-6fb9ae4a21b3}</value>
+   <value type="int" key="ProjectExplorer.ToolChain.Language">2</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.LanguageV2">Cxx</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>ToolChain.10</variable>
+  <valuemap type="QVariantMap">
+   <value type="QString" key="ExplicitCodeModelTargetTriple"></value>
+   <value type="bool" key="ManuallyProvidedCxxPath">false</value>
+   <value type="QByteArray" key="ProjectExplorer.ClangToolChain.ParentToolChainId"></value>
+   <value type="int" key="ProjectExplorer.ClangToolChain.Priority">0</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.OriginalTargetTriple">x86_64-apple-darwin25.5.0</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.Path">/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang</value>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformCodeGenFlags">
+    <value type="QString">-arch</value>
+    <value type="QString">x86_64</value>
+   </valuelist>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformLinkerFlags">
+    <value type="QString">-arch</value>
+    <value type="QString">x86_64</value>
+   </valuelist>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.SupportedAbis">
+    <value type="QString">x86-darwin-generic-mach_o-64bit</value>
+    <value type="QString">arm-darwin-generic-mach_o-32bit</value>
+    <value type="QString">arm-darwin-generic-mach_o-64bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-32bit</value>
+   </valuelist>
+   <value type="QString" key="ProjectExplorer.GccToolChain.TargetAbi">x86-darwin-generic-mach_o-64bit</value>
+   <value type="bool" key="ProjectExplorer.ToolChain.Autodetect">true</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.BundleId">{60dfc24c-b5d4-44c1-8fa4-79c40f953f0d}</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DetectionSource">iosdetectionsource</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DisplayName">Apple Clang iOS (x86_64 at &quot;/Applications/Xcode.app/Contents/Developer&quot;)</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.Id">ProjectExplorer.ToolChain.Clang:{70327b82-916a-4c56-99ce-5a5691c82abf}</value>
+   <value type="int" key="ProjectExplorer.ToolChain.Language">1</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.LanguageV2">C</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>ToolChain.11</variable>
+  <valuemap type="QVariantMap">
+   <value type="QString" key="ExplicitCodeModelTargetTriple"></value>
+   <value type="bool" key="ManuallyProvidedCxxPath">false</value>
+   <value type="QByteArray" key="ProjectExplorer.ClangToolChain.ParentToolChainId"></value>
+   <value type="int" key="ProjectExplorer.ClangToolChain.Priority">0</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.OriginalTargetTriple">x86_64-apple-darwin25.5.0</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.Path">/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++</value>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformCodeGenFlags">
+    <value type="QString">-arch</value>
+    <value type="QString">x86_64</value>
+   </valuelist>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformLinkerFlags">
+    <value type="QString">-arch</value>
+    <value type="QString">x86_64</value>
+   </valuelist>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.SupportedAbis">
+    <value type="QString">x86-darwin-generic-mach_o-64bit</value>
+    <value type="QString">arm-darwin-generic-mach_o-32bit</value>
+    <value type="QString">arm-darwin-generic-mach_o-64bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-32bit</value>
+   </valuelist>
+   <value type="QString" key="ProjectExplorer.GccToolChain.TargetAbi">x86-darwin-generic-mach_o-64bit</value>
+   <value type="bool" key="ProjectExplorer.ToolChain.Autodetect">true</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.BundleId">{60dfc24c-b5d4-44c1-8fa4-79c40f953f0d}</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DetectionSource">iosdetectionsource</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DisplayName">Apple Clang iOS (x86_64 at &quot;/Applications/Xcode.app/Contents/Developer&quot;)</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.Id">ProjectExplorer.ToolChain.Clang:{ca691aa1-75be-4a46-ab87-b838964d2b39}</value>
+   <value type="int" key="ProjectExplorer.ToolChain.Language">2</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.LanguageV2">Cxx</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>ToolChain.2</variable>
+  <valuemap type="QVariantMap">
+   <value type="QString" key="ExplicitCodeModelTargetTriple"></value>
+   <value type="bool" key="ManuallyProvidedCxxPath">false</value>
+   <value type="QByteArray" key="ProjectExplorer.ClangToolChain.ParentToolChainId"></value>
+   <value type="int" key="ProjectExplorer.ClangToolChain.Priority">10</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.OriginalTargetTriple">arm64-apple-darwin25.5.0</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.Path">/usr/bin/clang++</value>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformCodeGenFlags"/>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformLinkerFlags"/>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.SupportedAbis">
+    <value type="QString">arm-darwin-generic-mach_o-64bit</value>
+    <value type="QString">arm-darwin-generic-mach_o-32bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-32bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-64bit</value>
+   </valuelist>
+   <value type="QString" key="ProjectExplorer.GccToolChain.TargetAbi">x86-darwin-generic-mach_o-32bit</value>
+   <value type="bool" key="ProjectExplorer.ToolChain.Autodetect">true</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.BundleId">{299693cc-4501-408e-b837-0f33ebf5944b}</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DetectionSource"></value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DisplayName">Clang (x86 32bit at &quot;/usr/bin/clang++&quot;)</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.Id">ProjectExplorer.ToolChain.Clang:{7248264a-7d8e-475a-90f6-5cd3f4d1e894}</value>
+   <value type="int" key="ProjectExplorer.ToolChain.Language">2</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.LanguageV2">Cxx</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>ToolChain.3</variable>
+  <valuemap type="QVariantMap">
+   <value type="QString" key="ExplicitCodeModelTargetTriple"></value>
+   <value type="bool" key="ManuallyProvidedCxxPath">false</value>
+   <value type="QByteArray" key="ProjectExplorer.ClangToolChain.ParentToolChainId"></value>
+   <value type="int" key="ProjectExplorer.ClangToolChain.Priority">10</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.OriginalTargetTriple">arm64-apple-darwin25.5.0</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.Path">/usr/bin/clang++</value>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformCodeGenFlags"/>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformLinkerFlags"/>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.SupportedAbis">
+    <value type="QString">arm-darwin-generic-mach_o-64bit</value>
+    <value type="QString">arm-darwin-generic-mach_o-32bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-32bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-64bit</value>
+   </valuelist>
+   <value type="QString" key="ProjectExplorer.GccToolChain.TargetAbi">x86-darwin-generic-mach_o-64bit</value>
+   <value type="bool" key="ProjectExplorer.ToolChain.Autodetect">true</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.BundleId">{6bcb3586-cef4-4d02-ad99-fe92c8616661}</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DetectionSource"></value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DisplayName">Clang (x86 64bit at &quot;/usr/bin/clang++&quot;)</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.Id">ProjectExplorer.ToolChain.Clang:{4a9ac124-3b3f-4e17-9352-11bea6c5ac84}</value>
+   <value type="int" key="ProjectExplorer.ToolChain.Language">2</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.LanguageV2">Cxx</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>ToolChain.4</variable>
+  <valuemap type="QVariantMap">
+   <value type="QString" key="ExplicitCodeModelTargetTriple"></value>
+   <value type="bool" key="ManuallyProvidedCxxPath">false</value>
+   <value type="QByteArray" key="ProjectExplorer.ClangToolChain.ParentToolChainId"></value>
+   <value type="int" key="ProjectExplorer.ClangToolChain.Priority">10</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.OriginalTargetTriple">arm64-apple-darwin25.5.0</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.Path">/usr/bin/clang</value>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformCodeGenFlags"/>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformLinkerFlags"/>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.SupportedAbis">
+    <value type="QString">arm-darwin-generic-mach_o-64bit</value>
+    <value type="QString">arm-darwin-generic-mach_o-32bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-32bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-64bit</value>
+   </valuelist>
+   <value type="QString" key="ProjectExplorer.GccToolChain.TargetAbi">arm-darwin-generic-mach_o-64bit</value>
+   <value type="bool" key="ProjectExplorer.ToolChain.Autodetect">true</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.BundleId">{d5a6e05e-b7ca-4772-81a7-24165b4659bc}</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DetectionSource"></value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DisplayName">Clang (arm 64bit at &quot;/usr/bin/clang&quot;)</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.Id">ProjectExplorer.ToolChain.Clang:{a14d5c83-0d83-46a9-b569-6c084f3f1381}</value>
+   <value type="int" key="ProjectExplorer.ToolChain.Language">1</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.LanguageV2">C</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>ToolChain.5</variable>
+  <valuemap type="QVariantMap">
+   <value type="QString" key="ExplicitCodeModelTargetTriple"></value>
+   <value type="bool" key="ManuallyProvidedCxxPath">false</value>
+   <value type="QByteArray" key="ProjectExplorer.ClangToolChain.ParentToolChainId"></value>
+   <value type="int" key="ProjectExplorer.ClangToolChain.Priority">10</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.OriginalTargetTriple">arm64-apple-darwin25.5.0</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.Path">/usr/bin/clang</value>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformCodeGenFlags"/>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformLinkerFlags"/>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.SupportedAbis">
+    <value type="QString">arm-darwin-generic-mach_o-64bit</value>
+    <value type="QString">arm-darwin-generic-mach_o-32bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-32bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-64bit</value>
+   </valuelist>
+   <value type="QString" key="ProjectExplorer.GccToolChain.TargetAbi">arm-darwin-generic-mach_o-32bit</value>
+   <value type="bool" key="ProjectExplorer.ToolChain.Autodetect">true</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.BundleId">{fa7824c6-ed3b-4e2f-bd14-88ae27e60dba}</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DetectionSource"></value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DisplayName">Clang (arm 32bit at &quot;/usr/bin/clang&quot;)</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.Id">ProjectExplorer.ToolChain.Clang:{3e461c57-6681-457b-8495-be9e8a9c866d}</value>
+   <value type="int" key="ProjectExplorer.ToolChain.Language">1</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.LanguageV2">C</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>ToolChain.6</variable>
+  <valuemap type="QVariantMap">
+   <value type="QString" key="ExplicitCodeModelTargetTriple"></value>
+   <value type="bool" key="ManuallyProvidedCxxPath">false</value>
+   <value type="QByteArray" key="ProjectExplorer.ClangToolChain.ParentToolChainId"></value>
+   <value type="int" key="ProjectExplorer.ClangToolChain.Priority">10</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.OriginalTargetTriple">arm64-apple-darwin25.5.0</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.Path">/usr/bin/clang</value>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformCodeGenFlags"/>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformLinkerFlags"/>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.SupportedAbis">
+    <value type="QString">arm-darwin-generic-mach_o-64bit</value>
+    <value type="QString">arm-darwin-generic-mach_o-32bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-32bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-64bit</value>
+   </valuelist>
+   <value type="QString" key="ProjectExplorer.GccToolChain.TargetAbi">x86-darwin-generic-mach_o-32bit</value>
+   <value type="bool" key="ProjectExplorer.ToolChain.Autodetect">true</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.BundleId">{299693cc-4501-408e-b837-0f33ebf5944b}</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DetectionSource"></value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DisplayName">Clang (x86 32bit at &quot;/usr/bin/clang&quot;)</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.Id">ProjectExplorer.ToolChain.Clang:{068de46f-0f5e-4934-a662-fd268408798c}</value>
+   <value type="int" key="ProjectExplorer.ToolChain.Language">1</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.LanguageV2">C</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>ToolChain.7</variable>
+  <valuemap type="QVariantMap">
+   <value type="QString" key="ExplicitCodeModelTargetTriple"></value>
+   <value type="bool" key="ManuallyProvidedCxxPath">false</value>
+   <value type="QByteArray" key="ProjectExplorer.ClangToolChain.ParentToolChainId"></value>
+   <value type="int" key="ProjectExplorer.ClangToolChain.Priority">10</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.OriginalTargetTriple">arm64-apple-darwin25.5.0</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.Path">/usr/bin/clang</value>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformCodeGenFlags"/>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformLinkerFlags"/>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.SupportedAbis">
+    <value type="QString">arm-darwin-generic-mach_o-64bit</value>
+    <value type="QString">arm-darwin-generic-mach_o-32bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-32bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-64bit</value>
+   </valuelist>
+   <value type="QString" key="ProjectExplorer.GccToolChain.TargetAbi">x86-darwin-generic-mach_o-64bit</value>
+   <value type="bool" key="ProjectExplorer.ToolChain.Autodetect">true</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.BundleId">{6bcb3586-cef4-4d02-ad99-fe92c8616661}</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DetectionSource"></value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DisplayName">Clang (x86 64bit at &quot;/usr/bin/clang&quot;)</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.Id">ProjectExplorer.ToolChain.Clang:{c6f3f502-39b6-4e02-a820-8c1edf1cb09c}</value>
+   <value type="int" key="ProjectExplorer.ToolChain.Language">1</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.LanguageV2">C</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>ToolChain.8</variable>
+  <valuemap type="QVariantMap">
+   <value type="QString" key="ExplicitCodeModelTargetTriple"></value>
+   <value type="bool" key="ManuallyProvidedCxxPath">false</value>
+   <value type="QByteArray" key="ProjectExplorer.ClangToolChain.ParentToolChainId"></value>
+   <value type="int" key="ProjectExplorer.ClangToolChain.Priority">0</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.OriginalTargetTriple">arm64-apple-darwin25.5.0</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.Path">/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang</value>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformCodeGenFlags">
+    <value type="QString">-arch</value>
+    <value type="QString">arm64</value>
+   </valuelist>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformLinkerFlags">
+    <value type="QString">-arch</value>
+    <value type="QString">arm64</value>
+   </valuelist>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.SupportedAbis">
+    <value type="QString">arm-darwin-generic-mach_o-64bit</value>
+    <value type="QString">arm-darwin-generic-mach_o-32bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-32bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-64bit</value>
+   </valuelist>
+   <value type="QString" key="ProjectExplorer.GccToolChain.TargetAbi">arm-darwin-generic-mach_o-64bit</value>
+   <value type="bool" key="ProjectExplorer.ToolChain.Autodetect">true</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.BundleId">{1f92655b-f70f-4320-9529-7f1dfe0a35f5}</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DetectionSource">iosdetectionsource</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DisplayName">Apple Clang iOS (arm64 at &quot;/Applications/Xcode.app/Contents/Developer&quot;)</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.Id">ProjectExplorer.ToolChain.Clang:{1f02b7d5-9913-4c1f-aba9-9faf7bc3d747}</value>
+   <value type="int" key="ProjectExplorer.ToolChain.Language">1</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.LanguageV2">C</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>ToolChain.9</variable>
+  <valuemap type="QVariantMap">
+   <value type="QString" key="ExplicitCodeModelTargetTriple"></value>
+   <value type="bool" key="ManuallyProvidedCxxPath">false</value>
+   <value type="QByteArray" key="ProjectExplorer.ClangToolChain.ParentToolChainId"></value>
+   <value type="int" key="ProjectExplorer.ClangToolChain.Priority">0</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.OriginalTargetTriple">arm64-apple-darwin25.5.0</value>
+   <value type="QString" key="ProjectExplorer.GccToolChain.Path">/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++</value>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformCodeGenFlags">
+    <value type="QString">-arch</value>
+    <value type="QString">arm64</value>
+   </valuelist>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.PlatformLinkerFlags">
+    <value type="QString">-arch</value>
+    <value type="QString">arm64</value>
+   </valuelist>
+   <valuelist type="QVariantList" key="ProjectExplorer.GccToolChain.SupportedAbis">
+    <value type="QString">arm-darwin-generic-mach_o-64bit</value>
+    <value type="QString">arm-darwin-generic-mach_o-32bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-32bit</value>
+    <value type="QString">x86-darwin-generic-mach_o-64bit</value>
+   </valuelist>
+   <value type="QString" key="ProjectExplorer.GccToolChain.TargetAbi">arm-darwin-generic-mach_o-64bit</value>
+   <value type="bool" key="ProjectExplorer.ToolChain.Autodetect">true</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.BundleId">{1f92655b-f70f-4320-9529-7f1dfe0a35f5}</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DetectionSource">iosdetectionsource</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.DisplayName">Apple Clang iOS (arm64 at &quot;/Applications/Xcode.app/Contents/Developer&quot;)</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.Id">ProjectExplorer.ToolChain.Clang:{705cf5e6-d749-4fe8-92c8-c72a06c5c0b1}</value>
+   <value type="int" key="ProjectExplorer.ToolChain.Language">2</value>
+   <value type="QString" key="ProjectExplorer.ToolChain.LanguageV2">Cxx</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>ToolChain.Count</variable>
+  <value type="int">12</value>
+ </data>
+ <data>
+  <variable>Version</variable>
+  <value type="int">1</value>
+ </data>
+</qtcreator>

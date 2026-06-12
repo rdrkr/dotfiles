@@ -337,3 +337,6 @@ fi
 
 # bun completions
 [ -s "/Users/ronendruker/.bun/_bun" ] && source "/Users/ronendruker/.bun/_bun"
+
+# Added by Antigravity IDE
+export PATH="/Users/ronendruker/.antigravity-ide/antigravity-ide/bin:$PATH"

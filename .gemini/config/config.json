@@ -1,0 +1,15 @@
+{
+  "userSettings": {
+    "globalPermissionGrants": {
+      "allow": [
+        "command(head)",
+        "command(dns-sd)",
+        "command(sleep)",
+        "command(wait)",
+        "command(git status)",
+        "command(git add)",
+        "command(git commit)"
+      ]
+    }
+  }
+}

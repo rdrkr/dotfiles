@@ -1,0 +1,20 @@
+{
+  "trustedtaps": [
+    "alexstrnik/browserino",
+    "barutsrb/tap",
+    "blacktop/tap",
+    "felixkratz/formulae",
+    "gentleman-programming/tap",
+    "glzr-io/tap",
+    "hamed-elfayome/claude-usage",
+    "machlit/tap",
+    "mediosz/tap",
+    "mocki-toki/formulae",
+    "nikitabobko/tap",
+    "oven-sh/bun",
+    "rdrkr/tap",
+    "steipete/tap",
+    "touch-tap/tap",
+    "vjeantet/tap"
+  ]
+}

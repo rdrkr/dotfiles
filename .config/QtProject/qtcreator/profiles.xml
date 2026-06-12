@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE QtCreatorProfiles>
+<!-- Written by QtCreator 19.0.2, 2026-05-26T11:36:32. -->
+<qtcreator>
+ <data>
+  <variable>Kit.IrrelevantAspects</variable>
+  <valuelist type="QVariantList">
+   <value type="QString">Python.Interpreter</value>
+  </valuelist>
+ </data>
+ <data>
+  <variable>Profile.0</variable>
+  <valuemap type="QVariantMap">
+   <value type="bool" key="PE.Profile.AutoDetected">true</value>
+   <value type="QString" key="PE.Profile.AutoDetectionSource"></value>
+   <valuemap type="QVariantMap" key="PE.Profile.Data">
+    <valuelist type="QVariantList" key="CMake.ConfigurationKitInformation">
+     <value type="QString">CMAKE_CXX_COMPILER:FILEPATH=%{Compiler:Executable:Cxx}</value>
+     <value type="QString">CMAKE_C_COMPILER:FILEPATH=%{Compiler:Executable:C}</value>
+     <value type="QString">CMAKE_PREFIX_PATH:PATH=%{Qt:QT_INSTALL_PREFIX}</value>
+     <value type="QString">QT_QMAKE_EXECUTABLE:FILEPATH=%{Qt:qmakeExecutable}</value>
+    </valuelist>
+    <valuemap type="QVariantMap" key="CMake.GeneratorKitInformation">
+     <value type="QString" key="ExtraGenerator"></value>
+     <value type="QString" key="Generator">Unix Makefiles</value>
+     <value type="QString" key="Platform"></value>
+     <value type="QString" key="Toolset"></value>
+    </valuemap>
+    <value type="QString" key="CMakeProjectManager.CMakeKitInformation">qt.tools.cmake</value>
+    <value type="QString" key="Debugger.Information">{e34b6101-c066-4df5-9825-c88d0edfdfed}</value>
+    <value type="QString" key="PE.Profile.BuildDeviceType">Desktop</value>
+    <value type="QString" key="PE.Profile.DeviceType">Desktop</value>
+    <valuemap type="QVariantMap" key="PE.Profile.ToolChainsV3">
+     <value type="QByteArray" key="C">{a14d5c83-0d83-46a9-b569-6c084f3f1381}</value>
+     <value type="QByteArray" key="Cxx">{31a29d99-1b19-4e4e-83e6-7a6ba7d7533a}</value>
+    </valuemap>
+    <value type="QString" key="QtSupport.QtInformation">SDK.qt.qt6.6111.clang_64</value>
+   </valuemap>
+   <value type="QString" key="PE.Profile.DeviceTypeForIcon"></value>
+   <value type="QString" key="PE.Profile.Icon"></value>
+   <value type="QString" key="PE.Profile.Id">qt.qt6.6111.clang_64_kit</value>
+   <valuelist type="QVariantList" key="PE.Profile.MutableInfo"/>
+   <value type="QString" key="PE.Profile.Name">Qt %{Qt:Version} for macOS</value>
+   <value type="bool" key="PE.Profile.SDK">true</value>
+   <valuelist type="QVariantList" key="PE.Profile.StickyInfo">
+    <value type="QString">PE.Profile.DeviceType</value>
+    <value type="QString">QtSupport.QtInformation</value>
+   </valuelist>
+  </valuemap>
+ </data>
+ <data>
+  <variable>Profile.1</variable>
+  <valuemap type="QVariantMap">
+   <value type="bool" key="PE.Profile.AutoDetected">true</value>
+   <value type="QString" key="PE.Profile.AutoDetectionSource">iosdetectionsource</value>
+   <valuemap type="QVariantMap" key="PE.Profile.Data">
+    <valuelist type="QVariantList" key="CMake.ConfigurationKitInformation">
+     <value type="QString">CMAKE_CXX_COMPILER:FILEPATH=%{Compiler:Executable:Cxx}</value>
+     <value type="QString">CMAKE_C_COMPILER:FILEPATH=%{Compiler:Executable:C}</value>
+     <value type="QString">CMAKE_PREFIX_PATH:PATH=%{Qt:QT_INSTALL_PREFIX}</value>
+     <value type="QString">QT_QMAKE_EXECUTABLE:FILEPATH=%{Qt:qmakeExecutable}</value>
+    </valuelist>
+    <valuemap type="QVariantMap" key="CMake.GeneratorKitInformation">
+     <value type="QString" key="ExtraGenerator"></value>
+     <value type="QString" key="Generator">Xcode</value>
+     <value type="QString" key="Platform"></value>
+     <value type="QString" key="Toolset"></value>
+    </valuemap>
+    <value type="QString" key="CMakeProjectManager.CMakeKitInformation">qt.tools.cmake</value>
+    <value type="QString" key="Debugger.Information">{a37aaa07-c05a-41e5-80c6-0a2fb7335da8}</value>
+    <value type="QString" key="PE.Profile.BuildDeviceType">Desktop</value>
+    <value type="QString" key="PE.Profile.Device"></value>
+    <value type="QString" key="PE.Profile.DeviceType">Ios.Device.Type</value>
+    <value type="QString" key="PE.Profile.SysRoot">/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk</value>
+    <valuemap type="QVariantMap" key="PE.Profile.ToolChainsV3">
+     <value type="QByteArray" key="C">{1f02b7d5-9913-4c1f-aba9-9faf7bc3d747}</value>
+     <value type="QByteArray" key="Cxx">{705cf5e6-d749-4fe8-92c8-c72a06c5c0b1}</value>
+    </valuemap>
+    <value type="int" key="QtSupport.QtInformation">6</value>
+   </valuemap>
+   <value type="QString" key="PE.Profile.DeviceTypeForIcon"></value>
+   <value type="QString" key="PE.Profile.Icon"></value>
+   <value type="QString" key="PE.Profile.Id">{2f049e34-0e3e-4e1a-b68b-23ad3fdd9d21}</value>
+   <valuelist type="QVariantList" key="PE.Profile.MutableInfo"/>
+   <value type="QString" key="PE.Profile.Name">Qt %{Qt:Version} for iOS</value>
+   <value type="bool" key="PE.Profile.SDK">false</value>
+   <valuelist type="QVariantList" key="PE.Profile.StickyInfo">
+    <value type="QString">PE.Profile.DeviceType</value>
+    <value type="QString">QtSupport.QtInformation</value>
+    <value type="QString">PE.Profile.SysRoot</value>
+    <value type="QString">PE.Profile.ToolChainsV3</value>
+   </valuelist>
+  </valuemap>
+ </data>
+ <data>
+  <variable>Profile.2</variable>
+  <valuemap type="QVariantMap">
+   <value type="bool" key="PE.Profile.AutoDetected">true</value>
+   <value type="QString" key="PE.Profile.AutoDetectionSource">iosdetectionsource</value>
+   <valuemap type="QVariantMap" key="PE.Profile.Data">
+    <valuelist type="QVariantList" key="CMake.ConfigurationKitInformation">
+     <value type="QString">CMAKE_CXX_COMPILER:FILEPATH=%{Compiler:Executable:Cxx}</value>
+     <value type="QString">CMAKE_C_COMPILER:FILEPATH=%{Compiler:Executable:C}</value>
+     <value type="QString">CMAKE_PREFIX_PATH:PATH=%{Qt:QT_INSTALL_PREFIX}</value>
+     <value type="QString">QT_QMAKE_EXECUTABLE:FILEPATH=%{Qt:qmakeExecutable}</value>
+    </valuelist>
+    <valuemap type="QVariantMap" key="CMake.GeneratorKitInformation">
+     <value type="QString" key="ExtraGenerator"></value>
+     <value type="QString" key="Generator">Xcode</value>
+     <value type="QString" key="Platform"></value>
+     <value type="QString" key="Toolset"></value>
+    </valuemap>
+    <value type="QString" key="CMakeProjectManager.CMakeKitInformation">qt.tools.cmake</value>
+    <value type="QString" key="Debugger.Information">{a37aaa07-c05a-41e5-80c6-0a2fb7335da8}</value>
+    <value type="QString" key="PE.Profile.BuildDeviceType">Desktop</value>
+    <value type="QString" key="PE.Profile.DeviceType">Ios.Simulator.Type</value>
+    <value type="QString" key="PE.Profile.SysRoot">/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk</value>
+    <valuemap type="QVariantMap" key="PE.Profile.ToolChainsV3">
+     <value type="QByteArray" key="C">{70327b82-916a-4c56-99ce-5a5691c82abf}</value>
+     <value type="QByteArray" key="Cxx">{ca691aa1-75be-4a46-ab87-b838964d2b39}</value>
+    </valuemap>
+    <value type="int" key="QtSupport.QtInformation">6</value>
+   </valuemap>
+   <value type="QString" key="PE.Profile.DeviceTypeForIcon"></value>
+   <value type="QString" key="PE.Profile.Icon"></value>
+   <value type="QString" key="PE.Profile.Id">{74cf8b0d-97f7-44b6-994a-8344f5f1d272}</value>
+   <valuelist type="QVariantList" key="PE.Profile.MutableInfo"/>
+   <value type="QString" key="PE.Profile.Name">Qt %{Qt:Version} for iOS Simulator</value>
+   <value type="bool" key="PE.Profile.SDK">false</value>
+   <valuelist type="QVariantList" key="PE.Profile.StickyInfo">
+    <value type="QString">PE.Profile.DeviceType</value>
+    <value type="QString">QtSupport.QtInformation</value>
+    <value type="QString">PE.Profile.SysRoot</value>
+    <value type="QString">PE.Profile.ToolChainsV3</value>
+   </valuelist>
+  </valuemap>
+ </data>
+ <data>
+  <variable>Profile.3</variable>
+  <valuemap type="QVariantMap">
+   <valuelist type="QVariantList" key="PE.Kit.RelevantAspects">
+    <value type="QString">Python.Interpreter</value>
+    <value type="QString">PE.Profile.Environment</value>
+    <value type="QString">Debugger.Information</value>
+   </valuelist>
+   <value type="bool" key="PE.Profile.AutoDetected">true</value>
+   <value type="QString" key="PE.Profile.AutoDetectionSource">Python</value>
+   <valuemap type="QVariantMap" key="PE.Profile.Data">
+    <value type="QString" key="Debugger.Information">{e34b6101-c066-4df5-9825-c88d0edfdfed}</value>
+    <value type="QString" key="Python.Interpreter">{5b7915f3-78f2-46da-b8c6-8f498d1e61be}</value>
+   </valuemap>
+   <value type="QString" key="PE.Profile.DeviceTypeForIcon"></value>
+   <value type="QString" key="PE.Profile.Icon"></value>
+   <value type="QString" key="PE.Profile.Id">{5b7915f3-78f2-46da-b8c6-8f498d1e61be}</value>
+   <valuelist type="QVariantList" key="PE.Profile.MutableInfo"/>
+   <value type="QString" key="PE.Profile.Name">%{Python:Name}</value>
+   <value type="bool" key="PE.Profile.SDK">false</value>
+   <valuelist type="QVariantList" key="PE.Profile.StickyInfo">
+    <value type="QString">Python.Interpreter</value>
+   </valuelist>
+  </valuemap>
+ </data>
+ <data>
+  <variable>Profile.Count</variable>
+  <value type="int">4</value>
+ </data>
+ <data>
+  <variable>Profile.Default</variable>
+  <value type="QString">qt.qt6.6111.clang_64_kit</value>
+ </data>
+ <data>
+  <variable>Version</variable>
+  <value type="int">1</value>
+ </data>
+</qtcreator>
