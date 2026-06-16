@@ -150,12 +150,12 @@ setup_directories() {
     chmod 700 "$BACKUP_DIR"/{configs,credentials,scripts}
 }
 
-# Backup fetch-claude-usage.swift
+# Backup fetch-claude-usage.js
 backup_account_script() {
     local account_num="$1"
     local email="$2"
-    local script_file="$HOME/.claude/fetch-claude-usage.swift"
-    local backup_file="$BACKUP_DIR/scripts/.fetch-claude-usage-${account_num}-${email}.swift"
+    local script_file="$HOME/.claude/fetch-claude-usage.js"
+    local backup_file="$BACKUP_DIR/scripts/.fetch-claude-usage-${account_num}-${email}.js"
     
     if [[ -f "$script_file" ]]; then
         mkdir -p "$BACKUP_DIR/scripts"
@@ -163,12 +163,12 @@ backup_account_script() {
     fi
 }
 
-# Restore fetch-claude-usage.swift
+# Restore fetch-claude-usage.js
 restore_account_script() {
     local account_num="$1"
     local email="$2"
-    local script_file="$HOME/.claude/fetch-claude-usage.swift"
-    local backup_file="$BACKUP_DIR/scripts/.fetch-claude-usage-${account_num}-${email}.swift"
+    local script_file="$HOME/.claude/fetch-claude-usage.js"
+    local backup_file="$BACKUP_DIR/scripts/.fetch-claude-usage-${account_num}-${email}.js"
     
     rm -f "$script_file"
     if [[ -f "$backup_file" ]]; then
@@ -482,7 +482,7 @@ cmd_remove_account() {
             ;;
     esac
     rm -f "$BACKUP_DIR/configs/.claude-config-${account_num}-${email}.json"
-    rm -f "$BACKUP_DIR/scripts/.fetch-claude-usage-${account_num}-${email}.swift"
+    rm -f "$BACKUP_DIR/scripts/.fetch-claude-usage-${account_num}-${email}.js"
     
     # Update sequence.json
     local updated_sequence

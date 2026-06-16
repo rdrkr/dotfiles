@@ -69,9 +69,9 @@ cat << 'EOF' | node ~/.claude/statusline-command.js
 EOF
 */
 
-import { existsSync, readFileSync } from 'fs';
-import { join, basename } from 'path';
-import { execSync } from 'child_process';
+const { existsSync, readFileSync } = require('fs');
+const { join, basename } = require('path');
+const { execSync } = require('child_process');
 
 const configPath = join(process.env.HOME, '.claude/statusline-config.txt');
 const config = {
@@ -255,7 +255,14 @@ function format_usage_str(util, resets_at, is_weekly, acc_prefix, acc_color, con
     if (reset_flag === 1 && resets_at && resets_at !== 'null' && resets_at.trim() !== '') {
       let time_format = '0';
       try {
-        time_format = execSync('defaults read -g AppleICUForce24HourTime 2>/dev/null').toString().trim();
+        // Cross-platform 24h detection: check Intl locale format
+        if (process.platform === 'darwin') {
+          time_format = execSync('defaults read -g AppleICUForce24HourTime 2>/dev/null').toString().trim();
+        } else {
+          // On Linux/Windows, detect from locale's time format
+          const sample = new Intl.DateTimeFormat(undefined, { hour: 'numeric' }).resolvedOptions();
+          time_format = sample.hour12 === false ? '1' : '0';
+        }
       } catch (e) { }
 
       let dateObj = new Date(resets_at.trim());
@@ -397,13 +404,14 @@ if (show_usage === 1 || show_weekly_usage === 1) {
       color_idx = (color_idx + 1) % 4;
 
       let script_path = acc == active_account
-        ? join(process.env.HOME, '.claude/fetch-claude-usage.swift')
-        : join(process.env.HOME, `.claude-switch-backup/scripts/.fetch-claude-usage-${acc}-${email}.swift`);
+        ? join(process.env.HOME, '.claude/fetch-claude-usage.js')
+        : join(process.env.HOME, `.claude-switch-backup/scripts/.fetch-claude-usage-${acc}-${email}.js`);
 
       let swift_result = '';
       if (existsSync(script_path)) {
         try {
-          swift_result = execSync(`swift "${script_path}" 2>/dev/null`).toString();
+          const nullDev = process.platform === 'win32' ? '2>NUL' : '2>/dev/null';
+          swift_result = execSync(`node "${script_path}" ${nullDev}`).toString();
         } catch (e) { }
       } else {
         swift_result = 'ERROR';
@@ -412,7 +420,8 @@ if (show_usage === 1 || show_weekly_usage === 1) {
     }
   } else {
     try {
-      let swift_result = execSync(`swift "${join(process.env.HOME, '.claude/fetch-claude-usage.swift')}" 2>/dev/null`).toString();
+      const nullDev = process.platform === 'win32' ? '2>NUL' : '2>/dev/null';
+      let swift_result = execSync(`node "${join(process.env.HOME, '.claude/fetch-claude-usage.js')}" ${nullDev}`).toString();
       process_result(swift_result, '', '', '');
     } catch (e) {
       process_result('', '', '', '');

@@ -247,15 +247,15 @@ function Write-AccountConfig {
 
 function Backup-AccountScript {
     param([string]$AccountNum, [string]$Email)
-    $src = Join-Path $HOME '.claude' 'fetch-claude-usage.swift'
-    $dst = Join-Path $script:BACKUP_DIR 'scripts' ".fetch-claude-usage-${AccountNum}-${Email}.swift"
+    $src = Join-Path $HOME '.claude' 'fetch-claude-usage.js'
+    $dst = Join-Path $script:BACKUP_DIR 'scripts' ".fetch-claude-usage-${AccountNum}-${Email}.js"
     if (Test-Path $src) { Copy-Item $src $dst -Force }
 }
 
 function Restore-AccountScript {
     param([string]$AccountNum, [string]$Email)
-    $src = Join-Path $script:BACKUP_DIR 'scripts' ".fetch-claude-usage-${AccountNum}-${Email}.swift"
-    $dst = Join-Path $HOME '.claude' 'fetch-claude-usage.swift'
+    $src = Join-Path $script:BACKUP_DIR 'scripts' ".fetch-claude-usage-${AccountNum}-${Email}.js"
+    $dst = Join-Path $HOME '.claude' 'fetch-claude-usage.js'
     Remove-Item $dst -Force -ErrorAction SilentlyContinue
     if (Test-Path $src) {
         Copy-Item $src $dst -Force
@@ -426,7 +426,7 @@ function Invoke-RemoveAccount {
             -Force -ErrorAction SilentlyContinue
     }
     Remove-Item (Join-Path $script:BACKUP_DIR 'configs'  ".claude-config-${accountNum}-${email}.json")            -Force -ErrorAction SilentlyContinue
-    Remove-Item (Join-Path $script:BACKUP_DIR 'scripts' ".fetch-claude-usage-${accountNum}-${email}.swift")        -Force -ErrorAction SilentlyContinue
+    Remove-Item (Join-Path $script:BACKUP_DIR 'scripts' ".fetch-claude-usage-${accountNum}-${email}.js")        -Force -ErrorAction SilentlyContinue
 
     # Update sequence.json
     $seq.accounts.PSObject.Properties.Remove($accountNum)
