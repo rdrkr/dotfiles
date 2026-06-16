@@ -7,9 +7,153 @@
             "command": 
             {
                 "action": "newWindow",
-                "profile": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}"
+                "profile": "PowerShell"
             },
-            "id": "User.newWindow.5DEADB41"
+            "id": "User.newWindow.5DEADB41",
+            "name": "Open PowerShell in new window"
+        },
+        {
+            "command": 
+            {
+                "action": "newWindow",
+                "profile": "{0bc1d5d8-b69e-531c-9d55-7588894835da}"
+            },
+            "id": "User.newWindow.5DEADB42",
+            "name": "Open Ubuntu-26.04 in new window"
+        },
+        {
+            "command": 
+            {
+                "action": "newWindow",
+                "profile": "Ubuntu-24.04"
+            },
+            "id": "User.newWindow.5DEADB43",
+            "name": "Open Ubuntu-24.04 in new window"
+        },
+        {
+            "command": 
+            {
+                "action": "newWindow",
+                "profile": "{3dfde28d-1fb7-4441-a1f1-877db1b2390c}"
+            },
+            "id": "User.newWindow.5DEADB52",
+            "name": "Open EU-POC-J3PHFK4 (Ubuntu-24.04) in new window"
+        },
+        {
+            "command": 
+            {
+                "action": "newWindow",
+                "profile": "zsh"
+            },
+            "id": "User.newWindow.5DEADB47",
+            "name": "Open zsh in new window"
+        },
+        {
+            "command": 
+            {
+                "action": "newWindow",
+                "profile": "Ubuntu-22.04"
+            },
+            "id": "User.newWindow.5DEADB44",
+            "name": "Open Ubuntu-22.04 in new window"
+        },
+        {
+            "command": 
+            {
+                "action": "newTab",
+                "profile": "PowerShell"
+            },
+            "id": "User.newTab.B1939203",
+            "name": "Open PowerShell in new tab"
+        },
+        {
+            "command": 
+            {
+                "action": "newWindow",
+                "profile": "{0bc1d5d8-b69e-531c-9d55-7588894835da}"
+            },
+            "id": "User.newWindow.2950570F"
+        },
+        {
+            "command": 
+            {
+                "action": "newWindow",
+                "profile": "Command Prompt"
+            },
+            "id": "User.newWindow.5DEADB45",
+            "name": "Open Command Prompt in new window"
+        },
+        {
+            "command": 
+            {
+                "action": "newTab",
+                "profile": "zsh"
+            },
+            "id": "User.newTab.B1939208",
+            "name": "Open zsh in new tab"
+        },
+        {
+            "command": 
+            {
+                "action": "newWindow",
+                "profile": "Nushell"
+            },
+            "id": "User.newWindow.5DEADB46",
+            "name": "Open Nushell in new window"
+        },
+        {
+            "command": 
+            {
+                "action": "newTab",
+                "profile": "Ubuntu-26.04"
+            },
+            "id": "User.newTab.B1939200",
+            "name": "Open Ubuntu-26.04 in new tab"
+        },
+        {
+            "command": 
+            {
+                "action": "newTab",
+                "profile": "Ubuntu-24.04"
+            },
+            "id": "User.newTab.B1939201",
+            "name": "Open Ubuntu-24.04 in new tab"
+        },
+        {
+            "command": 
+            {
+                "action": "newTab",
+                "profile": "Ubuntu-22.04"
+            },
+            "id": "User.newTab.B1939202",
+            "name": "Open Ubuntu-22.04 in new tab"
+        },
+        {
+            "command": 
+            {
+                "action": "newTab",
+                "profile": "Command Prompt"
+            },
+            "id": "User.newTab.B1939204",
+            "name": "Open Command Prompt in new tab"
+        },
+        {
+            "command": 
+            {
+                "action": "newTab",
+                "profile": "Nushell"
+            },
+            "id": "User.newTab.B1939205",
+            "name": "Open Nushell in new tab"
+        },
+        {
+            "command": 
+            {
+                "action": "newTab",
+                "profile": "{3dfde28d-1fb7-4441-a1f1-877db1b2390c}"
+            },
+            "id": "User.newTab.B1939206",
+            "name": "Open EU-POC-J3PHFK4 (Ubuntu-24.04) in new tab"
         }
     ],
     "alwaysShowTabs": true,
@@ -19,6 +163,18 @@
     "keybindings": 
     [
         {
+            "id": "Terminal.PasteFromClipboard",
+            "keys": "ctrl+v"
+        },
+        {
+            "id": "Terminal.FindText",
+            "keys": "ctrl+shift+f"
+        },
+        {
+            "id": null,
+            "keys": "alt+right"
+        },
+        {
             "id": "Terminal.CopyToClipboard",
             "keys": "win+c"
         },
@@ -27,24 +183,16 @@
             "keys": "ctrl+w"
         },
         {
-            "id": "Terminal.OpenNewTab",
-            "keys": "ctrl+t"
-        },
-        {
             "id": "Terminal.CopyToClipboard",
             "keys": "ctrl+c"
         },
         {
+            "id": "Terminal.OpenNewTab",
+            "keys": "ctrl+t"
+        },
+        {
             "id": "Terminal.ClearBuffer",
             "keys": "ctrl+k"
-        },
-        {
-            "id": "Terminal.PasteFromClipboard",
-            "keys": "ctrl+v"
-        },
-        {
-            "id": "Terminal.FindText",
-            "keys": "ctrl+shift+f"
         },
         {
             "id": "Terminal.PasteFromClipboard",
@@ -59,17 +207,16 @@
             "keys": "ctrl+n"
         },
         {
-            "id": null,
+            "id": "User.newWindow.2950570F",
             "keys": "ctrl+shift+n"
+        },
+        {
+            "id": "User.newWindow.5DEADB52",
+            "keys": "ctrl+alt+shift+n"
         }
     ],
     "newTabMenu": 
     [
-        {
-            "icon": null,
-            "profile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
-            "type": "profile"
-        },
         {
             "type": "remainingProfiles"
         }
@@ -78,11 +225,7 @@
     {
         "defaults": 
         {
-            "bellStyle": 
-            [
-                "window",
-                "taskbar"
-            ],
+            "bellStyle": "none",
             "colorScheme": "Gruvbox",
             "cursorShape": "filledBox",
             "elevate": true,
@@ -97,22 +240,42 @@
         "list": 
         [
             {
-                "commandline": "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
-                "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
                 "hidden": false,
-                "name": "Windows PowerShell"
+                "name": "PowerShell",
+                "source": "Windows.Terminal.PowershellCore"
+            },
+            {
+                "guid": "{0bc1d5d8-b69e-531c-9d55-7588894835da}",
+                "hidden": false,
+                "name": "Ubuntu-26.04",
+                "source": "Microsoft.WSL"
+            },
+            {
+                "commandline": "\"C:\\Users\\rdruker\\AppData\\Local\\Microsoft\\WindowsApps\\Microsoft.PowerShell_8wekyb3d8bbwe\\pwsh.exe\" -c \"ssh ${env:USERNAME}@EU-POC-J3PHFK4\"",
+                "guid": "{3dfde28d-1fb7-4441-a1f1-877db1b2390c}",
+                "hidden": false,
+                "icon": "\ud83d\udda5\ufe0f",
+                "name": "EU-POC-J3PHFK4 (Ubuntu 24.04)",
+                "startingDirectory": "%USERPROFILE%"
+            },
+            {
+                "guid": "{046b6939-21aa-5ba3-99e5-b0434d99ea09}",
+                "hidden": false,
+                "name": "Ubuntu-24.04",
+                "source": "Microsoft.WSL"
+            },
+            {
+                "guid": "{1a3f2171-2b05-5ddb-a70f-d537daa12b2a}",
+                "hidden": false,
+                "name": "Ubuntu-22.04",
+                "source": "Microsoft.WSL"
             },
             {
                 "commandline": "%SystemRoot%\\System32\\cmd.exe",
                 "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
                 "hidden": false,
                 "name": "Command Prompt"
-            },
-            {
-                "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
-                "hidden": false,
-                "name": "Azure Cloud Shell",
-                "source": "Windows.Terminal.Azure"
             },
             {
                 "guid": "{47302f9c-1ac4-566c-aa3e-8cf29889d6ab}",
@@ -136,10 +299,34 @@
                 "useAcrylic": false
             },
             {
-                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+                "commandline": "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
                 "hidden": false,
-                "name": "PowerShell",
-                "source": "Windows.Terminal.PowershellCore"
+                "name": "Windows PowerShell"
+            },
+            {
+                "guid": "{5fa74b51-e275-58ed-9126-1d8494204443}",
+                "hidden": false,
+                "name": "Developer Command Prompt for VS 2022",
+                "source": "Windows.Terminal.VisualStudio"
+            },
+            {
+                "guid": "{ea73c78b-8260-567e-b1aa-58b79618014a}",
+                "hidden": false,
+                "name": "Developer PowerShell for VS 2022",
+                "source": "Windows.Terminal.VisualStudio"
+            },
+            {
+                "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
+                "hidden": false,
+                "name": "Azure Cloud Shell",
+                "source": "Windows.Terminal.Azure"
+            },
+            {
+                "guid": "{16208362-94fc-5b1f-a491-5b2624d5ab56}",
+                "hidden": true,
+                "name": "Visual Studio Debug Console",
+                "source": "VSDebugConsole"
             }
         ]
     },

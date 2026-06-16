@@ -2,7 +2,7 @@
 
 # --- Configuration ---
 DOTFILES_DIR="${HOME}/dotfiles"
-DOTFILES_REPO="https://github.com/rdrkr/dotfiles.git"
+DOTFILES_REPO="https://github.com/rdruker_tps/dotfiles.git"
 DRY_RUN=false
 
 # --- Bootstrap ---
@@ -96,8 +96,9 @@ fi
 ORIGINAL_DIR=$(pwd)
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 cd "$SCRIPT_DIR" || exit
-# Restore the original directory when the script exits.
-trap 'cd "$ORIGINAL_DIR"' EXIT
+# Restore the original directory when the script exits (silently ignore if it
+# no longer exists, e.g. symlink changes during stow in WSL).
+trap 'cd "$ORIGINAL_DIR" 2>/dev/null || true' EXIT
 
 NPM_GLOBAL_FILE="${SCRIPT_DIR}/.config/npm-global-packages.txt"
 PIPX_PACKAGES_FILE="${SCRIPT_DIR}/.config/pipx-packages.txt"
@@ -254,7 +255,28 @@ run_stow() {
   local mode="${1:-restore}"
   print_header "Running stow..."
   if command -v stow &>/dev/null; then
-    run_command "stow --adopt ."
+    # In WSL the dotfiles directory is a symlink to the Windows repo
+    # (/mnt/c/...). Stow doesn't recognise symlinks it didn't create as
+    # "owned", so pre-existing symlinks that point into the dotfiles tree
+    # cause "not owned by stow" conflicts. Remove them first so stow can
+    # recreate them cleanly.
+    if [ "$IS_WSL" = true ] && [ "$DRY_RUN" = false ]; then
+      local dir
+      for dir in "$HOME" "$HOME/.config"; do
+        [ -d "$dir" ] || continue
+        find "$dir" -maxdepth 1 -type l | while IFS= read -r link; do
+          local dest
+          dest="$(readlink "$link")"
+          case "$dest" in
+          dotfiles/* | ../dotfiles/* | */dotfiles/*)
+            rm -f "$link"
+            ;;
+          esac
+        done
+      done
+    fi
+
+    run_command "stow --target=\"$HOME\" --adopt ."
     if [ $? -ne 0 ] && [ "$DRY_RUN" = false ]; then
       print_error "Stow command failed."
       exit 1
@@ -262,7 +284,9 @@ run_stow() {
     # During restore, discard adopted files so symlinks point to repo versions.
     # During backup, keep adopted files — they represent the current state we want to commit.
     if [ "$mode" = "restore" ] && [ "$DRY_RUN" = false ]; then
-      run_command "git -C \"$SCRIPT_DIR\" checkout ."
+      # Use plain `git checkout .` since we already cd'd into SCRIPT_DIR.
+      # git -C can fail in WSL when the dotfiles directory is a symlink.
+      run_command "git checkout ."
     fi
     print_success "Stow command completed successfully."
   else
@@ -353,10 +377,21 @@ install_linux_packages() {
         packages="$packages $package"
       done <"$PKG_LIST_FILE"
       if [ -n "$packages" ]; then
-        run_command "$PKG_INSTALL $packages"
-        if [ $? -ne 0 ]; then
-          print_error "Package installation failed."
-          exit 1
+        # Try installing all packages at once first; if that fails, fall back
+        # to installing each package individually so one missing/unavailable
+        # package doesn't block the rest.
+        if ! run_command "$PKG_INSTALL $packages" 2>/dev/null; then
+          print_warning "Bulk install failed. Falling back to per-package installation..."
+          local failed_pkgs=""
+          for pkg in $packages; do
+            if ! run_command "$PKG_INSTALL $pkg" 2>/dev/null; then
+              print_warning "Failed to install: $pkg (skipping)"
+              failed_pkgs="$failed_pkgs $pkg"
+            fi
+          done
+          if [ -n "$failed_pkgs" ]; then
+            print_warning "The following packages could not be installed:$failed_pkgs"
+          fi
         fi
       fi
     else
@@ -433,8 +468,8 @@ install_linuxbrew() {
   if ! command -v brew &>/dev/null; then
     # Linuxbrew requires build-essential/gcc and curl
     case "$PKG_MANAGER" in
-    apt)    run_command "sudo apt-get install -y build-essential curl" ;;
-    dnf)    run_command "sudo dnf groupinstall -y 'Development Tools' && sudo dnf install -y curl" ;;
+    apt) run_command "sudo apt-get install -y build-essential curl" ;;
+    dnf) run_command "sudo dnf groupinstall -y 'Development Tools' && sudo dnf install -y curl" ;;
     pacman) run_command "sudo pacman -S --noconfirm --needed base-devel curl" ;;
     zypper) run_command "sudo zypper install -y -t pattern devel_basis && sudo zypper install -y curl" ;;
     esac
@@ -445,10 +480,6 @@ install_linuxbrew() {
       print_error "Linuxbrew installation failed."
       return 1
     fi
-    # Add brew to PATH for the rest of this session
-    if [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
-      eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-    fi
     print_success "Linuxbrew installed successfully."
 
     # Install GCC as recommended by Homebrew on Linux
@@ -456,6 +487,13 @@ install_linuxbrew() {
     run_command "brew install gcc"
   else
     print_success "Linuxbrew is already installed."
+  fi
+
+  # Always ensure brew is on PATH for the rest of this session (the shellenv
+  # may not have been sourced yet, e.g. when PATH was stripped of /mnt/c/
+  # entries or the script is running under bash instead of zsh).
+  if [ -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
   fi
 
   print_header "Installing from Brewfile (Linuxbrew)..."
@@ -490,9 +528,211 @@ install_linuxbrew() {
       print_warning "Some Brewfile entries may have failed (platform-specific packages are expected to skip)."
     fi
     rm -f "$linux_brewfile"
+    # Refresh the command hash table so brew-installed binaries (npm, pipx,
+    # bun, starship, etc.) are found by subsequent `command -v` checks.
+    hash -r 2>/dev/null || true
     print_success "Brewfile dependencies installed."
   else
     print_warning "Brewfile not found. Skipping brew bundle."
+  fi
+}
+
+# --- Nix Installation ---
+# Installs the Nix package manager (multi-user) and enables flakes.
+# The flakes feature flag is provided by .config/nix/nix.conf which stow
+# symlinks into ~/.config/nix/nix.conf.  Dev-shell flakes under
+# .config/nix-devshells/ are locked so they are ready to use immediately.
+NIX_DEVSHELLS_DIR="${SCRIPT_DIR}/.config/nix-devshells"
+
+install_nix() {
+  print_header "Checking for Nix package manager..."
+  if command -v nix &>/dev/null; then
+    print_success "Nix is already installed."
+  else
+    print_warning "Installing Nix (multi-user daemon mode)..."
+    if [ "$DRY_RUN" = false ]; then
+      curl -L https://nixos.org/nix/install -o /tmp/nix-install.sh
+      chmod +x /tmp/nix-install.sh
+      /tmp/nix-install.sh --daemon --yes
+      rm -f /tmp/nix-install.sh
+    else
+      print_warning "[DRY RUN] Would install Nix via https://nixos.org/nix/install --daemon --yes"
+    fi
+
+    # Source the Nix profile so nix is available for the remainder of this session.
+    if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
+      . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+    elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+      . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+    fi
+
+    if command -v nix &>/dev/null; then
+      print_success "Nix installed successfully."
+    elif [ "$DRY_RUN" = false ]; then
+      print_error "Nix installation failed (nix not found on PATH after install)."
+      return 1
+    fi
+  fi
+
+  # Flakes are enabled via .config/nix/nix.conf which stow symlinks into place.
+  # Verify the symlink target exists; if not, create it directly so flakes work
+  # even before stow runs.
+  local nix_conf="${HOME}/.config/nix/nix.conf"
+  if [ ! -f "$nix_conf" ] && [ "$DRY_RUN" = false ]; then
+    print_warning "Ensuring flakes are enabled (pre-stow)..."
+    mkdir -p "${HOME}/.config/nix"
+    echo 'experimental-features = nix-command flakes' >"$nix_conf"
+    print_success "Wrote $nix_conf (will be replaced by stow symlink later)."
+  elif grep -q 'experimental-features.*flakes' "$nix_conf" 2>/dev/null; then
+    print_success "Nix flakes already enabled."
+  fi
+
+  # Lock dev-shell flakes so they are ready to use on first invocation.
+  if [ -d "$NIX_DEVSHELLS_DIR" ] && command -v nix &>/dev/null; then
+    print_header "Locking Nix dev-shell flakes..."
+    for flake_dir in "$NIX_DEVSHELLS_DIR"/*/; do
+      [ -f "${flake_dir}flake.nix" ] || continue
+      local name
+      name="$(basename "$flake_dir")"
+      if [ "$DRY_RUN" = false ]; then
+        print_warning "Locking flake: $name"
+        nix flake lock "$flake_dir" 2>/dev/null &&
+          print_success "Flake $name locked." ||
+          print_warning "Failed to lock flake $name (will lock on first use)."
+      else
+        print_warning "[DRY RUN] Would lock flake: $name"
+      fi
+    done
+  fi
+
+  print_success "Nix setup complete."
+  echo -e "  Use ${C_SAPPHIRE}nix develop ~/.config/nix-devshells/gcc-12.3.0${NC} to enter a GCC 12.3.0 shell"
+  echo -e "  Use ${C_SAPPHIRE}nix develop ~/.config/nix-devshells/gcc-12.4.0${NC} to enter a GCC 12.4.0 shell"
+}
+
+# --- Qt Creator Configuration ---
+# Qt Creator stores its configuration in platform-specific locations.
+# These functions sync between those locations and .config/qtcreator in
+# the dotfiles repo so settings are portable across macOS, Linux, and Windows.
+
+# Returns the platform-specific Qt Creator config directory.
+qtcreator_local_dir() {
+  case "$OS_TYPE" in
+  macos) echo "${HOME}/Library/Application Support/QtProject/qtcreator" ;;
+  linux) echo "${HOME}/.config/QtProject/qtcreator" ;;
+  *) echo "" ;;
+  esac
+}
+
+# Copies Qt Creator configuration from the dotfiles repo into the
+# platform-specific location.
+restore_qtcreator() {
+  print_header "Restoring Qt Creator configuration..."
+
+  local repo_dir="${SCRIPT_DIR}/.config/qtcreator"
+  local live_dir
+  live_dir="$(qtcreator_local_dir)"
+
+  if [ -z "$live_dir" ]; then
+    print_warning "Unsupported platform for Qt Creator restore. Skipping."
+    return
+  fi
+
+  if [ ! -d "$repo_dir" ]; then
+    print_warning "Qt Creator config not found in dotfiles repo ($repo_dir). Skipping."
+    return
+  fi
+
+  if [ "$DRY_RUN" = true ]; then
+    print_warning "[DRY RUN] Would copy $repo_dir -> $live_dir"
+    return
+  fi
+
+  # Ensure parent directory exists
+  mkdir -p "$(dirname "$live_dir")"
+
+  # Remove existing target and do a clean copy
+  if [ -e "$live_dir" ] || [ -L "$live_dir" ]; then
+    rm -rf "$live_dir"
+    print_warning "Removed existing Qt Creator config at $live_dir."
+  fi
+
+  cp -R "$repo_dir" "$live_dir"
+  print_success "Copied Qt Creator config to $live_dir."
+}
+
+# Copies Qt Creator configuration from the platform-specific location
+# back into the dotfiles repo.
+backup_qtcreator() {
+  print_header "Backing up Qt Creator configuration..."
+
+  local repo_dir="${SCRIPT_DIR}/.config/qtcreator"
+  local live_dir
+  live_dir="$(qtcreator_local_dir)"
+
+  if [ -z "$live_dir" ]; then
+    print_warning "Unsupported platform for Qt Creator backup. Skipping."
+    return
+  fi
+
+  if [ ! -d "$live_dir" ]; then
+    print_warning "Qt Creator config not found at $live_dir. Skipping."
+    return
+  fi
+
+  # If the live copy is a symlink, there is nothing to sync
+  if [ -L "$live_dir" ]; then
+    print_warning "Qt Creator config at $live_dir is a symlink. Nothing to back up."
+    return
+  fi
+
+  if [ "$DRY_RUN" = true ]; then
+    print_warning "[DRY RUN] Would mirror $live_dir -> $repo_dir"
+    return
+  fi
+
+  # Mirror: remove repo copy and replace with live copy
+  if [ -e "$repo_dir" ]; then
+    rm -rf "$repo_dir"
+  fi
+
+  cp -R "$live_dir" "$repo_dir"
+  print_success "Backed up Qt Creator config to $repo_dir."
+}
+
+# --- OpenSSH Server Setup ---
+# Ensures openssh-server is installed, enabled to start on boot, and running.
+# On WSL, systemd may not be available so we fall back to service(8).
+setup_openssh_server() {
+  print_header "Setting up openssh-server..."
+
+  # Install openssh-server if not present
+  if ! dpkg -s openssh-server &>/dev/null 2>&1 && ! command -v sshd &>/dev/null; then
+    print_warning "Installing openssh-server..."
+    run_command "$PKG_INSTALL openssh-server"
+  else
+    print_success "openssh-server is already installed."
+  fi
+
+  if [ "$DRY_RUN" = true ]; then
+    print_warning "[DRY RUN] Would enable and start openssh-server."
+    return
+  fi
+
+  # Enable and start sshd
+  if command -v systemctl &>/dev/null && systemctl is-system-running &>/dev/null 2>&1; then
+    # systemd is available (native Linux or WSL with systemd enabled)
+    run_command "sudo systemctl enable ssh"
+    run_command "sudo systemctl start ssh"
+    print_success "openssh-server enabled and started via systemd."
+  elif command -v service &>/dev/null; then
+    # Fallback for WSL without systemd
+    run_command "sudo service ssh start"
+    print_success "openssh-server started via service."
+    print_warning "systemd not available; sshd may not persist across WSL restarts."
+    print_warning "Consider enabling systemd in /etc/wsl.conf ([boot] systemd=true)."
+  else
+    print_error "Neither systemctl nor service found. Cannot start openssh-server."
   fi
 }
 
@@ -600,6 +840,23 @@ restore() {
     print_warning "$BUN_PACKAGES_FILE not found. Skipping."
   fi
 
+  # 5b. Set up openssh-server to auto-start on boot (Linux/WSL only)
+  if [ "$OS_TYPE" = "linux" ]; then
+    setup_openssh_server
+  fi
+
+  # 5c. Install Nix and set up dev-shell flakes (Linux/WSL only)
+  if [ "$OS_TYPE" = "linux" ]; then
+    install_nix
+  fi
+
+  # 5c. Restore Qt Creator configuration (skip in WSL -- Windows manages it)
+  if [ "$IS_WSL" = true ]; then
+    print_warning "WSL detected. Skipping Qt Creator restore (managed by Windows)."
+  else
+    restore_qtcreator
+  fi
+
   run_stow
 
   # 6. macOS-only: Apply cutler configuration
@@ -683,13 +940,20 @@ backup() {
   print_header "Backing up Bun Packages..."
   if command -v bun &>/dev/null; then
     if [ "$DRY_RUN" = false ]; then
-      bun pm ls -g | grep -v node_modules | awk '{print $2}' | sed 's/@[^@]*$//' >"$BUN_PACKAGES_FILE"
+      bun pm ls -g 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | grep '──' | awk '{print $NF}' | sed 's/@[^@]*$//' | grep -v '^$' >"$BUN_PACKAGES_FILE"
       print_success "Bun packages backed up to $BUN_PACKAGES_FILE."
     else
       print_warning "[DRY RUN] Would backup bun packages to $BUN_PACKAGES_FILE"
     fi
   else
     print_warning "bun not found. Skipping bun backup."
+  fi
+
+  # Back up Qt Creator configuration (skip in WSL -- Windows manages it)
+  if [ "$IS_WSL" = true ]; then
+    print_warning "WSL detected. Skipping Qt Creator backup (managed by Windows)."
+  else
+    backup_qtcreator
   fi
 
   run_stow "backup"
@@ -713,7 +977,7 @@ backup() {
 # Dumps the current Homebrew state into a Brewfile.
 backup_macos_packages() {
   print_header "Backing up Homebrew packages..."
-  run_command "brew bundle dump --all --force --describe --file=.config/Brewfile"
+  run_command "brew bundle dump --force --file=.config/Brewfile"
   if [ $? -ne 0 ] && [ "$DRY_RUN" = false ]; then
     print_error "Brew bundle dump command failed."
     exit 1
@@ -828,6 +1092,15 @@ fi
 # Detect platform before running any command
 detect_platform
 detect_package_manager
+
+# In WSL, Windows PATH entries are appended by default (appendWindowsPath).
+# This causes commands like npm, pipx, bun to resolve to Windows .exe shims
+# under /mnt/c/ which fail with "Exec format error" or produce wrong results.
+# Strip /mnt/c/ entries so only Linux-native tools are used.
+if [ "$IS_WSL" = true ]; then
+  PATH=$(echo "$PATH" | tr ':' '\n' | grep -v '/mnt/c/' | tr '\n' ':' | sed 's/:$//')
+  export PATH
+fi
 
 if [ "$DRY_RUN" = true ]; then
   print_warning "Running in dry-run mode. No commands will be executed."

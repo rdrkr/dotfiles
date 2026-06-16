@@ -120,65 +120,79 @@ const taskGroups = taskFile.groups.map((g) => ({
 }))
 
 // Run all groups in parallel, where each group runs its tasks sequentially with live output streaming
-await task.group(
-  (rootCreator) => taskGroups.map(({ title, tasks }) =>
-    rootCreator(
-      title,
-      async () => await task.group(
-        (childCreator) => tasks.map(({ title, command, args, cwd, verbose: taskVerbose }) => {
-          const isVerbose = verbose || taskVerbose;
-          const registeredTask = childCreator(
-            "Waiting...",
-            async ({ setTitle, setError, streamPreview }) => {
-              setTitle(title)
+try {
+  await task.group(
+    (rootCreator) => taskGroups.map(({ title, tasks }) =>
+      rootCreator(
+        title,
+        async () => await task.group(
+          (childCreator) => tasks.map(({ title, command, args, cwd, verbose: taskVerbose }) => {
+            const isVerbose = verbose || taskVerbose;
+            const registeredTask = childCreator(
+              "Waiting...",
+              async ({ setTitle, setError, streamPreview }) => {
+                setTitle(title)
 
-              await new Promise<void>((resolve, reject) => {
-                const child = spawn(command, args, {
-                  cwd,
-                  env: { ...process.env, TERM: "dumb" },
-                  stdio: ["ignore", "pipe", "pipe"],
-                })
+                await new Promise<void>((resolve, reject) => {
+                  const child = spawn(command, args, {
+                    cwd,
+                    env: { ...process.env, TERM: "dumb" },
+                    stdio: ["ignore", "pipe", "pipe"],
+                  })
 
-                child.stdout.pipe(streamPreview, { end: false })
-                child.stderr.pipe(streamPreview, { end: false })
+                  child.stdout.pipe(streamPreview, { end: false })
+                  child.stderr.pipe(streamPreview, { end: false })
 
-                child.on("close", (code) => {
-                  if (code === 0) {
-                    setTitle(title)
-                    resolve()
+                  child.on("close", (code) => {
+                    if (code === 0) {
+                      setTitle(title)
+                      resolve()
 
-                    if (!isVerbose) {
-                      streamPreview.clear()
+                      if (!isVerbose) {
+                        streamPreview.clear()
+                      }
+                    } else {
+                      const msg = `exited with code ${code}`
+                      setError(msg)
+                      reject(new Error(msg))
                     }
-                  } else {
-                    const msg = `exited with code ${code}`
-                    setError(msg)
-                    reject(new Error(msg))
-                  }
-                })
+                  })
 
-                child.on("error", (err) => {
-                  setError(err.message)
-                  reject(err)
+                  child.on("error", (err) => {
+                    setError(err.message)
+                    reject(err)
+                  })
                 })
-              })
-            },
-            { previewLines: isVerbose ? 100 : 10 },
-          )
+              },
+              { previewLines: isVerbose ? 100 : 10 },
+            )
 
-          return registeredTask
-        },
+            return registeredTask
+          },
+          ),
+          {
+            concurrency: 1,
+            // Keep going after a failing task so the rest of the group's
+            // updates still run; each failure is surfaced inline via setError().
+            stopOnError: false,
+          },
         ),
-        {
-          concurrency: 1,
-          stopOnError: true,
-        },
+        { showTime: true },
       ),
-      { showTime: true },
     ),
-  ),
-  {
-    concurrency: taskGroups.length,
-    stopOnError: false,
-  },
-)
+    {
+      concurrency: taskGroups.length,
+      stopOnError: false,
+    },
+  )
+} catch (err) {
+  // tasuku rejects with an AggregateError when any task fails, even with
+  // stopOnError: false. Every failure has already been shown inline by the
+  // owning task (✖ + streamed stderr), so swallow the noisy minified stack
+  // trace here and just signal failure through the exit code.
+  if (err instanceof AggregateError) {
+    process.exitCode = 1
+  } else {
+    throw err
+  }
+}

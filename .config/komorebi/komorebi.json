@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/v0.1.40/schema.json",
-  "app_specific_configuration_path": "C:/Users/ronen/.config/komorebi/applications.json",
+  "app_specific_configuration_path": "C:/Users/rdruker/.config/komorebi/applications.json",
   "window_hiding_behaviour": "Cloak",
   "cross_monitor_move_behaviour": "Insert",
   "default_workspace_padding": 16,
@@ -52,7 +52,12 @@
           },
           "workspace_rules": [
             {
-              "id": "(?i)warp",
+              "id": "TscShellContainerClass",
+              "kind": "Class",
+              "matching_strategy": "Equals"
+            },
+            {
+              "id": "(?i)mstsc|msrdcw|rdclient",
               "kind": "Exe",
               "matching_strategy": "Regex"
             }
@@ -66,7 +71,7 @@
           },
           "workspace_rules": [
             {
-              "id": "(?i)intellij|idea|xcode|visual|android|studio64",
+              "id": "(?i)intellij|idea|xcode|visual|android|studio64|devenv",
               "kind": "Exe",
               "matching_strategy": "Regex"
             }
@@ -88,7 +93,7 @@
           },
           "workspace_rules": [
             {
-              "id": "(?i)messages|whatsapp|beeper",
+              "id": "(?i)outlook|teams",
               "kind": "Exe",
               "matching_strategy": "Regex"
             }
@@ -100,16 +105,27 @@
             "1": "BSP",
             "4": "Grid"
           },
-          "workspace_rules": []
+          "workspace_rules": [
+            {
+              "id": "(?i)messages|whatsapp|beeper|phone",
+              "kind": "Exe",
+              "matching_strategy": "Regex"
+            }
+          ]
         }
       ]
     }
   ],
   "floating_applications": [
     {
-      "id": "(?i)mail|contacts|phone|facetime|quicktime|finder|ollama|calendar|activity|gpt|chatgpt|preview|photos|podcasts|perplexity|store|java|passwords|pearcleaner|reminders|sf symbols|teamviewer",
+      "id": "(?i)mail|contacts|facetime|quicktime|finder|ollama|calendar|activity|gpt|chatgpt|preview|photos|podcasts|perplexity|store|java|passwords|pearcleaner|reminders|sf symbols|teamviewer",
       "kind": "Exe",
       "matching_strategy": "Regex"
+    },
+    {
+      "id": "msrdc.exe",
+      "kind": "Exe",
+      "matching_strategy": "Equals"
     },
     {
       "id": "mintty.exe",
@@ -119,6 +135,13 @@
     {
       "id": "[Pp]icture.in.[Pp]icture",
       "kind": "Title",
+      "matching_strategy": "Regex"
+    }
+  ],
+  "ignore_rules": [
+    {
+      "id": "(?i)vlc|helper",
+      "kind": "Exe",
       "matching_strategy": "Regex"
     }
   ]

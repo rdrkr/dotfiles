@@ -84,11 +84,11 @@ function c { Clear-Host }
 function ua { npx tsx "$env:USERPROFILE\dotfiles\scripts\run-tasks\run-tasks.ts" "$env:USERPROFILE\dotfiles\scripts\run-tasks\update-$($global:_OS).yaml" }
 
 # claude code aliases
-function cc { claude --dangerously-skip-permissions --channels plugin:telegram@claude-plugins-official @args }
-function ccs { bash "$env:USERPROFILE\dotfiles\scripts\ccswitch.sh" @args }
+function cc { claude --dangerously-skip-permissions @args }
+function ccs { & "$env:USERPROFILE\dotfiles\scripts\ccswitch.ps1" @args }
 function ccl { ccs --list }
-function cc1 { ccs --switch-to 1; cc }
-function cc2 { ccs --switch-to 2; cc }
+function cc1 { ccs --switch-to 1; cc @args }
+function cc2 { ccs --switch-to 2; cc @args }
 
 # shell integrations
 if (Get-Command fzf -ErrorAction SilentlyContinue) {

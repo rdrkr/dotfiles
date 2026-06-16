@@ -1,7 +1,7 @@
 [appearance]
 
 [appearance.text]
-font_size = 13.0
+font_size = 16.0
 font_name = "JetBrainsMono Nerd Font Mono"
 notebook_font_size = 14.0
 match_notebook_to_monospace_font_size = true

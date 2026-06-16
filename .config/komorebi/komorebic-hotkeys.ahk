@@ -10,16 +10,19 @@ Komorebic(cmd) {
 	RunWait(format("*RunAs komorebic.exe {}", cmd), , "Hide")
 }
 
+; Disable Win+L lock screen so AHK can intercept it
+RegWrite(1, "REG_DWORD", "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\System", "DisableLockWorkstation")
+
 ; Start Komorebi
 Komorebic("start")
 
 ; Start Komorebi Bar or Zebar
-Run("*RunAs komorebi-bar.exe", , "Hide", &BarPID)
-Sleep(1000)
-if !ProcessExist(BarPID) {
+; Run("*RunAs komorebi-bar.exe", , "Hide", &BarPID)
+; Sleep(1000)
+;if !ProcessExist(BarPID) {
 	RunWait(A_ComSpec ' /c cd /d "' EnvGet("USERPROFILE") '\.glzr\zebar\gruvbox" && pnpm build', , "Hide")
 	Run("*RunAs zebar.exe", , "Hide")
-}
+;}
 
 ; Language switching (Alt+Space -> Ctrl+Shift)
 !Space:: Send("{Ctrl Down}{Shift}{Ctrl Up}")
@@ -38,10 +41,16 @@ LWin & Tab::AltTab
 ; Quit the active app (Cmd+Q -> Alt+F4)
 #q:: Send("!{f4}")
 
+; Exit RDP full screen (Ctrl+Alt+Cmd+B -> Ctrl+Alt+Pause)
+^!#b:: Send("^!{Pause}")
+
 ; Page navigation (Cmd+Arrows -> Back/Forward)
 #Left:: Send("{Browser_Back}")
 #Right:: Send("{Browser_Forward}")
 #Up:: Send("^{Home}")
+#HotIf WinActive("ahk_class CabinetWClass")
+#Down:: Send("{Enter}")
+#HotIf
 #Down:: Send("^{End}")
 
 ; Shift + Cmd + Arrows
@@ -70,6 +79,9 @@ LWin & Tab::AltTab
 +^Down:: Komorebic("move down")
 
 ; Essential Mac shortcuts (Cmd+C, Cmd+V, etc.) mapped from Win (#)
+#HotIf WinActive("ahk_exe ms-teams.exe")
++Enter:: Send("+{Enter}")
+#HotIf
 +Enter:: Send("^j")
 #c:: Send("^c")
 #x:: Send("^x")
@@ -82,6 +94,14 @@ LWin & Tab::AltTab
 #t:: Send("^t")
 #d:: Send("^d")
 #n:: Send("^n")
+#r:: Send("^r")
+#p:: Send("^p")
+#l:: Send("^l")
+#,:: Send("^,")
++#f:: Send("^+f")
++#n:: Send("^+n")
++#p:: Send("^+p")
++#s:: Send("^+s")
 
 ; Focus windows
 !^#Left:: Komorebic("focus left")
@@ -140,8 +160,8 @@ LWin & Tab::AltTab
 ; Restart WM and Bars (Stop and start itself)
 !+;:: {
 	Komorebic("stop")
-	if ProcessExist("komorebi-bar.exe")
-		ProcessClose("komorebi-bar.exe")
+;	if ProcessExist("komorebi-bar.exe")
+;		ProcessClose("komorebi-bar.exe")
 	if ProcessExist("zebar.exe")
 		ProcessClose("zebar.exe")
 	Reload()

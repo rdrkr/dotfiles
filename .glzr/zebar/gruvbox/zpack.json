@@ -30,7 +30,12 @@
         "rules": []
       },
       "privileges": {
-        "shellCommands": []
+        "shellCommands": [
+          {
+            "program": "powershell",
+            "argsRegex": "^-NoProfile -Command \\$r=0"
+          }
+        ]
       },
       "presets": [
         {
@@ -39,7 +44,7 @@
           "offsetX": "0px",
           "offsetY": "0px",
           "width": "100%",
-          "height": "48px",
+          "height": "40px",
           "monitorSelection": {
             "type": "all"
           },

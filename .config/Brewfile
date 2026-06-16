@@ -1,19 +1,19 @@
-tap "alexstrnik/browserino"
-tap "barutsrb/tap"
-tap "blacktop/tap"
-tap "felixkratz/formulae"
-tap "gentleman-programming/tap"
-tap "glzr-io/tap"
-tap "hamed-elfayome/claude-usage"
-tap "machlit/tap"
-tap "mediosz/tap"
-tap "mocki-toki/formulae"
-tap "nikitabobko/tap"
-tap "oven-sh/bun"
-tap "rdrkr/tap"
-tap "steipete/tap"
-tap "touch-tap/tap"
-tap "vjeantet/tap"
+tap "alexstrnik/browserino", trusted: true
+tap "barutsrb/tap", trusted: true
+tap "blacktop/tap", trusted: true
+tap "felixkratz/formulae", trusted: true
+tap "gentleman-programming/tap", trusted: true
+tap "glzr-io/tap", trusted: true
+tap "hamed-elfayome/claude-usage", trusted: true
+tap "machlit/tap", trusted: true
+tap "mediosz/tap", trusted: true
+tap "mocki-toki/formulae", trusted: true
+tap "nikitabobko/tap", trusted: true
+tap "oven-sh/bun", trusted: true
+tap "rdrkr/tap", trusted: true
+tap "steipete/tap", trusted: true
+tap "touch-tap/tap", trusted: true
+tap "vjeantet/tap", trusted: true
 # Next-gen compiler infrastructure
 brew "llvm"
 # Code searching, linting, rewriting
@@ -45,7 +45,7 @@ brew "composer"
 # GNU File, Shell, and Text utilities
 brew "coreutils"
 # Pack, ship and run any application as a lightweight container
-brew "docker"
+brew "docker", link: false
 # Docker CLI plugin for extended build capabilities with BuildKit
 brew "docker-buildx"
 # Isolated development environments using Docker
@@ -256,8 +256,10 @@ cask "alt-tab"
 cask "altserver"
 # Tools for building Android applications
 cask "android-studio"
-# AI Coding Agent IDE
+# Agent orchestration platform
 cask "antigravity"
+# Terminal interface for Antigravity agents
+cask "antigravity-cli"
 # Inspect application bundles
 cask "apparency"
 # Universal chat app powered by Matrix
@@ -334,6 +336,8 @@ cask "lyricsfinder"
 cask "mac-mouse-fix"
 # Provides updates to various Microsoft products
 cask "microsoft-auto-update"
+# Multi-platform web browser
+cask "microsoft-edge"
 # Meet, chat, call, and collaborate in just one place
 cask "microsoft-teams"
 # Open-source software for live streaming and screen recording
@@ -381,7 +385,6 @@ mas "Actions", id: 1586435171
 mas "Amphetamine", id: 937984704
 mas "Bandwidth+", id: 490461369
 mas "Cloud Battery", id: 1481005137
-mas "Dark Reader for Safari", id: 1438243180
 mas "Developer", id: 640199958
 mas "Equinox", id: 1591510203
 mas "iMovie", id: 408981434
@@ -486,3 +489,10 @@ go "github.com/golangci/golangci-lint/v2/cmd/golangci-lint"
 go "golang.org/x/tools/gopls"
 go "honnef.co/go/tools/cmd/staticcheck"
 cargo "tmuxpanel"
+npm "@google/gemini-cli"
+npm "fastify"
+npm "lighthouse"
+npm "mcporter"
+npm "neovim"
+npm "pnpm"
+npm "tsx"

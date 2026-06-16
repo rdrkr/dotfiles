@@ -7,9 +7,6 @@
     and PowerShell symlinks. This is the Windows-native counterpart to
     install.sh (which covers macOS, Linux, and WSL).
 
-    Can be run as a one-liner to bootstrap a fresh machine:
-      irm https://raw.githubusercontent.com/rdrkr/dotfiles/main/install.ps1 | iex
-
 .PARAMETER Command
     The action to perform: restore, backup, or schedule.
 
@@ -77,13 +74,12 @@ if ($needsAdmin -and -not $Help -and -not $DryRun) {
     if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
         Write-Host "${C_PEACH}X This script must be run from an Administrator PowerShell.${NC}"
         Write-Host "${C_YELLOW}! Right-click 'Windows Terminal' (or 'PowerShell') and pick 'Run as Administrator', then re-run:${NC}"
-        Write-Host "    irm `"https://raw.githubusercontent.com/rdrkr/dotfiles/main/install.ps1`" | iex"
         return
     }
 }
 
 $DotfilesDir = Join-Path $env:USERPROFILE "dotfiles"
-$DotfilesRepo = "https://github.com/rdrkr/dotfiles.git"
+$DotfilesRepo = "ssh://git@github.com:rdruker_tps/dotfiles.git"
 
 # Force wsl.exe to emit UTF-8 instead of UTF-16 LE. Without this, commands
 # like `wsl --list --quiet` return strings riddled with NUL bytes that break
@@ -229,6 +225,8 @@ $WindowsTerminalConfigDir = Join-Path $ScriptDir ".config\windows-terminal"
 $WindowsTerminalLocalState = Join-Path $env:LOCALAPPDATA "Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState"
 $WarpConfigDir = Join-Path $ScriptDir ".warp"
 $WarpLocalState = Join-Path $env:LOCALAPPDATA "warp\Warp\config"
+$QtCreatorConfigDir = Join-Path $ScriptDir ".config\qtcreator"
+$QtCreatorLocalState = Join-Path $env:APPDATA "QtProject\qtcreator"
 $WallpapersDir = Join-Path $ScriptDir ".wallpapers"
 $DotfilesTarget = $env:USERPROFILE
 
@@ -449,7 +447,65 @@ function Create-Symlinks {
     }
 }
 
-# --- Developer Mode ---
+
+function Link-QtCreatorFolder {
+    <#
+    .SYNOPSIS
+        Creates a junction from %APPDATA%\QtProject\qtcreator to the dotfiles
+        repo's .config\qtcreator directory. Used during restore so Qt Creator
+        settings are managed directly from the repo.
+
+    .DESCRIPTION
+        Replaces any existing qtcreator folder at the target with a junction
+        pointing back to the repo. Since the repo owns the files, no separate
+        backup step is needed -- edits in Qt Creator write through the
+        junction into the repo working tree.
+    #>
+    Print-Header "Linking Qt Creator configuration..."
+
+    $src = $QtCreatorConfigDir
+    $dest = $QtCreatorLocalState
+
+    if (-not (Test-Path $src)) {
+        Print-Warning "Qt Creator config not found in dotfiles repo ($src). Skipping."
+        return
+    }
+
+    if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would junction $dest -> $src"
+        return
+    }
+
+    try {
+        # Ensure parent directory exists
+        $parent = Split-Path -Parent $dest
+        if (-not (Test-Path $parent)) {
+            New-Item -ItemType Directory -Path $parent -Force | Out-Null
+        }
+
+        # Remove existing target (junction, symlink, or real directory)
+        if (Test-Path -LiteralPath $dest) {
+            $item = Get-Item -LiteralPath $dest -Force -ErrorAction SilentlyContinue
+            if ($item.LinkType) {
+                Print-Warning "Already linked, skipping: $dest"
+                return
+            }
+            else {
+                Remove-Item -Path $dest -Recurse -Force
+                Print-Warning "Removed existing directory: $dest"
+            }
+        }
+
+        $escDest = [Management.Automation.WildcardPattern]::Escape($dest)
+        $escSrc = [Management.Automation.WildcardPattern]::Escape($src)
+        New-Item -ItemType Junction -Path $escDest -Target $escSrc -ErrorAction Stop | Out-Null
+        Print-Success "Linked: $dest -> $src"
+    }
+    catch {
+        Print-Error "Failed to link Qt Creator config: $($_.Exception.Message)"
+    }
+}
+
 function Test-IsAdmin {
     <#
     .SYNOPSIS
@@ -490,6 +546,43 @@ function Enable-DeveloperMode {
     }
     catch {
         Print-Error "Failed to enable Developer Mode: $($_.Exception.Message)"
+    }
+}
+
+function Configure-GitDefaults {
+    <#
+    .SYNOPSIS
+        Configures global git defaults: LF line endings and long path support.
+
+    .DESCRIPTION
+        Sets core.autocrlf=input so CRLF is converted to LF on commit but
+        checkout leaves files as-is, core.eol=lf so new files use Unix
+        line endings, and core.fileMode=false so permission differences
+        between Unix (755) and Windows (644) are ignored. These are global
+        (--global) settings so they apply to every repo on the machine.
+    #>
+    Print-Header "Configuring git defaults..."
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Print-Warning "git not found. Skipping git configuration."
+        return
+    }
+
+    if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would set git config --global core.autocrlf input"
+        Print-Warning "`[DRY RUN`] Would set git config --global core.eol lf"
+        Print-Warning "`[DRY RUN`] Would set git config --global core.fileMode false"
+        return
+    }
+
+    try {
+        git config --global core.autocrlf input
+        git config --global core.eol lf
+        git config --global core.fileMode false
+        Print-Success "Git configured: core.autocrlf=input, core.eol=lf, core.fileMode=false."
+    }
+    catch {
+        Print-Error "Failed to configure git defaults: $($_.Exception.Message)"
     }
 }
 
@@ -681,6 +774,41 @@ $StartupKeys = @(
     "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run",
     "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\StartupFolder"
 )
+
+function Set-ExplorerDefaultFolder {
+    <#
+    .SYNOPSIS
+        Configures File Explorer to open to the current user's profile folder
+        (e.g. C:\Users\<username>) instead of Quick Access / Home.
+
+    .DESCRIPTION
+        Overrides the "open new window" shell command for the Explorer CLSID
+        {52205fd8-5dfb-447d-801a-d0b52f2e83e1} so that clicking the taskbar
+        icon or pressing Win+E opens the user's home folder. Uses the
+        shell:profile moniker which resolves generically to %USERPROFILE%
+        regardless of the actual username.
+    #>
+    Print-Header "Setting File Explorer default folder to user profile..."
+
+    $clsidKey = "HKCU:\Software\Classes\CLSID\{52205fd8-5dfb-447d-801a-d0b52f2e83e1}\shell\opennewwindow\command"
+
+    if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would set Explorer default folder to shell:profile via $clsidKey"
+        return
+    }
+
+    try {
+        if (-not (Test-Path $clsidKey)) {
+            New-Item -Path $clsidKey -Force -ErrorAction Stop | Out-Null
+        }
+        Set-ItemProperty -Path $clsidKey -Name "(Default)" -Value "explorer.exe shell:profile" -Force -ErrorAction Stop
+        Set-ItemProperty -Path $clsidKey -Name "DelegateExecute" -Value "" -Force -ErrorAction Stop
+        Print-Success "File Explorer will now open to the user profile folder."
+    }
+    catch {
+        Print-Error "Failed to set Explorer default folder: $($_.Exception.Message)"
+    }
+}
 
 function Configure-Desktop {
     <#
@@ -1463,20 +1591,29 @@ function Backup-WarpSettings {
 function Set-XdgConfigHome {
     <#
     .SYNOPSIS
-        Persists XDG_CONFIG_HOME and STARSHIP_CONFIG as user-scope environment 
-        variables. Ensures non-zsh sessions (PowerShell, GUI apps, Command Prompt)
-        resolve lookups to the correct locations.
+        Persists user-scope environment variables (XDG_CONFIG_HOME, STARSHIP_CONFIG,
+        KOMOREBI_CONFIG_HOME, Android SDK/NDK paths, and BOOST). Ensures non-zsh
+        sessions (PowerShell, GUI apps, Command Prompt) resolve lookups to the
+        correct locations.
     #>
     Print-Header "Setting Environment Variables..."
 
     $targetXdg = Join-Path $env:USERPROFILE ".config"
     $targetStarship = Join-Path $targetXdg "starship\starship.toml"
     $targetKomorebi = Join-Path $targetXdg "komorebi"
+    $targetAndroidSdkRoot = Join-Path $env:LOCALAPPDATA "Android\Sdk"
+    $targetAndroidNdkRoot = Join-Path $targetAndroidSdkRoot "ndk\28.2.13676358"
+    $targetAndroidUserHome = Join-Path $env:USERPROFILE ".android"
+    $targetBoost = Join-Path $env:USERPROFILE "development\repos\boost"
 
     if ($DryRun) {
         Print-Warning "`[DRY RUN`] Would set user env XDG_CONFIG_HOME = $targetXdg"
         Print-Warning "`[DRY RUN`] Would set user env STARSHIP_CONFIG = $targetStarship"
         Print-Warning "`[DRY RUN`] Would set user env KOMOREBI_CONFIG_HOME = $targetKomorebi"
+        Print-Warning "`[DRY RUN`] Would set user env ANDROID_SDK_ROOT = $targetAndroidSdkRoot"
+        Print-Warning "`[DRY RUN`] Would set user env ANDROID_NDK_ROOT = $targetAndroidNdkRoot"
+        Print-Warning "`[DRY RUN`] Would set user env ANDROID_USER_HOME = $targetAndroidUserHome"
+        Print-Warning "`[DRY RUN`] Would set user env BOOST = $targetBoost"
         return
     }
 
@@ -1492,6 +1629,22 @@ function Set-XdgConfigHome {
         [Environment]::SetEnvironmentVariable("KOMOREBI_CONFIG_HOME", $targetKomorebi, "User")
         $env:KOMOREBI_CONFIG_HOME = $targetKomorebi
         Print-Success "KOMOREBI_CONFIG_HOME set to $targetKomorebi (user scope)."
+
+        [Environment]::SetEnvironmentVariable("ANDROID_SDK_ROOT", $targetAndroidSdkRoot, "User")
+        $env:ANDROID_SDK_ROOT = $targetAndroidSdkRoot
+        Print-Success "ANDROID_SDK_ROOT set to $targetAndroidSdkRoot (user scope)."
+
+        [Environment]::SetEnvironmentVariable("ANDROID_NDK_ROOT", $targetAndroidNdkRoot, "User")
+        $env:ANDROID_NDK_ROOT = $targetAndroidNdkRoot
+        Print-Success "ANDROID_NDK_ROOT set to $targetAndroidNdkRoot (user scope)."
+
+        [Environment]::SetEnvironmentVariable("ANDROID_USER_HOME", $targetAndroidUserHome, "User")
+        $env:ANDROID_USER_HOME = $targetAndroidUserHome
+        Print-Success "ANDROID_USER_HOME set to $targetAndroidUserHome (user scope)."
+
+        [Environment]::SetEnvironmentVariable("BOOST", $targetBoost, "User")
+        $env:BOOST = $targetBoost
+        Print-Success "BOOST set to $targetBoost (user scope)."
     }
     catch {
         Print-Error "Failed to set environment variables: $($_.Exception.Message)"
@@ -1502,20 +1655,19 @@ function Set-XdgConfigHome {
 function Invoke-WslInstall {
     <#
     .SYNOPSIS
-        Runs install.sh <subcommand> inside the Ubuntu WSL distro so Linux-side
-        dotfiles state (apt, Linuxbrew, stow, zsh) stays in sync with Windows.
+        Symlinks the Windows dotfiles repo into the WSL user's home directory
+        and runs install.sh <subcommand> inside the Ubuntu WSL distro.
 
     .DESCRIPTION
-        Preflights WSL + Ubuntu readiness before attempting. On fresh installs,
-        Ubuntu is registered but cannot run commands until the VM Platform
-        reboot completes — that case is detected and skipped with a warning.
-
-        We invoke install.sh via the public one-liner (curl | bash) rather than
-        a Windows path because install.sh has its own bootstrap that clones
-        into the WSL-side $HOME/dotfiles, where stow and Linuxbrew expect it.
+        Creates a symbolic link at ~/dotfiles inside WSL pointing to the
+        Windows-owned dotfiles repo (via /mnt/c/...). This means both
+        Windows and WSL share the same repo -- no separate clone needed.
+        After ensuring the symlink exists, runs install.sh with the given
+        subcommand so Linux-side state (apt, Linuxbrew, stow, zsh) stays
+        in sync.
 
     .PARAMETER Subcommand
-        'restore' or 'backup' — forwarded as-is to install.sh.
+        'restore' or 'backup' -- forwarded as-is to install.sh.
     #>
     param(
         [Parameter(Mandatory = $true)]
@@ -1531,6 +1683,7 @@ function Invoke-WslInstall {
     }
 
     if ($DryRun) {
+        Print-Warning "`[DRY RUN`] Would symlink ~/dotfiles in WSL to Windows dotfiles repo"
         Print-Warning "`[DRY RUN`] Would run inside WSL (Ubuntu): install.sh $Subcommand"
         return
     }
@@ -1545,10 +1698,53 @@ function Invoke-WslInstall {
         return
     }
 
-    $remoteUrl = "https://raw.githubusercontent.com/rdrkr/dotfiles/main/install.sh"
-    $cmd = "curl -fsSL $remoteUrl | bash -s -- $Subcommand"
+    # Resolve the Windows dotfiles path as a WSL /mnt/c/... path.
+    # $DotfilesDir is e.g. C:\Users\<user>\dotfiles -> /mnt/c/Users/<user>/dotfiles
+    $winPath = $DotfilesDir -replace '\\', '/'
+    $driveLetter = $winPath.Substring(0, 1).ToLower()
+    $rest = $winPath.Substring(2)
+    $wslMntPath = "/mnt/$driveLetter$rest"
+
+    # Create symlink ~/dotfiles -> /mnt/c/.../dotfiles inside WSL.
+    # `ln -sfn` atomically replaces any existing symlink/file at the target;
+    # if a real directory exists there, we remove it first.
     try {
-        wsl -d Ubuntu -- bash -lc $cmd
+        # Get WSL home directory
+        $wslHome = (wsl -d Ubuntu -- bash -c 'echo $HOME').Trim()
+        $wslLink = "$wslHome/dotfiles"
+
+        # Check if already a correct symlink (avoid unnecessary work)
+        $currentTarget = $null
+        $linkInfo = wsl -d Ubuntu -- readlink $wslLink 2>$null
+        if ($LASTEXITCODE -eq 0) { $currentTarget = ($linkInfo | Out-String).Trim() }
+
+        if ($currentTarget -eq $wslMntPath) {
+            Print-Success "WSL ~/dotfiles already symlinked to $wslMntPath."
+        }
+        else {
+            # Remove existing non-symlink directory if present
+            wsl -d Ubuntu -- bash -c "[ -d '$wslLink' ] && [ ! -L '$wslLink' ] && rm -rf '$wslLink'" 2>$null
+            # Create (or replace) the symlink
+            wsl -d Ubuntu -- ln -sfn $wslMntPath $wslLink
+            if ($LASTEXITCODE -eq 0) {
+                Print-Success "Created symlink: ~/dotfiles -> $wslMntPath."
+            }
+            else {
+                Print-Error "Failed to create symlink (ln exit code $LASTEXITCODE)."
+                return
+            }
+        }
+    }
+    catch {
+        Print-Error "Failed to create WSL dotfiles symlink: $($_.Exception.Message)"
+        return
+    }
+
+    # Run install.sh from the symlinked repo inside WSL.
+    # Use `cd ~/dotfiles` so SCRIPT_DIR resolves to the WSL home path and
+    # stow targets /home/<user>/ (not /mnt/c/Users/<user>/).
+    try {
+        wsl -d Ubuntu -- bash -lc "cd ~/dotfiles && ./install.sh $Subcommand"
         if ($LASTEXITCODE -eq 0) {
             Print-Success "WSL $Subcommand completed."
         }
@@ -1558,33 +1754,6 @@ function Invoke-WslInstall {
     }
     catch {
         Print-Error "WSL $Subcommand failed: $($_.Exception.Message)"
-    }
-}
-
-function Set-WindowsLanguageHotkey {
-    <#
-    .SYNOPSIS
-        Sets the Windows keyboard input language toggle hotkey to Ctrl+Shift.
-    #>
-    Print-Header "Setting Windows keyboard language hotkey..."
-    
-    $regPath = "HKCU:\Keyboard Layout\Toggle"
-    if ($DryRun) {
-        Print-Warning "`[DRY RUN`] Would set Language Hotkey to 2 (Ctrl+Shift) in $regPath"
-        return
-    }
-
-    try {
-        if (-not (Test-Path $regPath)) {
-            New-Item -Path $regPath -Force -ErrorAction Stop | Out-Null
-        }
-        New-ItemProperty -Path $regPath -Name "Hotkey" -PropertyType String -Value "2" -Force -ErrorAction Stop | Out-Null
-        New-ItemProperty -Path $regPath -Name "Language Hotkey" -PropertyType String -Value "2" -Force -ErrorAction Stop | Out-Null
-        New-ItemProperty -Path $regPath -Name "Layout Hotkey" -PropertyType String -Value "3" -Force -ErrorAction Stop | Out-Null
-        Print-Success "Keyboard language hotkey set to Ctrl+Shift."
-    }
-    catch {
-        Print-Error "Failed to set keyboard language hotkey: $($_.Exception.Message)"
     }
 }
 
@@ -1621,9 +1790,10 @@ function Invoke-Restore {
     #>
     Print-Header "Starting Restore... (platform: Windows, pkg managers: winget + scoop)"
 
-    # 0. Enable Developer Mode and Long Paths (best-effort; requires admin)
+    # 0. Enable Developer Mode, Long Paths, and Git defaults (best-effort)
     Enable-DeveloperMode
     Enable-LongPaths
+    Configure-GitDefaults
 
     # 1. Check for winget
     Print-Header "Checking for winget..."
@@ -1881,6 +2051,9 @@ function Invoke-Restore {
     # 10. Create symlinks
     Create-Symlinks
 
+    # 10a. Junction Qt Creator config from repo to %APPDATA%\QtProject\qtcreator
+    Link-QtCreatorFolder
+
     # 10b. Now that %USERPROFILE%\.config exists as a junction, persist
     # XDG_CONFIG_HOME so non-zsh sessions resolve it too.
     Set-XdgConfigHome
@@ -1905,10 +2078,10 @@ function Invoke-Restore {
     # after the theme so its DWM accent overrides theme defaults. Then pin
     # the lock screen via PersonalizationCSP and reapply sign-in programs.
     Configure-Desktop
+    Set-ExplorerDefaultFolder
     Restore-WindowsPersonalization
     Apply-WindowsLockScreen
     Restore-WindowsStartup
-    Set-WindowsLanguageHotkey
 
     # 12. Run install.sh restore inside WSL so Linux-side state (apt, Linuxbrew,
     # stow, zsh) is set up to match. Skip on a fresh install -- the VM Platform

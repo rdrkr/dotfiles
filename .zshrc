@@ -14,6 +14,8 @@ case "$(uname -s)" in
 esac
 
 # homebrew (macOS Apple Silicon, macOS Intel, or Linuxbrew)
+export HOMEBREW_NO_REQUIRE_TAP_TRUST=1
+
 if [[ -f "/opt/homebrew/bin/brew" ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 elif [[ -f "/usr/local/bin/brew" ]]; then
@@ -51,7 +53,7 @@ zinit light zsh-users/zsh-syntax-highlighting
 zinit light zsh-users/zsh-completions
 zinit light zsh-users/zsh-autosuggestions
 zinit light Aloxaf/fzf-tab
-zinit light matheusml/zsh-ai
+#zinit light matheusml/zsh-ai
 #zinit light jeffreytse/zsh-vi-mode
 
 # add in snippets
@@ -64,8 +66,14 @@ zinit snippet OMZP::kubectl
 zinit snippet OMZP::kubectx
 zinit snippet OMZP::command-not-found
 
-# load completions
-autoload -Uz compinit && compinit
+# load completions - fix insecure dirs automatically, fall back to -i if no permission
+autoload -Uz compinit
+
+if [[ -n "$(compaudit 2>/dev/null)" ]]; then
+  compaudit 2>/dev/null | xargs chmod g-w,o-w 2>/dev/null || true
+fi
+
+compinit -i
 zinit cdreplay -q
 
 # starship
@@ -74,7 +82,7 @@ export STARSHIP_CONFIG=~/.config/starship/starship.toml
 if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
   # Workaround for starship init zsh quoting bug when the path contains spaces
   if [[ "$_OS" == "unknown" && -x /usr/bin/sed ]]; then
-    eval "$(starship init zsh | /usr/bin/sed -E "s|'[^']*[/\\\\]starship(\.exe)?'|starship|g")"
+    eval "$(starship init zsh | /usr/bin/sed -E "s|'[^']*[/\\\\\\\\]starship(\\.exe)?'|starship|g")"
   else
     eval "$(starship init zsh)"
   fi
@@ -113,7 +121,7 @@ function chpwd() {
 
   # tell Ghostty (and other OSC-7-aware terminals) the new CWD
   if [[ -n "$TMUX" ]]; then
-    # Pass OSC 7 through tmux using passthrough sequence \ePtmux;...\e\\
+    # Pass OSC 7 through tmux using passthrough sequence \ePtmux;\e\e]7;file://%s%s\a\e\\
     # Inside, escape \e as \e\e
     printf '\ePtmux;\e\e]7;file://%s%s\a\e\\' "$HOST" "$PWD"
   else
@@ -185,9 +193,10 @@ zstyle ':fzf-tab:*' popup-min-size 40 20
 # bind keys
 bindkey -e                            # disable vi mode
 #bindkey -v                           # enable vi mode
-bindkey "^[[1;3C" forward-word        # autosuggest next word
-bindkey "^[[1;3D" backward-word       # autosuggest previous word
-bindkey "^[[1;3D" backward-word       # autosuggest previous word
+bindkey "^[[1;3C" forward-word        # next word
+bindkey "^[[1;3D" backward-word       # previous word
+bindkey "^[[1;5C" forward-word        # next word
+bindkey "^[[1;5D" backward-word       # previous word
 bindkey '^[^?'    backward-kill-word  # delete previous word
 #bindkey '^R'     history-incremental-search-backward 
 #bindkey '^S'     history-incremental-search-forward
@@ -207,7 +216,7 @@ alias c='clear'
 alias ua='npx tsx ~/dotfiles/scripts/run-tasks/run-tasks.ts ~/dotfiles/scripts/run-tasks/update-${_OS}.yaml'
 
 ## claude code aliases
-alias cc='claude --dangerously-skip-permissions --channels plugin:telegram@claude-plugins-official'
+alias cc='claude --dangerously-skip-permissions'
 alias ccs="~/scripts/ccswitch.sh"
 alias ccl="ccs --list"
 alias cc1="ccs --switch-to 1 && cc"
@@ -223,7 +232,7 @@ command -v carapace &>/dev/null && source <(carapace _carapace zsh)
 # paths
 path_dirs=()
 
-if [[ -f "/opt/homebrew/bin/brew" ]] then
+if [[ -f "/opt/homebrew/bin/brew" ]]; then
   path_dirs+=(
     "/opt/homebrew/opt/coreutils/libexec/gnubin"
     "/opt/homebrew/opt/ffmpeg-full/bin"
@@ -336,7 +345,79 @@ fi
 
 
 # bun completions
-[ -s "/Users/ronendruker/.bun/_bun" ] && source "/Users/ronendruker/.bun/_bun"
+[ -s "/$HOME/.bun/_bun" ] && source "/$HOME/.bun/_bun"
 
-# Added by Antigravity IDE
-export PATH="/Users/ronendruker/.antigravity-ide/antigravity-ide/bin:$PATH"
+# --- AUTO LAUNCH TMUX in Ubuntu WSL (Windows Terminal) ---
+if [[ "$(uname -s)" == "Linux" ]] && [[ -n "$WT_PROFILE_ID" ]]; then
+  # Don’t run if already inside tmux or if this shell is invoked via tmux itself
+  if [[ -z "$TMUX" ]] && [[ -n "$WT_PROFILE_ID" ]] && [[ -o interactive ]]; then
+    if ! ps -p $$ -o args= | grep -q "tmux"; then
+      # Temp file for persistent PWD across tmux sessions
+      export TMUX_PWD_FILE="$(mktemp -t tmux-pwd.XXXXXX)"
+
+      # Check for detached sessions
+      local -a _detached_sessions
+      _detached_sessions=("${(@f)$(tmux list-sessions -f "#{==:#{session_attached},0}" -F "#{session_name}" 2>/dev/null)}")
+      _detached_sessions=("${_detached_sessions[@]:#}")
+
+      if [[ ${#_detached_sessions[@]} -gt 0 ]]; then
+        local _target_session="${_detached_sessions[1]}"
+        # Optionally open a second terminal window if more than one detached
+        if [[ ${#_detached_sessions[@]} -gt 1 ]]; then
+          if command -v wt &>/dev/null; then
+            nohup wt new-window --profile "Ubuntu" >/dev/null 2>&1 &
+          else
+            nohup wt.exe new-window --profile "Ubuntu" >/dev/null 2>&1 &
+          fi
+        fi
+        tmux attach-session -t "$_target_session"
+      else
+        tmux new-session -s "$(_tmux_random_name)" -e TMUX_PWD_FILE="$TMUX_PWD_FILE"
+      fi
+      unset _detached_sessions
+
+      # On exit, change to last tmux‑stored PWD
+      if [[ -f "$TMUX_PWD_FILE" ]]; then
+        local last_pwd="$(cat "$TMUX_PWD_FILE")"
+        if [[ -n "$last_pwd" && -d "$last_pwd" ]]; then
+          builtin cd -- "$last_pwd"
+        fi
+        rm -f "$TMUX_PWD_FILE"
+      fi
+      unset TMUX_PWD_FILE
+    fi
+  fi
+fi
+
+
+# --- PERSISTENT SSH AGENT & KEY (only inside tmux) ---
+if [[ -n "$TMUX" ]]; then
+  SSH_ENV="$HOME/.ssh/agent.env"
+
+  start_agent() {
+    mkdir -p ~/.ssh/agent
+    ssh-agent -t 24h > "$SSH_ENV" 2>/dev/null && source "$SSH_ENV" > /dev/null
+  }
+
+  # If no valid SSH_AUTH_SOCK, start or restart agent
+  if [[ ! -S "$SSH_AUTH_SOCK" || "$SSH_AUTH_SOCK" != /tmp/ssh-*/* && "$SSH_AUTH_SOCK" != ~/.ssh/agent/* ]]; then
+    start_agent
+  fi
+
+  # If SSH_ENV exists, source it so SSH_AUTH_SOCK/SSH_AGENT_PID are set
+  if [[ -f "$SSH_ENV" ]]; then
+    source "$SSH_ENV" > /dev/null
+  fi
+
+  # Extra safety: export if not already exported
+  if pgrep -u "$USER" ssh-agent > /dev/null; then
+    export SSH_AUTH_SOCK
+    export SSH_AGENT_PID
+  fi
+
+  # Auto‑add key once per agent session if not loaded
+  if ! ssh-add -l | grep -q "$HOME/.ssh/dell-wsl"; then
+    ssh-add ~/.ssh/dell-wsl 2>/dev/null || true
+  fi
+fi
+

@@ -12,7 +12,7 @@ groups:
         args:
           [
             -c,
-            'if command -v apt-get >/dev/null; then sudo apt-get update && sudo apt-get upgrade -y; elif command -v dnf >/dev/null; then sudo dnf upgrade -y; elif command -v pacman >/dev/null; then sudo pacman -Syu --noconfirm; elif command -v zypper >/dev/null; then sudo zypper update -y; else echo "No supported package manager found"; exit 1; fi'
+            'if command -v apt-get >/dev/null; then sudo apt-get update && sudo apt-get upgrade -y; elif command -v dnf >/dev/null; then sudo dnf upgrade -y; elif command -v pacman >/dev/null; then sudo pacman -Syu --noconfirm; elif command -v zypper >/dev/null; then sudo zypper update -y; else echo "No supported package manager found"; exit 1; fi',
           ]
         verbose: true
 
@@ -20,62 +20,83 @@ groups:
     tasks:
       - title: Updating Homebrew
         command: bash
-        args: [-c, 'if command -v brew >/dev/null; then brew update; else echo "brew not found"; fi']
+        args:
+          [
+            -c,
+            'if command -v brew >/dev/null; then brew update; else echo "brew not found"; fi',
+          ]
         verbose: true
       - title: Upgrading Homebrew packages
         command: bash
-        args: [-c, 'if command -v brew >/dev/null; then brew upgrade; else echo "brew not found"; fi']
+        args:
+          [
+            -c,
+            'if command -v brew >/dev/null; then brew upgrade -y; else echo "brew not found"; fi',
+          ]
       - title: Cleaning up Homebrew
         command: bash
-        args: [-c, 'if command -v brew >/dev/null; then brew cleanup --prune=all; else echo "brew not found"; fi']
+        args:
+          [
+            -c,
+            'if command -v brew >/dev/null; then brew cleanup --prune=all; else echo "brew not found"; fi',
+          ]
 
   - title: Updating global npm packages
     tasks:
       - title: Upgrading global npm packages
         command: bash
-        args: [-c, 'pkgs=$(grep -v "^#" ~/dotfiles/.config/npm-global-packages.txt | xargs); if [ -n "$pkgs" ]; then npm install -g $pkgs; fi']
+        args:
+          [
+            -c,
+            'pkgs=$(grep -v "^#" ~/dotfiles/.config/npm-global-packages.txt | xargs); if [ -n "$pkgs" ]; then npm install -g $pkgs; fi',
+          ]
         verbose: true
 
   - title: Updating pipx packages
     tasks:
       - title: Upgrading pipx packages
         command: bash
-        args: [-c, 'if command -v pipx >/dev/null; then pipx upgrade-all; else echo "pipx not found"; fi']
+        args:
+          [
+            -c,
+            'if command -v pipx >/dev/null; then pipx upgrade-all; else echo "pipx not found"; fi',
+          ]
 
   - title: Updating bun packages
     tasks:
       - title: Upgrading bun
         command: bash
-        args: [-c, 'if command -v bun >/dev/null; then bun upgrade; else echo "bun not found"; fi']
+        args:
+          [
+            -c,
+            'if command -v bun >/dev/null; then bun upgrade; else echo "bun not found"; fi',
+          ]
 
   - title: Updating zinit
     tasks:
       - title: Updating zinit
         command: zsh
-        args:
-          [
+        args: [
             -l,
             -c,
             'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh"
-              && zinit self-update',
+            && zinit self-update',
           ]
       - title: Updating zinit plugins
         command: zsh
-        args:
-          [
+        args: [
             -l,
             -c,
             'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh"
-              && zinit update --quiet --all',
+            && zinit update --quiet --all',
           ]
       - title: Clearing zinit cache
         command: zsh
-        args:
-          [
+        args: [
             -l,
             -c,
             'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh"
-              && zinit cclear',
+            && zinit cclear',
           ]
 
   - title: Updating LazyVim

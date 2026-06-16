@@ -3,6 +3,7 @@ import { createStore } from "solid-js/store";
 import { onCleanup, onMount, useContext } from "solid-js";
 import { createContext, ParentProps } from "solid-js";
 
+/** Provider group for all built-in zebar providers. */
 export const providers = zebar.createProviderGroup({
   cpu: { type: "cpu" },
   memory: { type: "memory" },
@@ -13,16 +14,26 @@ export const providers = zebar.createProviderGroup({
   keyboard: { type: "keyboard" },
   media: { type: "media" },
   tray: { type: "systray" },
+  battery: { type: "battery" },
 });
 
+/** Combined provider output type. */
 export type Providers = Partial<typeof providers.outputMap>;
 
+/** Solid context carrying the reactive provider store. */
 export const ProvidersContext = createContext(providers.outputMap);
 
+/**
+ * Returns the current provider outputs from context.
+ */
 export function useProviders() {
   return useContext(ProvidersContext);
 }
 
+/**
+ * Wraps children with provider context, initializing all zebar providers
+ * and forwarding their outputs into a reactive store.
+ */
 export function ProvidersProvider(
   props: ParentProps<{ WmType?: "glazewm" | "komorebi" }>,
 ) {

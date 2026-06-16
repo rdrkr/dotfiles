@@ -8,6 +8,8 @@ import { MediaWidget } from "@features/media.widget";
 import { MetricsWidget } from "@features/metrics.widget";
 import { KeyboardLayoutWidget } from "@features/keyboard-layout.widget";
 import { DateTimeWidget } from "@features/date-time.widget";
+import { BatteryWidget } from "@features/battery.widget";
+import { NetworkSpeedWidget } from "@features/network-speed.widget";
 import { onMount } from "solid-js";
 import { WorkspacesGlazewmWidget } from "@/features/workspaces.glazewm.widget";
 import { FocusedWindowTitleGlazewmWidget } from "@/features/focused-window-title.glazewm.widget";
@@ -74,8 +76,10 @@ export function RightGroup() {
       }}
       class="justify-self-end justify-end"
     >
+      <NetworkSpeedWidget />
       <MetricsWidget />
       <KeyboardLayoutWidget />
+      <BatteryWidget />
       <DateTimeWidget />
     </Group>
   );

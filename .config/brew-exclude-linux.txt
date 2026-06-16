@@ -10,13 +10,17 @@ cocoapods
 infat
 ios-deploy
 mas
+mole
+neofetch
 pam-reattach
 periphery
+tmux
 xcbeautify
 xcode-build-server
 xcodegen
 
 # macOS-only third-party formulae
+hamed-elfayome/claude-usage/claude-usage-tracker
 acsandmann/tap/rift
 felixkratz/formulae/borders
 koekeishiya/formulae/skhd

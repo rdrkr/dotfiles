@@ -16,3 +16,9 @@
 [filesystem "JetBrains s.r.o.|25.0.2|/dev/disk3s1"]
 	timestampResolution = 15000 nanoseconds
 	minRacyThreshold = 0 nanoseconds
+[filesystem "JetBrains s.r.o.|25.0.2|-1370754229"]
+	timestampResolution = 609 microseconds
+	minRacyThreshold = 0 nanoseconds
+[filesystem "JetBrains s.r.o.|21.0.10|-1370754229"]
+	timestampResolution = 1425 microseconds
+	minRacyThreshold = 0 nanoseconds
