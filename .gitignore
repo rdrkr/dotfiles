@@ -33,6 +33,7 @@ node_modules/
 .claude/backups
 .claude/.claude.json
 .claude/.claude.json.backup*
+.claude/fetch-claude-usage.js
 .claude/fetch-claude-usage.swift
 .claude/history.jsonl
 .claude/powerline/usage/today.json
