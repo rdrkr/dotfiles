@@ -45,7 +45,7 @@ brew "composer"
 # GNU File, Shell, and Text utilities
 brew "coreutils"
 # Pack, ship and run any application as a lightweight container
-brew "docker", link: false
+brew "docker"
 # Docker CLI plugin for extended build capabilities with BuildKit
 brew "docker-buildx"
 # Isolated development environments using Docker
@@ -474,9 +474,11 @@ go "golang.org/x/tools/gopls"
 go "honnef.co/go/tools/cmd/staticcheck"
 cargo "tmuxpanel"
 npm "@google/gemini-cli"
+npm "esbuild"
 npm "fastify"
 npm "lighthouse"
 npm "mcporter"
 npm "neovim"
+npm "node-pty"
 npm "pnpm"
 npm "tsx"

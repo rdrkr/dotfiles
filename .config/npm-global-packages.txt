@@ -1,7 +1,9 @@
 @google/gemini-cli
+esbuild
 fastify
 lighthouse
 mcporter
 neovim
+node-pty
 pnpm
 tsx
