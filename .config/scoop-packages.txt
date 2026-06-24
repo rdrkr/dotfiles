@@ -1,4 +1,6 @@
 7zip
 clink
 extras/psreadline
+kotlin
+maven
 pipx

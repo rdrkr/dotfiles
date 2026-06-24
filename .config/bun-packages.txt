@@ -1,0 +1,4 @@
+@types/bun[0m[2m
+typescript[0m[2m
+vscode-json-languageserver[0m[2m
+yaml-language-server[0m[2m

@@ -44,6 +44,7 @@ Microsoft.VCLibs.Desktop.14
 Microsoft.VCRedist.2015+.x64
 Microsoft.VCRedist.2015+.x86
 Microsoft.VisualStudio.2022.Professional
+Microsoft.VisualStudio.Professional
 Microsoft.VisualStudioCode
 Microsoft.WindowsAppRuntime.1.4
 Microsoft.WindowsAppRuntime.1.5
@@ -75,3 +76,4 @@ TheQtCompanyLtd.QtCreator
 Uncrustify.Uncrustify
 VideoLAN.VLC
 Warp.Warp
+WinDirStat.WinDirStat

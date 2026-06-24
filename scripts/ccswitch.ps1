@@ -263,6 +263,37 @@ function Restore-AccountScript {
     }
 }
 
+function Deploy-UsageScripts {
+    <#
+    .SYNOPSIS
+        Deploys the universal usage-fetch script to the active location and a
+        per-account backup copy for every managed account.
+    .DESCRIPTION
+        Every copy is byte-identical; the script self-identifies by its own filename
+        (per-account backup copies) or by the active account in sequence.json (the
+        active copy). Running this keeps the status line able to show usage for all
+        accounts and guarantees a switch never leaves the active script missing.
+        Credentials live separately in ~/.claude/usage-secrets.json, so no secrets
+        are written here.
+    #>
+    $template = Join-Path $HOME '.claude' 'fetch-claude-usage-template.js'
+    if (-not (Test-Path $template)) { return }
+
+    $activeDst = Join-Path $HOME '.claude' 'fetch-claude-usage.js'
+    Copy-Item $template $activeDst -Force
+    if ((Get-Platform) -ne 'windows') { chmod 755 $activeDst }
+
+    if (-not (Test-Path $script:SEQUENCE_FILE)) { return }
+    $seq = Read-JsonFile $script:SEQUENCE_FILE
+    $scriptsDir = Join-Path $script:BACKUP_DIR 'scripts'
+    if (-not (Test-Path $scriptsDir)) { New-Item -ItemType Directory -Path $scriptsDir -Force | Out-Null }
+    foreach ($prop in $seq.accounts.PSObject.Properties) {
+        $dst = Join-Path $scriptsDir ".fetch-claude-usage-$($prop.Name)-$($prop.Value.email).js"
+        Copy-Item $template $dst -Force
+        if ((Get-Platform) -ne 'windows') { chmod 755 $dst }
+    }
+}
+
 # ─────────────────────────────────────────────
 # Current account
 # ─────────────────────────────────────────────
@@ -374,6 +405,7 @@ function Invoke-AddAccount {
     $seq.lastUpdated         = $now
 
     Write-JsonFile -Path $script:SEQUENCE_FILE -Content $seq
+    Deploy-UsageScripts
     Write-Host "Added Account ${accountNum}: $currentEmail"
 }
 
@@ -573,6 +605,9 @@ function Invoke-PerformSwitch {
     $seq.activeAccountNumber = [int]$TargetAccount
     $seq.lastUpdated         = Get-Date -Format 'yyyy-MM-ddTHH:mm:ssZ' -AsUTC
     Write-JsonFile -Path $script:SEQUENCE_FILE -Content $seq
+
+    # Keep all usage-fetch scripts deployed (active + per-account backups)
+    Deploy-UsageScripts
 
     Write-Host "Switched to Account-$TargetAccount ($targetEmail)"
     Invoke-List

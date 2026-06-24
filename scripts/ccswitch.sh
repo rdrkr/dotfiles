@@ -169,12 +169,35 @@ restore_account_script() {
     local email="$2"
     local script_file="$HOME/.claude/fetch-claude-usage.js"
     local backup_file="$BACKUP_DIR/scripts/.fetch-claude-usage-${account_num}-${email}.js"
-    
+
     rm -f "$script_file"
     if [[ -f "$backup_file" ]]; then
         cp "$backup_file" "$script_file"
         chmod 755 "$script_file"
     fi
+}
+
+# Deploy the universal usage-fetch script to the active location and a per-account
+# backup copy for every managed account. All copies are byte-identical; the script
+# self-identifies by its own filename (backup copies) or by the active account in
+# sequence.json (active copy). Credentials live separately in
+# ~/.claude/usage-secrets.json, so no secrets are written here.
+deploy_usage_scripts() {
+    local template="$HOME/.claude/fetch-claude-usage-template.js"
+    [[ -f "$template" ]] || return 0
+
+    cp "$template" "$HOME/.claude/fetch-claude-usage.js"
+    chmod 755 "$HOME/.claude/fetch-claude-usage.js"
+
+    [[ -f "$SEQUENCE_FILE" ]] || return 0
+    mkdir -p "$BACKUP_DIR/scripts"
+    local num email dst
+    while IFS=$'\t' read -r num email; do
+        [[ -n "$num" ]] || continue
+        dst="$BACKUP_DIR/scripts/.fetch-claude-usage-${num}-${email}.js"
+        cp "$template" "$dst"
+        chmod 755 "$dst"
+    done < <(jq -r '.accounts | to_entries[] | "\(.key)\t\(.value.email)"' "$SEQUENCE_FILE")
 }
 
 # Claude Code process detection (Node.js app)
@@ -407,7 +430,9 @@ cmd_add_account() {
     ' "$SEQUENCE_FILE")
     
     write_json "$SEQUENCE_FILE" "$updated_sequence"
-    
+
+    deploy_usage_scripts
+
     echo "Added Account $account_num: $current_email"
 }
 
@@ -700,7 +725,10 @@ perform_switch() {
     ' "$SEQUENCE_FILE")
     
     write_json "$SEQUENCE_FILE" "$updated_sequence"
-    
+
+    # Keep all usage-fetch scripts deployed (active + per-account backups)
+    deploy_usage_scripts
+
     echo "Switched to Account-$target_account ($target_email)"
     # Display updated account list
     cmd_list

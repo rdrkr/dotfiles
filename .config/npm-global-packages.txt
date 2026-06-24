@@ -1,9 +1,10 @@
+@github/copilot
 @google/gemini-cli
-esbuild
 fastify
 lighthouse
 mcporter
 neovim
-node-pty
+opencode-ai
 pnpm
+rdruker
 tsx

@@ -79,3 +79,10 @@ node_modules/
 /.gemini/config/.migrated
 /.gemini/config/mcp_config.json
 /.gemini/antigravity-ide
+/.claude/usage-secrets.json
+/.claude/.usage-cookies-1.txt
+/.claude/.usage-cookies-2.txt
+/.claude/9L3aYXI6Yp2hzcWhLzlJYxQEuFTocUMJKDx6WToZ.tmp
+/.claude/elxpNFGzSp3KdMaOiG2zFevg4GC0W8cHBZMoK3Mt.tmp
+/.claude/.usage-cache-1.json
+/.claude/.usage-cache-2.json
