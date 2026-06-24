@@ -1,4 +1,3 @@
-cmakelang
 coverage
 datamodel-code-generator
 fastapi
@@ -6,4 +5,3 @@ httpx
 mypy
 pre-commit
 pytest
-translate-toolkit
