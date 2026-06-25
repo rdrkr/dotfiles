@@ -1,7 +1,7 @@
 {
   "LazyVim": { "branch": "main", "commit": "c10948c50b18fae7f256433afdef09e432410480" },
   "LuaSnip": { "branch": "master", "commit": "642b0c595e11608b4c18219e93b88d7637af27bc" },
-  "SchemaStore.nvim": { "branch": "main", "commit": "e3a2fc3862fa750603b7067789cb4b90578bcd07" },
+  "SchemaStore.nvim": { "branch": "main", "commit": "322751401046ae2dbbe32eeb31992a5d4fcc8d92" },
   "android-nvim-plugin": { "branch": "main", "commit": "1b13adb5c0c85027498c068efa05466aa93ea374" },
   "apple-notes.nvim": { "branch": "main", "commit": "e78bf81358be75dd353b7e96125f3d39d42e7fee" },
   "async.nvim": { "branch": "main", "commit": "e2a813be9cd143ab1181de6d8a0720e0230cd86e" },
