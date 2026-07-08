@@ -230,8 +230,7 @@ brew "yamlfmt"
 brew "yazi"
 # Shell extension to navigate your filesystem faster
 brew "zoxide"
-# AeroSpace is an i3-like tiling window manager for macOS
-cask "nikitabobko/tap/aerospace"
+cask "aerospace"
 # Modern macOS menu bar application for managing AeroSpace window manager
 cask "rdrkr/tap/aerospacebar"
 # Enable Windows-like alt-tab
@@ -330,8 +329,7 @@ cask "obs"
 cask "ollama-app"
 # Finds large, unwanted files and deletes them
 cask "omnidisksweeper"
-# Tiling window manager for macOS with Niri-inspired column-based layout
-cask "barutsrb/tap/omniwm"
+cask "omniwm"
 # Utility to uninstall apps and remove leftover files from old/uninstalled apps
 cask "pearcleaner"
 # Home media server
