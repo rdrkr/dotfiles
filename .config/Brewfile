@@ -231,8 +231,7 @@ brew "yazi"
 # Shell extension to navigate your filesystem faster
 brew "zoxide"
 cask "aerospace"
-# Modern macOS menu bar application for managing AeroSpace window manager
-cask "rdrkr/tap/aerospacebar"
+cask "aerospacebar"
 # Enable Windows-like alt-tab
 cask "alt-tab"
 # iOS App Store alternative
@@ -251,16 +250,14 @@ cask "beeper"
 cask "betterdisplay"
 # Compare files and folders
 cask "beyond-compare@4"
-# Browserino is a tiny browser selector for MacOS written in SwiftUI
-cask "alexstrnik/browserino/browserino"
+cask "browserino"
 # OpenAI's official ChatGPT desktop app
 cask "chatgpt"
 # Anthropic's official Claude AI desktop app
 cask "claude"
 # Terminal-based AI coding assistant
 cask "claude-code"
-# Native macOS menu bar app for monitoring Claude AI usage limits
-cask "hamed-elfayome/claude-usage/claude-usage-tracker"
+cask "claude-usage-tracker"
 # Write, edit, and chat about your code with AI
 cask "cursor"
 # Server and cloud storage browser
@@ -281,8 +278,7 @@ cask "font-symbols-only-nerd-font"
 cask "ghostty@tip"
 # Free and open-source image editor
 cask "gimp"
-# A tiling window manager for macOS and Windows
-cask "glzr-io/tap/glazewm"
+cask "glazewm"
 # Tiling window manager with tree layouts
 cask "glide"
 # Web browser
@@ -346,8 +342,7 @@ cask "sf-symbols"
 cask "staruml"
 # Text editor for code, markup and prose
 cask "sublime-text"
-# SwipeAeroSpace is a tool to switch AeroSpace worksapces by swiping.
-cask "mediosz/tap/swipeaerospace"
+cask "swipeaerospace"
 # Remote access and connectivity software focused on security
 cask "teamviewer"
 # Macro remote control
@@ -358,8 +353,7 @@ cask "tuist"
 cask "warp"
 # Video communication and virtual meeting platform
 cask "webex"
-# Cross-platform desktop widgets
-cask "glzr-io/tap/zebar"
+cask "zebar"
 # Video communication and virtual meeting platform
 cask "zoom"
 mas "1Password 7", id: 1333542190
