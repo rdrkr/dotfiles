@@ -325,7 +325,6 @@ cask "obs"
 cask "ollama-app"
 # Finds large, unwanted files and deletes them
 cask "omnidisksweeper"
-cask "omniwm"
 # Utility to uninstall apps and remove leftover files from old/uninstalled apps
 cask "pearcleaner"
 # Home media server
