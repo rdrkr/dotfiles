@@ -39,7 +39,7 @@ brew "cmatrix"
 # Dependency manager for Cocoa projects
 brew "cocoapods"
 # Container runtimes on MacOS (and Linux) with minimal setup
-brew "colima"
+brew "colima", restart_service: :changed
 # Postgres C API library
 brew "libpq"
 # Dependency Manager for PHP
@@ -474,6 +474,7 @@ npm "esbuild"
 npm "fastify"
 npm "homebridge-config-ui-x"
 npm "homebridge-dreo"
+npm "homebridge-smartthings-oauth"
 npm "homebridge"
 npm "lighthouse"
 npm "mcporter"

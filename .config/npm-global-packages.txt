@@ -3,6 +3,7 @@ esbuild
 fastify
 homebridge-config-ui-x
 homebridge-dreo
+homebridge-smartthings-oauth
 homebridge
 lighthouse
 mcporter

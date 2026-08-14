@@ -237,7 +237,7 @@ if [[ -f "/opt/homebrew/bin/brew" ]]; then
     "/opt/homebrew/opt/coreutils/libexec/gnubin"
     "/opt/homebrew/opt/ffmpeg-full/bin"
     "/opt/homebrew/opt/libpq/bin"
-    "/opt/homebrew/opt/node@22/bin"
+    "/opt/homebrew/opt/node@24/bin"
     "/opt/homebrew/opt/openjdk@21/bin"
     "/opt/homebrew/opt/python@3.13/bin"
   )
