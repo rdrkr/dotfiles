@@ -1,6 +1,9 @@
 @google/gemini-cli
 esbuild
 fastify
+homebridge-config-ui-x
+homebridge-dreo
+homebridge
 lighthouse
 mcporter
 neovim
