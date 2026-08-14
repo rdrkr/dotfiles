@@ -40,7 +40,7 @@ brew "cmatrix"
 # Dependency manager for Cocoa projects
 brew "cocoapods"
 # Container runtimes on MacOS (and Linux) with minimal setup
-brew "colima", restart_service: :changed
+brew "colima"
 # Postgres C API library
 brew "libpq"
 # Dependency Manager for PHP
