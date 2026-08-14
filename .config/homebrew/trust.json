@@ -16,5 +16,8 @@
     "steipete/tap",
     "touch-tap/tap",
     "vjeantet/tap"
+  ],
+  "trustedformulae": [
+    "smartthingscommunity/smartthings/smartthings"
   ]
 }

@@ -11,6 +11,7 @@ tap "mocki-toki/formulae"
 tap "nikitabobko/tap"
 tap "oven-sh/bun"
 tap "rdrkr/tap"
+tap "smartthingscommunity/smartthings"
 tap "steipete/tap"
 tap "touch-tap/tap"
 tap "vjeantet/tap"
@@ -39,7 +40,7 @@ brew "cmatrix"
 # Dependency manager for Cocoa projects
 brew "cocoapods"
 # Container runtimes on MacOS (and Linux) with minimal setup
-brew "colima"
+brew "colima", restart_service: :changed
 # Postgres C API library
 brew "libpq"
 # Dependency Manager for PHP
