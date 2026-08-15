@@ -47,6 +47,8 @@ brew "libpq"
 brew "composer"
 # GNU File, Shell, and Text utilities
 brew "coreutils"
+# POP/IMAP/SMTP/Caldav/Carddav/LDAP exchange gateway
+brew "davmail"
 # Pack, ship and run any application as a lightweight container
 brew "docker"
 # Docker CLI plugin for extended build capabilities with BuildKit
