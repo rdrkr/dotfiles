@@ -1,49 +1,19 @@
 {
   "settings": [
     {
-      "domain": "NSGlobalDomain",
-      "key": "AppleKeyboardUIMode",
-      "original_value": null
-    },
-    {
-      "domain": "com.apple.menuextra.clock",
-      "key": "ShowAMPM",
-      "original_value": true
-    },
-    {
-      "domain": "com.apple.screencapture",
-      "key": "type",
-      "original_value": null
-    },
-    {
       "domain": "com.apple.dock",
       "key": "autohide-time-modifier",
       "original_value": null
     },
     {
-      "domain": "NSGlobalDomain",
-      "key": "com.apple.mouse.scaling",
-      "original_value": 3.0
-    },
-    {
-      "domain": "com.apple.finder",
-      "key": "AppleShowAllFiles",
-      "original_value": null
-    },
-    {
-      "domain": "com.apple.finder",
-      "key": "_FXSortFoldersFirst",
+      "domain": "com.apple.spaces",
+      "key": "spans-displays",
       "original_value": false
     },
     {
-      "domain": "com.apple.finder",
-      "key": "CreateDesktop",
-      "original_value": null
-    },
-    {
-      "domain": "NSGlobalDomain",
-      "key": "NSDocumentSaveNewDocumentsToCloud",
-      "original_value": null
+      "domain": "com.apple.dock",
+      "key": "autohide-delay",
+      "original_value": 0.0
     },
     {
       "domain": "com.apple.menuextra.clock",
@@ -56,8 +26,58 @@
       "original_value": null
     },
     {
+      "domain": "NSGlobalDomain",
+      "key": "NSDocumentSaveNewDocumentsToCloud",
+      "original_value": null
+    },
+    {
+      "domain": "NSGlobalDomain",
+      "key": "NSAutomaticInlinePredictionEnabled",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.finder",
+      "key": "_FXSortFoldersFirst",
+      "original_value": false
+    },
+    {
+      "domain": "com.apple.menuextra.clock",
+      "key": "Show24Hour",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.screencapture",
+      "key": "type",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.dock",
+      "key": "orientation",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.finder",
+      "key": "CreateDesktop",
+      "original_value": null
+    },
+    {
+      "domain": "NSGlobalDomain",
+      "key": "AppleKeyboardUIMode",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.dock",
+      "key": "tilesize",
+      "original_value": 47.0
+    },
+    {
       "domain": "com.apple.HIToolbox",
       "key": "AppleFnUsageType",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.menuextra.clock",
+      "key": "FlashDateSeparators",
       "original_value": null
     },
     {
@@ -67,8 +87,13 @@
     },
     {
       "domain": "com.apple.menuextra.clock",
-      "key": "FlashDateSeparators",
-      "original_value": null
+      "key": "ShowAMPM",
+      "original_value": true
+    },
+    {
+      "domain": "NSGlobalDomain",
+      "key": "com.apple.mouse.scaling",
+      "original_value": 3.0
     },
     {
       "domain": "com.apple.screencapture",
@@ -76,37 +101,12 @@
       "original_value": null
     },
     {
-      "domain": "com.apple.dock",
-      "key": "tilesize",
-      "original_value": 47.0
-    },
-    {
-      "domain": "com.apple.dock",
-      "key": "autohide-delay",
-      "original_value": 0.0
-    },
-    {
-      "domain": "NSGlobalDomain",
-      "key": "NSAutomaticInlinePredictionEnabled",
+      "domain": "com.apple.finder",
+      "key": "AppleShowAllFiles",
       "original_value": null
-    },
-    {
-      "domain": "com.apple.dock",
-      "key": "orientation",
-      "original_value": null
-    },
-    {
-      "domain": "com.apple.menuextra.clock",
-      "key": "Show24Hour",
-      "original_value": null
-    },
-    {
-      "domain": "com.apple.spaces",
-      "key": "spans-displays",
-      "original_value": false
     }
   ],
   "exec_run_count": 1,
-  "version": "0.19.7",
+  "version": "0.19.8",
   "digest": "be79ad92310c853cc9fa2b1cf9d91e4f6e0b72bdfb01ec28a29df18e18958b6f"
 }
