@@ -7,7 +7,7 @@
         "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/frontend-design/unknown",
         "version": "unknown",
         "installedAt": "2026-01-31T09:18:47.057Z",
-        "lastUpdated": "2026-03-25T10:15:49.409Z",
+        "lastUpdated": "2026-08-16T07:58:28.838Z",
         "gitCommitSha": "27d2b86d72da27c64585150857cee8472ad47abb"
       }
     ],
@@ -27,7 +27,7 @@
         "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/commit-commands/unknown",
         "version": "unknown",
         "installedAt": "2026-01-31T09:18:47.110Z",
-        "lastUpdated": "2026-03-25T10:15:49.409Z",
+        "lastUpdated": "2026-08-16T07:58:28.839Z",
         "gitCommitSha": "27d2b86d72da27c64585150857cee8472ad47abb"
       }
     ],
@@ -87,7 +87,7 @@
         "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/skill-creator/unknown",
         "version": "unknown",
         "installedAt": "2026-03-06T10:02:33.773Z",
-        "lastUpdated": "2026-03-25T10:15:49.416Z",
+        "lastUpdated": "2026-08-16T07:58:28.842Z",
         "gitCommitSha": "205b6e0b30366a969412d9aab7b99bea99d58db1"
       }
     ],
@@ -134,10 +134,10 @@
     "telegram@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/telegram/0.0.6",
-        "version": "0.0.6",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/telegram/0.0.7",
+        "version": "0.0.7",
         "installedAt": "2026-03-20T08:49:30.757Z",
-        "lastUpdated": "2026-04-15T06:48:35.487Z",
+        "lastUpdated": "2026-08-16T07:58:28.832Z",
         "gitCommitSha": "b664e152af5742dd11b6a6e5d7a65848a8c5a261"
       }
     ]
