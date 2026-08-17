@@ -5,4 +5,3 @@ httpx
 mypy
 pre-commit
 pytest
-websockify
