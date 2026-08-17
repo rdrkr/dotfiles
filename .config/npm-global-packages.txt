@@ -4,6 +4,7 @@ fastify
 homebridge-androidtv-ultimate
 homebridge-config-ui-x
 homebridge-dreo
+homebridge-shortcuts-buttons
 homebridge-smartthings-oauth
 homebridge
 lighthouse
