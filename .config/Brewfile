@@ -17,8 +17,6 @@ tap "touch-tap/tap"
 tap "vjeantet/tap"
 # Cryptography and SSL/TLS Toolkit
 brew "openssl@3"
-# Next-gen compiler infrastructure
-brew "llvm"
 # Code searching, linting, rewriting
 brew "ast-grep"
 # Bourne-Again SHell, a UNIX command interpreter
@@ -111,6 +109,8 @@ brew "lazygit"
 brew "lazysql"
 # Graphical front-end for GCC's coverage testing tool (gcov)
 brew "lcov"
+# Next-gen compiler infrastructure
+brew "llvm"
 # Powerful, lightweight programming language
 brew "lua"
 # Package manager for the Lua programming language
