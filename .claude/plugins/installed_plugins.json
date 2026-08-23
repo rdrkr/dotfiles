@@ -7,7 +7,7 @@
         "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/frontend-design/unknown",
         "version": "unknown",
         "installedAt": "2026-01-31T09:18:47.057Z",
-        "lastUpdated": "2026-08-20T06:12:00.923Z",
+        "lastUpdated": "2026-08-23T14:18:18.584Z",
         "gitCommitSha": "27d2b86d72da27c64585150857cee8472ad47abb"
       }
     ],
@@ -27,7 +27,7 @@
         "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/commit-commands/unknown",
         "version": "unknown",
         "installedAt": "2026-01-31T09:18:47.110Z",
-        "lastUpdated": "2026-08-20T06:12:00.923Z",
+        "lastUpdated": "2026-08-23T14:18:18.587Z",
         "gitCommitSha": "27d2b86d72da27c64585150857cee8472ad47abb"
       }
     ],
@@ -87,7 +87,7 @@
         "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/skill-creator/unknown",
         "version": "unknown",
         "installedAt": "2026-03-06T10:02:33.773Z",
-        "lastUpdated": "2026-08-20T06:12:00.928Z",
+        "lastUpdated": "2026-08-23T14:18:18.598Z",
         "gitCommitSha": "205b6e0b30366a969412d9aab7b99bea99d58db1"
       }
     ],
