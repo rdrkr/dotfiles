@@ -1,0 +1,14 @@
+#!/bin/bash
+
+export BORDER=0xFFebdbb2
+export PURPLE=0xFFb16286
+export GREY=0xFF282828
+export TRANSPARENT=0x00000000
+export WHITE=0xFFfbf1c7
+export BLUE=0xFF458588
+export MAGENTA=0xFFb16286
+export ORANGE=0xFFd65d0e
+export TEMPUS=0xFF1d2021
+export STATUS=0xFF3c3836
+export SPACEBG=0xAA32302f
+export MIDNIGHT=0xFF1d2021

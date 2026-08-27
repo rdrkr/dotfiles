@@ -1,0 +1,12 @@
+{
+  "rules" : "[]",
+  "hiddenBrowsers" : "[\"file:\\\/\\\/\\\/Applications\\\/Hammerspoon.app\\\/\",\"file:\\\/\\\/\\\/Applications\\\/Finicky.app\\\/\"]",
+  "showInMenuBar" : false,
+  "apps" : "[]",
+  "privateArgs" : "{\"com.google.Chrome\":\"\",\"com.apple.Safari\":\"\"}",
+  "ACDMonthlyAnalyticsLastPosted" : 789854635.38055897,
+  "PKFPANInitialEligibilityCheckPerformedKey" : true,
+  "browsers" : "[\"file:\\\/\\\/\\\/System\\\/Volumes\\\/Preboot\\\/Cryptexes\\\/App\\\/System\\\/Applications\\\/Safari.app\\\/\",\"file:\\\/\\\/\\\/Applications\\\/Google%20Chrome.app\\\/\",\"file:\\\/\\\/\\\/Applications\\\/Hammerspoon.app\\\/\",\"file:\\\/\\\/\\\/Applications\\\/Finicky.app\\\/\"]",
+  "directories" : "[{\"directoryPath\":\"\\\/Applications\"}]",
+  "NavPanelFileListModeForOpenMode" : 2
+}

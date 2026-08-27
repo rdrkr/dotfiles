@@ -1,0 +1,373 @@
+tap "alexstrnik/browserino", "https://github.com/AlexStrNik/homebrew-Browserino"
+tap "barutsrb/tap", "https://github.com/BarutSRB/homebrew-tap"
+tap "blacktop/tap"
+tap "felixkratz/formulae", "https://github.com/FelixKratz/homebrew-formulae"
+tap "gentleman-programming/tap", "https://github.com/Gentleman-Programming/homebrew-tap"
+tap "glzr-io/tap"
+tap "hamed-elfayome/claude-usage"
+tap "machlit/tap"
+tap "mediosz/tap"
+tap "mocki-toki/formulae"
+tap "nikitabobko/tap"
+tap "oven-sh/bun"
+tap "rdrkr/tap"
+tap "smartthingscommunity/smartthings"
+tap "steipete/tap"
+tap "touch-tap/tap"
+tap "vjeantet/tap"
+# Cryptography and SSL/TLS Toolkit
+brew "openssl@3"
+# Code searching, linting, rewriting
+brew "ast-grep"
+# Bourne-Again SHell, a UNIX command interpreter
+brew "bash"
+# Programmable completion for Bash 3.2
+brew "bash-completion"
+# Resource monitor. C++ version and continuation of bashtop and bpytop
+brew "btop"
+# Real-time data compression library
+brew "lzo"
+# Multi-shell multi-command argument completer
+brew "carapace"
+# Versatile and fast Unicode/ASCII/ANSI graphics renderer
+brew "chafa"
+# Linter/analyzer for Makefiles
+brew "checkmake"
+# Console Matrix
+brew "cmatrix"
+# Dependency manager for Cocoa projects
+brew "cocoapods"
+# Container runtimes on MacOS (and Linux) with minimal setup
+brew "colima", restart_service: :changed
+# Postgres C API library
+brew "libpq"
+# Dependency Manager for PHP
+brew "composer"
+# GNU File, Shell, and Text utilities
+brew "coreutils"
+# POP/IMAP/SMTP/Caldav/Carddav/LDAP exchange gateway
+brew "davmail"
+# Pack, ship and run any application as a lightweight container
+brew "docker"
+# Docker CLI plugin for extended build capabilities with BuildKit
+brew "docker-buildx"
+# Isolated development environments using Docker
+brew "docker-compose"
+# More intuitive version of du in rust
+brew "dust"
+# Open-source, cross-platform JavaScript runtime environment
+brew "node", link: false
+# AST-based pattern checker for JavaScript
+brew "eslint"
+# Simple, fast and user-friendly alternative to find
+brew "fd"
+# Play, record, convert, and stream many audio and video codecs
+brew "ffmpeg-full"
+# Command-line fuzzy finder written in Go
+brew "fzf"
+# GitHub command-line tool
+brew "gh"
+# Interpreter for PostScript and PDF
+brew "ghostscript"
+# Git extension for versioning large files
+brew "git-lfs"
+# Audit git repos for secrets
+brew "gitleaks"
+# Library for USB device access
+brew "libusb"
+# Stricter gofmt
+brew "gofumpt"
+# Tool to convert a Wallpaper's color scheme / palette
+brew "gowall"
+# Bash and Zsh completion for Gradle
+brew "gradle-completion"
+# Like cURL, but for gRPC
+brew "grpcurl"
+# Tool for glamorous shell scripts
+brew "gum"
+# Easy, fast, and beautiful database client for the terminal
+brew "harlequin"
+# Tools and libraries to manipulate images in select formats
+brew "imagemagick"
+# Tool to set default openers for file formats and url schemes on macOS
+brew "infat"
+# Install and debug iPhone apps from the command-line
+brew "ios-deploy"
+# Update of iperf: measures TCP, UDP, and SCTP bandwidth
+brew "iperf3"
+# Sort Python imports automatically
+brew "isort"
+# Lightweight and flexible command-line JSON processor
+brew "jq"
+# Fast, Dynamic Programming Language
+brew "julia"
+# Lazier way to manage everything docker
+brew "lazydocker"
+# Simple terminal UI for git commands
+brew "lazygit"
+# Cross-platform TUI database management tool
+brew "lazysql"
+# Graphical front-end for GCC's coverage testing tool (gcov)
+brew "lcov"
+# Next-gen compiler infrastructure
+brew "llvm"
+# Powerful, lightweight programming language
+brew "lua"
+# Package manager for the Lua programming language
+brew "luarocks"
+# Generate a markdown TOC (table of contents) with Remarkable
+brew "markdown-toc"
+# Fast, flexible, config-based cli for linting Markdown/CommonMark files
+brew "markdownlint-cli2"
+# Mac App Store command-line interface
+brew "mas"
+# Java-based project management
+brew "maven"
+# CLI for Mermaid library
+brew "mermaid-cli"
+# Polyglot runtime manager (asdf rust clone)
+brew "mise"
+# Simple tool to make locally trusted development certificates
+brew "mkcert"
+# Deep clean and optimize your Mac
+brew "mole"
+# Experimental optional static type checker for Python
+brew "mypy"
+# Fast, highly customisable system info script
+brew "neofetch"
+# Ambitious Vim-fork focused on extensibility and agility
+brew "neovim"
+# Open-source, cross-platform JavaScript runtime environment
+brew "node@22"
+# Open-source, cross-platform JavaScript runtime environment
+brew "node@24"
+# Modern shell for the GitHub era
+brew "nushell"
+# Search tool like grep and The Silver Searcher
+brew "ripgrep"
+# AI coding agent, built for the terminal
+brew "opencode"
+# Development kit for the Java programming language
+brew "openjdk@21"
+# PAM module for reattaching to the user's GUI (Aqua) session
+brew "pam-reattach"
+# Swiss-army knife of markup format conversion
+brew "pandoc"
+# Identify unused code in Swift projects
+brew "periphery"
+# Bash completion for Pip
+brew "pip-completion"
+# Execute binaries from Python packages in isolated environments
+brew "pipx"
+# Python package management tool
+brew "poetry"
+# PDF rendering library (based on the xpdf-3.0 code base)
+brew "poppler"
+# Modern API client that lives in your terminal
+brew "posting"
+# Code formatter for JavaScript, CSS, JSON, GraphQL, Markdown, YAML
+brew "prettier"
+# Interpreted, interactive, object-oriented programming language
+brew "python@3.13"
+# Python interface to Tcl/Tk
+brew "python-tk@3.13"
+# Interpreted, interactive, object-oriented programming language
+brew "python@3.11"
+# Database management TUI for PostgreSQL/MySQL/SQLite
+brew "rainfrog"
+# Your all-in-one OpenAPI utility
+brew "redocly-cli"
+# SVG rendering tool and library
+brew "resvg"
+# Extremely fast Python linter, written in Rust
+brew "ruff"
+# Safe, concurrent, practical language
+brew "rust"
+# Experimental Rust compiler front-end for IDEs
+brew "rust-analyzer"
+# 7-Zip is a file archiver with a high compression ratio
+brew "sevenzip"
+# Git-integrated backup tool for macOS and Linux devs
+brew "shallow-backup"
+# Static analysis and lint tool, for (ba)sh scripts
+brew "shellcheck"
+# Autoformat shell script source code
+brew "shfmt"
+# Add a public key to a remote machine's authorized_keys file
+brew "ssh-copy-id"
+# Cross-shell prompt for astronauts
+brew "starship"
+# Organize software neatly under a single directory tree (e.g. /usr/local)
+brew "stow"
+# Formatting tool for reformatting Swift code
+brew "swiftformat"
+# Tool to enforce Swift style and conventions
+brew "swiftlint"
+# Modernized, complete, self-contained TeX/LaTeX engine
+brew "tectonic"
+# Terminal multiplexer
+brew "tmux"
+# Display directories as trees (with optional color/HTML output)
+brew "tree"
+# Parser generator tool
+brew "tree-sitter-cli"
+# Find and verify credentials
+brew "trufflehog"
+# Language Server Protocol implementation for TypeScript wrapping tsserver
+brew "typescript-language-server"
+# Pretty print math in monospace fonts, using a TeX-like syntax
+brew "utftex"
+# Extremely fast Python package installer and resolver, written in Rust
+brew "uv"
+# Simple terminal image viewer written in Rust
+brew "viu"
+# Generator for LS_COLORS with support for multiple color themes
+brew "vivid"
+# Internet file retriever
+brew "wget"
+# Little beautifier tool for xcodebuild
+brew "xcbeautify"
+# Build server protocol implementation for integrating Xcode with sourcekit-lsp
+brew "xcode-build-server"
+# Generate your Xcode project from a spec file and your folder structure
+brew "xcodegen"
+# Extensible command-line tool to format YAML files
+brew "yamlfmt"
+# Blazing fast terminal file manager written in Rust, based on async I/O
+brew "yazi"
+# Shell extension to navigate your filesystem faster
+brew "zoxide"
+cask "aerospace"
+cask "aerospacebar"
+# Enable Windows-like alt-tab
+cask "alt-tab"
+# iOS App Store alternative
+cask "altserver"
+# Tools for building Android applications
+cask "android-studio"
+# Agent orchestration platform
+cask "antigravity"
+# Terminal interface for Antigravity agents
+cask "antigravity-cli"
+# Universal chat app powered by Matrix
+cask "beeper"
+# Display management tool
+cask "betterdisplay"
+# Compare files and folders
+cask "beyond-compare@4"
+cask "browserino"
+# Terminal-based AI coding assistant
+cask "claude-code"
+cask "claude-usage-tracker"
+# Server and cloud storage browser
+cask "cyberduck"
+# Voice and text chat software
+cask "discord"
+# Client for the Dropbox cloud storage service
+cask "dropbox"
+# Utility for customizing which browser to start
+cask "finicky"
+cask "font-fira-code-nerd-font"
+cask "font-hack-nerd-font"
+cask "font-jetbrains-mono-nerd-font"
+cask "font-sf-pro"
+cask "font-sketchybar-app-font"
+cask "font-symbols-only-nerd-font"
+# Terminal emulator that uses platform-native UI and GPU acceleration
+cask "ghostty@tip"
+# Free and open-source image editor
+cask "gimp"
+# Web browser
+cask "google-chrome"
+# Client for the Google Drive storage service
+cask "google-drive"
+# Desktop automation application
+cask "hammerspoon"
+# Open-source video transcoder
+cask "handbrake-app"
+# Keyboard shortcuts for every button on your screen
+cask "homerow"
+# Free and open-source media player
+cask "iina"
+# Tool to optimise images to a smaller size
+cask "imageoptim"
+# Vector graphics editor
+cask "inkscape"
+# IntelliJ IDEA Early Access Program
+cask "intellij-idea@eap"
+# Download manager
+cask "jdownloader"
+# Menu bar manager
+cask "jordanbaird-ice"
+# Keyboard customiser
+cask "karabiner-elements"
+# Open-source keystroke visualiser
+cask "keycastr"
+# Find and download song lyrics
+cask "lyricsfinder"
+# Mouse utility to add gesture functions and smooth scrolling to 3rd party mice
+cask "mac-mouse-fix"
+# Provides updates to various Microsoft products
+cask "microsoft-auto-update"
+# Multi-platform web browser
+cask "microsoft-edge"
+# Meet, chat, call, and collaborate in just one place
+cask "microsoft-teams"
+# Open-source software for live streaming and screen recording
+cask "obs"
+# Get up and running with large language models locally
+cask "ollama-app"
+# Finds large, unwanted files and deletes them
+cask "omnidisksweeper"
+# Utility to uninstall apps and remove leftover files from old/uninstalled apps
+cask "pearcleaner"
+# Home media server
+cask "plex-media-server"
+# VPN client focusing on security
+cask "protonvpn"
+# Control your tools with a few keystrokes
+cask "raycast"
+# Rust IDE
+cask "rustrover"
+# Tool that provides consistent, highly configurable symbols for apps
+cask "sf-symbols"
+# Software modeller
+cask "staruml"
+# Text editor for code, markup and prose
+cask "sublime-text"
+cask "swipeaerospace"
+# Remote access and connectivity software focused on security
+cask "teamviewer"
+# Macro remote control
+cask "touch-portal"
+# Create, maintain, and interact with Xcode projects at scale
+cask "tuist"
+# Video communication and virtual meeting platform
+cask "webex"
+# Video communication and virtual meeting platform
+cask "zoom"
+mas "1Password 7", id: 1333542190
+mas "Actions", id: 1586435171
+mas "Amphetamine", id: 937984704
+mas "Bandwidth+", id: 490461369
+mas "Cloud Battery", id: 1481005137
+mas "iMovie", id: 408981434
+mas "Infuse", id: 1136220934
+mas "Keynote", id: 361285480
+mas "Mail Signature", id: 1595342317
+mas "Mic Drop", id: 1489816366
+mas "Numbers", id: 361304891
+mas "Pages", id: 361309726
+mas "Slack", id: 803453959
+mas "Tag Editor 2", id: 984278082
+mas "Tailscale", id: 1475387142
+mas "TestFlight", id: 899247664
+mas "The Unarchiver", id: 425424353
+mas "WhatsApp", id: 310633997
+mas "Windows App", id: 1295203466
+mas "Xcode", id: 497799835
+mas "Xmind", id: 1327661892
+go "github.com/golangci/golangci-lint/v2/cmd/golangci-lint"
+go "golang.org/x/tools/gopls"
+go "honnef.co/go/tools/cmd/staticcheck"
+cargo "tmuxpanel"

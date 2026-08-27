@@ -1,0 +1,113 @@
+{
+  "env": {},
+  "permissions": {
+    "allow": [
+      "Bash(command -v:*)",
+      "Bash(curl:*)",
+      "Read(///**)",
+      "Read(//private/tmp/**)",
+      "WebFetch(domain:eslint.org)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:redocly.com)",
+      "WebFetch(domain:strapi.io)",
+      "WebFetch(domain:typescript-eslint.io)",
+      "WebSearch"
+    ],
+    "deny": [],
+    "ask": [],
+    "defaultMode": "plan"
+  },
+  "model": "opus",
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/dotfiles/scripts/notify.sh --title 'Claude Code — Needs Input' --message 'Claude is waiting for your input' --sound Ping --app-icon ~/dotfiles/scripts/icons/claude.png"
+          }
+        ]
+      },
+      {
+        "matcher": "auth_success",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/dotfiles/scripts/notify.sh --title 'Claude Code — Needs Input' --message 'Claude is waiting for your input' --sound Ping --app-icon ~/dotfiles/scripts/icons/claude.png"
+          }
+        ]
+      },
+      {
+        "matcher": "elicitation_dialog",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/dotfiles/scripts/notify.sh --title 'Claude Code — Needs Input' --message 'Claude is waiting for your input' --sound Ping --app-icon ~/dotfiles/scripts/icons/claude.png"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -n \"$TMUX\" ] && tmux rename-window -t \"$TMUX_PANE\" \"Claude\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/dotfiles/scripts/notify.sh --title 'Claude Code — Done' --message 'Claude has finished and is awaiting further instructions' --sound Glass --app-icon ~/dotfiles/scripts/icons/claude.png"
+          },
+          {
+            "type": "command",
+            "command": "[ -n \"$TMUX\" ] && tmux rename-window -t \"$TMUX_PANE\" \"Claude\""
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline-command.js"
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true,
+    "lua-lsp@claude-plugins-official": true,
+    "kotlin-lsp@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": true,
+    "clangd-lsp@claude-plugins-official": true,
+    "chrome-devtools-mcp@chrome-devtools-plugins": true,
+    "telegram@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "chrome-devtools-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "ChromeDevTools/chrome-devtools-mcp"
+      }
+    }
+  },
+  "alwaysThinkingEnabled": true,
+  "effortLevel": "medium",
+  "tui": "fullscreen",
+  "skipDangerousModePermissionPrompt": true,
+  "theme": "dark",
+  "remoteControlAtStartup": true,
+  "agentPushNotifEnabled": true
+}

@@ -1,0 +1,17 @@
+{
+  "theme": "auto",
+  "banner": "never",
+  "trusted_folders": [
+    "/Users/ronendruker/Development/repos/affilibuster"
+  ],
+  "last_logged_in_user": {
+    "host": "https://github.com",
+    "login": "rdrkr"
+  },
+  "logged_in_users": [
+    {
+      "host": "https://github.com",
+      "login": "rdrkr"
+    }
+  ]
+}
