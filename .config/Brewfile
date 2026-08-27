@@ -265,6 +265,8 @@ cask "cyberduck"
 cask "discord"
 # Client for the Dropbox cloud storage service
 cask "dropbox"
+# Matrix collaboration client
+cask "element"
 # Utility for customizing which browser to start
 cask "finicky"
 cask "font-fira-code-nerd-font"
