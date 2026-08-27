@@ -140,7 +140,7 @@ brew "neovim"
 # Open-source, cross-platform JavaScript runtime environment
 brew "node@22"
 # Open-source, cross-platform JavaScript runtime environment
-brew "node@24", link: true
+brew "node@24"
 # Modern shell for the GitHub era
 brew "nushell"
 # Search tool like grep and The Silver Searcher
@@ -371,19 +371,3 @@ go "github.com/golangci/golangci-lint/v2/cmd/golangci-lint"
 go "golang.org/x/tools/gopls"
 go "honnef.co/go/tools/cmd/staticcheck"
 cargo "tmuxpanel"
-npm "@google/gemini-cli"
-npm "corepack"
-npm "esbuild"
-npm "fastify"
-npm "homebridge-androidtv-ultimate"
-npm "homebridge-config-ui-x"
-npm "homebridge-dreo"
-npm "homebridge-shortcuts-buttons"
-npm "homebridge-smartthings-oauth"
-npm "homebridge"
-npm "lighthouse"
-npm "mcporter"
-npm "neovim"
-npm "node-pty"
-npm "pnpm"
-npm "tsx"
