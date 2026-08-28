@@ -344,6 +344,8 @@ cask "teamviewer"
 cask "touch-portal"
 # Create, maintain, and interact with Xcode projects at scale
 cask "tuist"
+# AI image upscaler
+cask "upscayl"
 # Video communication and virtual meeting platform
 cask "webex"
 # Video communication and virtual meeting platform
