@@ -1,0 +1,15 @@
+@google/gemini-cli
+esbuild
+fastify
+homebridge-androidtv-ultimate
+homebridge-config-ui-x
+homebridge-dreo
+homebridge-shortcuts-buttons
+homebridge-smartthings-oauth
+homebridge
+lighthouse
+mcporter
+neovim
+node-pty
+pnpm
+tsx
