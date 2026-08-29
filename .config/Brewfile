@@ -56,7 +56,7 @@ brew "docker-compose"
 # More intuitive version of du in rust
 brew "dust"
 # Open-source, cross-platform JavaScript runtime environment
-brew "node", link: false
+brew "node"
 # AST-based pattern checker for JavaScript
 brew "eslint"
 # Simple, fast and user-friendly alternative to find
@@ -375,3 +375,19 @@ go "github.com/golangci/golangci-lint/v2/cmd/golangci-lint"
 go "golang.org/x/tools/gopls"
 go "honnef.co/go/tools/cmd/staticcheck"
 cargo "tmuxpanel"
+npm "@google/gemini-cli"
+npm "corepack"
+npm "esbuild"
+npm "fastify"
+npm "homebridge-androidtv-ultimate"
+npm "homebridge-config-ui-x"
+npm "homebridge-dreo"
+npm "homebridge-shortcuts-buttons"
+npm "homebridge-smartthings-oauth"
+npm "homebridge"
+npm "lighthouse"
+npm "mcporter"
+npm "neovim"
+npm "node-pty"
+npm "pnpm"
+npm "tsx"
