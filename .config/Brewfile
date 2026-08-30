@@ -338,6 +338,8 @@ cask "staruml"
 # Text editor for code, markup and prose
 cask "sublime-text"
 cask "swipeaerospace"
+# Mesh VPN based on WireGuard
+cask "tailscale-app"
 # Remote access and connectivity software focused on security
 cask "teamviewer"
 # Macro remote control
@@ -364,7 +366,6 @@ mas "Numbers", id: 361304891
 mas "Pages", id: 361309726
 mas "Slack", id: 803453959
 mas "Tag Editor 2", id: 984278082
-mas "Tailscale", id: 1475387142
 mas "TestFlight", id: 899247664
 mas "The Unarchiver", id: 425424353
 mas "WhatsApp", id: 310633997
