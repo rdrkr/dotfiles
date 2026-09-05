@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Mutes the default audio output when the display sleeps and restores it
+         on wake. Must be a per-user Aqua agent: CoreAudio device properties and
+         the display power state both belong to the console GUI session, so a
+         system daemon would be looking at the wrong session. -->
+    <key>Label</key>
+    <string>com.ronendruker.display-sleep-mute</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/ronendruker/.local/bin/display-sleep-mute</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- Long-running watcher: restart it if it ever dies. -->
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <key>StandardOutPath</key>
+    <string>/Users/ronendruker/Library/Logs/display-sleep-mute.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/ronendruker/Library/Logs/display-sleep-mute.log</string>
+</dict>
+</plist>
