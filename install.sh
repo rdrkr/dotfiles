@@ -736,6 +736,158 @@ setup_openssh_server() {
   fi
 }
 
+# --- Display sleep muter (macOS) ---
+# Builds and loads the LaunchAgent that mutes the default audio output while the
+# screens are off. scripts/install-display-sleep-mute.sh is itself idempotent -
+# it rebuilds the binary and re-bootstraps the agent - so this only has to guard
+# on the toolchain being present.
+setup_display_sleep_mute() {
+  print_header "Setting up display-sleep muter..."
+
+  local installer="${SCRIPT_DIR}/scripts/install-display-sleep-mute.sh"
+  if [ ! -x "$installer" ]; then
+    print_warning "$installer not found. Skipping."
+    return 0
+  fi
+
+  if ! command -v swiftc &>/dev/null; then
+    print_warning "swiftc not found (install Xcode or the Command Line Tools). Skipping."
+    return 0
+  fi
+
+  run_command "$installer"
+  print_success "Display-sleep muter installed and loaded."
+}
+
+# --- Switchboard (macOS) ---
+# Brings up the self-hosted work-comms stack from the switchboard repo: Synapse
+# in colima, the Teams bridge, DavMail, the two re-login watchers, and the
+# tailscale serve rules that publish them.
+#
+# The one thing that cannot be automated is switchboard's .env - it holds the
+# identity block and the secrets that Matrix and DavMail are keyed to, so it is
+# in no repo and travels by password manager. Without it every rendered config
+# and plist is missing, so this warns and returns rather than half-building a
+# stack that looks installed.
+setup_switchboard() {
+  print_header "Setting up switchboard (matrix, teams, davmail, tailscale)..."
+
+  local dir="${HOME}/Development/repos/switchboard"
+
+  # 1. The checkout itself.
+  if [ ! -d "$dir/.git" ]; then
+    run_command "mkdir -p '$(dirname "$dir")'"
+    run_command "git clone https://github.com/rdrkr/switchboard.git '$dir'"
+    print_success "switchboard cloned to $dir."
+  fi
+  if [ ! -d "$dir" ] && [ "$DRY_RUN" = true ]; then
+    print_warning "[DRY RUN] switchboard not present; skipping the rest of its setup."
+    return 0
+  fi
+
+  # 2. Prerequisites the repo's own quick start lists. Homebrew is authoritative
+  #    for the Brewfile, but go and gettext are dependencies of other formulae
+  #    there and so never make it into a `brew bundle dump`.
+  local missing=()
+  local tool
+  for tool in colima docker docker-compose gettext go python3 shellcheck; do
+    command -v "$tool" &>/dev/null || missing+=("$tool")
+  done
+  if [ ${#missing[@]} -gt 0 ]; then
+    if command -v brew &>/dev/null; then
+      run_command "brew install ${missing[*]}"
+      print_success "Installed switchboard prerequisites: ${missing[*]}."
+    else
+      print_warning "Missing ${missing[*]} and no brew to install them. Skipping switchboard."
+      return 0
+    fi
+  fi
+
+  # 3. Secrets. Everything downstream is rendered from this file.
+  if [ ! -f "$dir/.env" ]; then
+    print_warning "$dir/.env is missing - it is the one file that travels by hand."
+    print_warning "Restore it from your password manager, then re-run: ./install.sh restore"
+    return 0
+  fi
+
+  # 4. Render every config and launchd plist from .env. Safe to re-run: it
+  #    rewrites the rendered files and generates only what is still blank.
+  run_command "make -C '$dir' bootstrap"
+
+  # 5. The Teams bridge binary is gitignored, so a fresh checkout has none.
+  if [ ! -x "$dir/bridge/mautrix-teams" ]; then
+    run_command "make -C '$dir' build-bridge"
+    print_success "Teams bridge built."
+  fi
+
+  # 6. Synapse and its Postgres run in colima's docker.
+  if command -v colima &>/dev/null; then
+    if ! colima status &>/dev/null; then
+      run_command "colima start --cpu 2 --memory 4 --disk 30"
+      print_success "colima started."
+    fi
+    run_command "docker compose -f '$dir/matrix/compose.yaml' up -d"
+  fi
+
+  # 7. The serve rules live only in tailscaled's state and are lost with it, so
+  #    re-applying them is the point of the script rather than a no-op.
+  local ts="/usr/local/bin/tailscale"
+  [ -x "$ts" ] || ts="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
+  if [ ! -x "$ts" ]; then
+    print_warning "Tailscale not installed. Skipping serve rules (brew install --cask tailscale-app)."
+  elif ! "$ts" status &>/dev/null; then
+    print_warning "Tailscale is not logged in. Run 'tailscale up', then: sh $dir/scripts/tailscale-serve.sh"
+  else
+    run_command "sh '$dir/scripts/tailscale-serve.sh'"
+    print_success "Tailscale serve rules applied."
+  fi
+
+  # 8. The four launchd agents. install-agents.sh boots each one out first, so
+  #    this picks up plist changes instead of silently keeping the old ones.
+  run_command "make -C '$dir' install-agents"
+  print_success "Switchboard agents loaded. 'make -C $dir status' shows what they are doing."
+
+  # Sign-ins are device-code flows that need a phone, so they stay manual.
+  print_warning "If a service reports signed out, sign in once:"
+  print_warning "  python3 $dir/matrix/tools/bridge-cmd.py 'login device_code'   # Teams"
+  print_warning "  python3 $dir/davmail/imap-login.py                            # DavMail"
+}
+
+# --- Homebridge (macOS) ---
+# The homebridge packages themselves come from npm-global-packages.txt earlier in
+# restore; what that cannot do is register the service. hb-service writes a root
+# LaunchDaemon, so this is the one part of restore that needs sudo, and it only
+# asks when the daemon is actually absent.
+setup_homebridge() {
+  print_header "Setting up Homebridge..."
+
+  if ! command -v hb-service &>/dev/null; then
+    print_warning "hb-service not found (npm i -g homebridge homebridge-config-ui-x). Skipping."
+    return 0
+  fi
+
+  local daemon="/Library/LaunchDaemons/com.homebridge.server.plist"
+  if [ -f "$daemon" ]; then
+    print_success "Homebridge service already installed."
+    # Present but not loaded happens after a restore that copied the plist in.
+    if ! launchctl print "system/com.homebridge.server" &>/dev/null; then
+      print_warning "Service is not loaded; loading it (needs sudo)."
+      run_command "sudo launchctl bootstrap system '$daemon'"
+    fi
+  else
+    print_warning "Installing the Homebridge service - this needs sudo."
+    run_command "sudo hb-service install --user '$USER'"
+    print_success "Homebridge service installed."
+  fi
+
+  # config.json carries the HomeKit pairing and every plugin's tokens, so it is
+  # not in any repo; without it Homebridge starts onto an empty setup wizard.
+  if [ ! -f "${HOME}/.homebridge/config.json" ]; then
+    print_warning "${HOME}/.homebridge/config.json is missing - restore it from a Homebridge backup"
+    print_warning "(the UI's Backup/Restore tab, or ~/.homebridge/backups) and restart the service."
+  fi
+}
+
 # --- Restore ---
 # Restores dotfiles and installs all dependencies for the detected platform.
 restore() {
@@ -880,6 +1032,15 @@ restore() {
     else
       print_warning "scripts/Nvim.app not found. Skipping."
     fi
+  fi
+
+  # 6b. macOS-only services. Each of these is idempotent and bows out with a
+  #     warning when a prerequisite - or a secret it has no way to generate - is
+  #     missing, so restore stays runnable on a machine that has neither.
+  if [ "$OS_TYPE" = "macos" ]; then
+    setup_display_sleep_mute
+    setup_switchboard
+    setup_homebridge
   fi
 
   # 7. Initialize pre-commit
