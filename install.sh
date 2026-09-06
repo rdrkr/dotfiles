@@ -888,6 +888,114 @@ setup_homebridge() {
   fi
 }
 
+# --- Media apps (macOS) ---
+# Jellyfin serves the library and Remux is the client for it; switchboard's
+# tailscale-serve.sh publishes both over the tailnet with TLS. Neither is a
+# launchd job - Jellyfin is a menu-bar app started as a login item and Remux is
+# launched by hand - so all this has to do is install them and make sure
+# Jellyfin comes back after a reboot.
+setup_media_apps() {
+  print_header "Setting up media apps (Jellyfin, Remux)..."
+
+  if [ -d "/Applications/Jellyfin.app" ]; then
+    print_success "Jellyfin already installed."
+  elif command -v brew &>/dev/null; then
+    run_command "brew install --cask jellyfin"
+    print_success "Jellyfin installed."
+  else
+    print_warning "Jellyfin is missing and brew is not available. Skipping."
+  fi
+
+  setup_jellyfin_login_item
+  install_remux
+}
+
+# --- Jellyfin login item (macOS) ---
+# Jellyfin's cask is a menu-bar app, not a service, so nothing starts it on
+# boot. A login item is the app's own idiom; a LaunchAgent would supervise the
+# wrapper rather than the server and duplicate what the app already does.
+setup_jellyfin_login_item() {
+  if [ ! -d "/Applications/Jellyfin.app" ]; then
+    return 0
+  fi
+
+  local items
+  items=$(osascript -e 'tell application "System Events" to get the name of every login item' 2>/dev/null)
+  case "$items" in
+  *Jellyfin*)
+    print_success "Jellyfin is already a login item."
+    return 0
+    ;;
+  esac
+
+  # System Events needs Automation permission; macOS prompts for it the first
+  # time this runs, and denying it only costs the login item.
+  run_command "osascript -e 'tell application \"System Events\" to make login item at end with properties {path:\"/Applications/Jellyfin.app\", hidden:false}'"
+  print_success "Jellyfin registered as a login item."
+}
+
+# --- Remux (macOS) ---
+# Remux is in no package manager, so this takes the DMG straight from the
+# GitHub release for this Mac's architecture. Only ever installs when the app
+# is absent: upgrades are Remux's own business, and silently replacing a
+# running app from a restore would be a surprise.
+install_remux() {
+  if [ -d "/Applications/Remux.app" ]; then
+    print_success "Remux already installed."
+    return 0
+  fi
+
+  local arch
+  case "$(uname -m)" in
+  arm64) arch="aarch64" ;;
+  x86_64) arch="x86_64" ;;
+  *)
+    print_warning "Unknown architecture $(uname -m). Skipping Remux."
+    return 0
+    ;;
+  esac
+
+  local asset="remux-desktop-macos-${arch}.dmg"
+  local url
+  url=$(curl -fsSL https://api.github.com/repos/lostb1t/remux/releases/latest 2>/dev/null |
+    grep -o "https://[^\"]*${asset}" | head -1)
+  if [ -z "$url" ]; then
+    print_warning "Could not find ${asset} in the latest Remux release. Skipping."
+    print_warning "Install it by hand from https://github.com/lostb1t/remux/releases"
+    return 0
+  fi
+
+  if [ "$DRY_RUN" = true ]; then
+    print_warning "[DRY RUN] Would install Remux from $url"
+    return 0
+  fi
+
+  local tmp
+  tmp=$(mktemp -d)
+  # The mount point is explicit so the volume name in the DMG cannot change
+  # where this looks, and so detaching cannot pick the wrong volume.
+  local mnt="${tmp}/mnt"
+  mkdir -p "$mnt"
+  if ! curl -fsSL "$url" -o "${tmp}/remux.dmg"; then
+    print_error "Downloading Remux failed."
+    rm -rf "$tmp"
+    return 0
+  fi
+  if ! hdiutil attach -nobrowse -readonly -quiet -mountpoint "$mnt" "${tmp}/remux.dmg"; then
+    print_error "Mounting the Remux disk image failed."
+    rm -rf "$tmp"
+    return 0
+  fi
+  if [ -d "${mnt}/Remux.app" ]; then
+    cp -R "${mnt}/Remux.app" /Applications/
+    print_success "Remux installed to /Applications."
+  else
+    print_error "Remux.app not found inside the disk image."
+  fi
+  hdiutil detach -quiet "$mnt" || true
+  rm -rf "$tmp"
+}
+
 # --- Restore ---
 # Restores dotfiles and installs all dependencies for the detected platform.
 restore() {
@@ -1041,6 +1149,7 @@ restore() {
     setup_display_sleep_mute
     setup_switchboard
     setup_homebridge
+    setup_media_apps
   fi
 
   # 7. Initialize pre-commit
