@@ -15,6 +15,7 @@ esac
 
 # homebrew (macOS Apple Silicon, macOS Intel, or Linuxbrew)
 export HOMEBREW_NO_REQUIRE_TAP_TRUST=1
+export HOMEBREW_CURLRC=1
 
 if [[ -f "/opt/homebrew/bin/brew" ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -213,7 +214,19 @@ alias v='nvim'
 alias lg='lazygit'
 alias ld='lazydocker'
 alias c='clear'
-alias ua='npx tsx ~/dotfiles/scripts/run-tasks/run-tasks.ts ~/dotfiles/scripts/run-tasks/update-${_OS}.yaml'
+# update all: prompt for sudo up front on Linux (the parallel task runner ignores
+# child stdin, so an interactive sudo prompt inside a task would hang forever), then
+# keep the sudo timestamp fresh in the background until the run finishes.
+ua() {
+  local _sudo_keepalive=
+  if [[ "$_OS" == "linux" ]]; then
+    sudo -v || return 1
+    ( while true; do sudo -n true; sleep 60; kill -0 "$$" 2>/dev/null || exit; done ) &>/dev/null &
+    _sudo_keepalive=$!
+    trap '[[ -n "$_sudo_keepalive" ]] && kill "$_sudo_keepalive" 2>/dev/null' INT TERM EXIT
+  fi
+  npx tsx ~/dotfiles/scripts/run-tasks/run-tasks.ts ~/dotfiles/scripts/run-tasks/update-${_OS}.yaml
+}
 
 ## claude code aliases
 alias cc='claude --dangerously-skip-permissions'
@@ -237,7 +250,7 @@ if [[ -f "/opt/homebrew/bin/brew" ]]; then
     "/opt/homebrew/opt/coreutils/libexec/gnubin"
     "/opt/homebrew/opt/ffmpeg-full/bin"
     "/opt/homebrew/opt/libpq/bin"
-    "/opt/homebrew/opt/node@24/bin"
+    "/opt/homebrew/opt/node@22/bin"
     "/opt/homebrew/opt/openjdk@21/bin"
     "/opt/homebrew/opt/python@3.13/bin"
   )

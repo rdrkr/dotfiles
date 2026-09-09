@@ -33,6 +33,15 @@
         {
             "command": 
             {
+                "action": "newTab",
+                "profile": "Nushell"
+            },
+            "id": "User.newTab.B1939205",
+            "name": "Open Nushell in new tab"
+        },
+        {
+            "command": 
+            {
                 "action": "newWindow",
                 "profile": "{3dfde28d-1fb7-4441-a1f1-877db1b2390c}"
             },
@@ -60,19 +69,19 @@
         {
             "command": 
             {
+                "action": "newWindow",
+                "profile": "{0bc1d5d8-b69e-531c-9d55-7588894835da}"
+            },
+            "id": "User.newWindow.2950570F"
+        },
+        {
+            "command": 
+            {
                 "action": "newTab",
                 "profile": "PowerShell"
             },
             "id": "User.newTab.B1939203",
             "name": "Open PowerShell in new tab"
-        },
-        {
-            "command": 
-            {
-                "action": "newWindow",
-                "profile": "{0bc1d5d8-b69e-531c-9d55-7588894835da}"
-            },
-            "id": "User.newWindow.2950570F"
         },
         {
             "command": 
@@ -138,41 +147,46 @@
             "name": "Open Command Prompt in new tab"
         },
         {
-            "command": 
-            {
-                "action": "newTab",
-                "profile": "Nushell"
-            },
-            "id": "User.newTab.B1939205",
-            "name": "Open Nushell in new tab"
-        },
-        {
-            "command": 
+            "command":
             {
                 "action": "newTab",
                 "profile": "{3dfde28d-1fb7-4441-a1f1-877db1b2390c}"
             },
             "id": "User.newTab.B1939206",
             "name": "Open EU-POC-J3PHFK4 (Ubuntu-24.04) in new tab"
+        },
+        {
+            "command":
+            {
+                "action": "sendInput",
+                "input": "\u0001n"
+            },
+            "id": "User.muxNextWindow",
+            "name": "psmux/tmux: next window"
+        },
+        {
+            "command":
+            {
+                "action": "sendInput",
+                "input": "\u0001p"
+            },
+            "id": "User.muxPreviousWindow",
+            "name": "psmux/tmux: previous window"
         }
     ],
-    "alwaysShowTabs": true,
+    "alwaysShowTabs": false,
     "copyFormatting": "none",
     "copyOnSelect": true,
     "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
     "keybindings": 
     [
         {
-            "id": "Terminal.PasteFromClipboard",
-            "keys": "ctrl+v"
-        },
-        {
             "id": "Terminal.FindText",
             "keys": "ctrl+shift+f"
         },
         {
-            "id": null,
-            "keys": "alt+right"
+            "id": "Terminal.PasteFromClipboard",
+            "keys": "ctrl+v"
         },
         {
             "id": "Terminal.CopyToClipboard",
@@ -213,8 +227,17 @@
         {
             "id": "User.newWindow.5DEADB52",
             "keys": "ctrl+alt+shift+n"
+        },
+        {
+            "id": "User.muxNextWindow",
+            "keys": "ctrl+tab"
+        },
+        {
+            "id": "User.muxPreviousWindow",
+            "keys": "ctrl+shift+tab"
         }
     ],
+    "launchMode": "focus",
     "newTabMenu": 
     [
         {
@@ -327,6 +350,18 @@
                 "hidden": true,
                 "name": "Visual Studio Debug Console",
                 "source": "VSDebugConsole"
+            },
+            {
+                "guid": "{3397d317-0037-54de-8e84-3e56aa3ceae9}",
+                "hidden": false,
+                "name": "Developer Command Prompt for VS 18",
+                "source": "Windows.Terminal.VisualStudio"
+            },
+            {
+                "guid": "{3a25041a-a15f-5d43-b1c6-dedf445a6802}",
+                "hidden": false,
+                "name": "Developer PowerShell for VS 18",
+                "source": "Windows.Terminal.VisualStudio"
             }
         ]
     },

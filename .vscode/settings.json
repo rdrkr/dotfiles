@@ -1,0 +1,6 @@
+{
+    "json.schemaDownload.trustedDomains": {
+        "https://aka.ms": true,
+        "https://raw.githubusercontent.com": true
+    }
+}

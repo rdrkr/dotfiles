@@ -118,7 +118,7 @@
   ],
   "floating_applications": [
     {
-      "id": "(?i)mail|contacts|facetime|quicktime|finder|ollama|calendar|activity|gpt|chatgpt|preview|photos|podcasts|perplexity|store|java|passwords|pearcleaner|reminders|sf symbols|teamviewer",
+      "id": "(?i)mail|contacts|facetime|quicktime|finder|ollama|calendar|activity|gpt|chatgpt|preview|photos|podcasts|perplexity|store|java|passwords|pearcleaner|reminders|sf symbols|teamviewer|vlc",
       "kind": "Exe",
       "matching_strategy": "Regex"
     },
@@ -140,7 +140,7 @@
   ],
   "ignore_rules": [
     {
-      "id": "(?i)vlc|helper",
+      "id": "(?i)helper",
       "kind": "Exe",
       "matching_strategy": "Regex"
     }

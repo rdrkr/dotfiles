@@ -2230,12 +2230,20 @@ function Invoke-Backup {
     Print-Header "Backing up Global NPM Packages..."
     if (Get-Command npm -ErrorAction SilentlyContinue) {
         if (-not $DryRun) {
-            $npmPackages = npm list -g --depth=0 --parseable 2>$null |
-            ForEach-Object {
-                if ($_ -match 'node_modules[\\/](.+)$') {
-                    $matches[1] -replace '\\', '/'
+            # Use --json to reliably distinguish real registry packages from
+            # locally-linked directories (e.g. junctions created by dotfiles
+            # setup). Real packages have a "version" field; file-linked entries
+            # only have "resolved": "file:..." and no version.
+            $jsonOutput = npm list -g --depth=0 --json 2>$null | Out-String
+            $parsed = $jsonOutput | ConvertFrom-Json
+            $npmPackages = @()
+            if ($parsed.dependencies) {
+                foreach ($prop in $parsed.dependencies.PSObject.Properties) {
+                    if ($prop.Name -in @("npm", "corepack")) { continue }
+                    if (-not $prop.Value.version) { continue }
+                    $npmPackages += $prop.Name
                 }
-            } | Where-Object { $_ -notin @("npm", "corepack") }
+            }
             $npmPackages | Out-File -FilePath $NpmGlobalFile -Encoding utf8
             Print-Success "Global npm packages backed up to $NpmGlobalFile."
         }

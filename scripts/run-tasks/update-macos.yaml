@@ -28,7 +28,7 @@ groups:
         args:
           [
             -c,
-            'pkgs=$(grep -v "^#" ~/dotfiles/.config/npm-global-packages.txt | xargs); if [ -n "$pkgs" ]; then npm install -g $pkgs; fi',
+            'pkgs=$(grep -v "^#" ~/dotfiles/.config/npm-global-packages.txt | xargs); if [ -n "$pkgs" ]; then npm install -g --allow-scripts=$pkgs; fi',
           ]
         verbose: true
 

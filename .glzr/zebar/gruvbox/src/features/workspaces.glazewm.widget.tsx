@@ -33,7 +33,11 @@ export function WorkspacesGlazewmWidget() {
   };
 
   const focusWorkspace = async (workspaceIndex: number) => {
-    await shellExec(`komorebic focus-workspace ${workspaceIndex}`);
+    try {
+      await shellExec("komorebic", ["focus-workspace", workspaceIndex.toString()]);
+    } catch (e) {
+      console.error("[WorkspacesWidget] focus-workspace failed:", e);
+    }
   };
 
   return (

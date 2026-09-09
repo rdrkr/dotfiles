@@ -9,7 +9,12 @@ groups:
     tasks:
       - title: Upgrading winget packages
         command: powershell
-        args: [-NoProfile, -Command, "winget upgrade --all --include-unknown --accept-package-agreements --accept-source-agreements"]
+        args:
+          [
+            -NoProfile,
+            -Command,
+            "winget upgrade --all --include-unknown --accept-package-agreements --accept-source-agreements",
+          ]
         verbose: true
 
   - title: Updating scoop packages
@@ -26,7 +31,12 @@ groups:
     tasks:
       - title: Upgrading global npm packages
         command: powershell
-        args: [-NoProfile, -Command, "$pkgs = Get-Content ~/dotfiles/.config/npm-global-packages.txt | Select-String -Pattern '^\\s*(#|$)' -NotMatch | Select-Object -ExpandProperty Line; if ($pkgs) { npm install -g $pkgs }"]
+        args:
+          [
+            -NoProfile,
+            -Command,
+            "$pkgs = Get-Content ~/dotfiles/.config/npm-global-packages.txt | Select-String -Pattern '^\\s*(#|$)' -NotMatch | Select-Object -ExpandProperty Line; if ($pkgs) { npm install -g $pkgs --dangerously-allow-all-scripts }",
+          ]
         verbose: true
 
   - title: Updating pipx packages
