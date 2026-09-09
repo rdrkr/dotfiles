@@ -45,7 +45,11 @@ readonly SCRIPT_NAME="$(basename "$0")"
 readonly SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 readonly DEFAULT_TITLE="Notification"
 readonly DEFAULT_SOUND="default"
-readonly DEFAULT_TIMEOUT="0"
+# alerter blocks until the notification is answered, so a notification nobody
+# clicks pins a Cocoa process for as long as the machine is up - six of them were
+# holding 566 MB, the oldest at 188 MB after under four hours. A default timeout
+# bounds that. 0 restores the old wait-forever behaviour.
+readonly DEFAULT_TIMEOUT="300"
 
 # OS Detection
 OS="$(uname -s)"
@@ -568,6 +572,38 @@ build_subtitle() {
 # Notification dispatch
 # =============================================================================
 
+## notify_state_dir - Directory holding one pidfile per notification group.
+## Echoes the path; creates it if needed.
+notify_state_dir() {
+  local dir="${TMPDIR:-/tmp}/notify-sh-$(id -u)"
+  mkdir -p "$dir" 2>/dev/null || true
+  printf '%s' "$dir"
+}
+
+## retire_previous_worker - Stop the worker still blocked on this group's
+## previous notification, and clear that notification.
+## Without this, every notification in a pane leaves its own resident alerter:
+## the banner is replaced but the process behind it keeps waiting forever.
+## Kills the worker's children first - the alerter it is blocked on - then the
+## worker itself, then records this worker as the group's current one.
+retire_previous_worker() {
+  local group="$1" alerter_bin="$2"
+  [ -n "$group" ] || return 0
+  local key file old
+  key=$(printf '%s' "$group" | tr -c 'A-Za-z0-9_.-' '_')
+  file="$(notify_state_dir)/${key}.pid"
+  if [ -f "$file" ]; then
+    old=$(cat "$file" 2>/dev/null || true)
+    if [ -n "$old" ] && [ "$old" != "$$" ] && kill -0 "$old" 2>/dev/null; then
+      pkill -P "$old" 2>/dev/null || true
+      kill "$old" 2>/dev/null || true
+    fi
+  fi
+  [ -n "$alerter_bin" ] && [ -x "$alerter_bin" ] &&
+    "$alerter_bin" --remove "$group" >/dev/null 2>&1 || true
+  printf '%s' "$$" >"$file" 2>/dev/null || true
+}
+
 ## run_alerter_worker - Background worker entry point. Invoked via
 ## __worker to run alerter (which blocks until the user interacts with the
 ## notification). When the user clicks the "Open" action, executes the
@@ -584,8 +620,12 @@ run_alerter_worker() {
   # Use provided group or generate a unique one if in tmux (for auto-dismissal)
   local group="${_NOTIFY_GROUP:-}"
   if [ -z "$group" ] && [ -n "${_NOTIFY_TMUX_PANE:-}" ]; then
-    group="notify-pane-${_NOTIFY_TMUX_PANE//%/_}-$$"
+    # Stable per pane, deliberately without $$: the group is what lets a new
+    # notification replace the pane's previous one rather than stack on it.
+    group="notify-pane-${_NOTIFY_TMUX_PANE//%/_}"
   fi
+
+  retire_previous_worker "$group" "$alerter_bin"
 
   # Rebuild alerter args from individual env vars
   local -a args=(--title "${_NOTIFY_TITLE:-}" --message "${_NOTIFY_MESSAGE:-}")
