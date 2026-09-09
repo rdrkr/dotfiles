@@ -96,7 +96,7 @@ function App() {
     }, 2000);
   });
   return (
-    <ProvidersProvider WmType="glazewm">
+    <ProvidersProvider WmType="komorebi">
       <div class="h-full grid grid-cols-3 px-[16px] items-end">
         <LeftGroup />
         <CenterGroup />

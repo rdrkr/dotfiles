@@ -12,7 +12,7 @@ groups:
         args:
           [
             -c,
-            'if command -v apt-get >/dev/null; then sudo apt-get update && sudo apt-get upgrade -y; elif command -v dnf >/dev/null; then sudo dnf upgrade -y; elif command -v pacman >/dev/null; then sudo pacman -Syu --noconfirm; elif command -v zypper >/dev/null; then sudo zypper update -y; else echo "No supported package manager found"; exit 1; fi',
+            'if ! sudo -n true 2>/dev/null; then echo "Skipping system packages: passwordless sudo unavailable. Run \"sudo -v\" in your terminal before \"ua\", or update manually with sudo."; exit 0; fi; if command -v apt-get >/dev/null; then sudo apt-get update && sudo env DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get upgrade -y -o Dpkg::Options::=--force-confold; elif command -v dnf >/dev/null; then sudo dnf upgrade -y; elif command -v pacman >/dev/null; then sudo pacman -Syu --noconfirm; elif command -v zypper >/dev/null; then sudo zypper update -y; else echo "No supported package manager found"; exit 1; fi',
           ]
         verbose: true
 
@@ -48,7 +48,7 @@ groups:
         args:
           [
             -c,
-            'pkgs=$(grep -v "^#" ~/dotfiles/.config/npm-global-packages.txt | xargs); if [ -n "$pkgs" ]; then npm install -g $pkgs; fi',
+            'f=~/dotfiles/.config/npm-global-packages.txt; if [ ! -f "$f" ]; then echo "npm package list not found: $f"; exit 1; fi; pkgs=$(grep -vE "^[[:space:]]*(#|$)" "$f" | tr -d "\r"); if [ -z "$(echo $pkgs)" ]; then echo "no npm packages to install in $f"; exit 0; fi; npm install -g $pkgs --dangerously-allow-all-scripts',
           ]
         verbose: true
 

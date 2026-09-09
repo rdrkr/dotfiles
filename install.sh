@@ -268,9 +268,9 @@ run_stow() {
           local dest
           dest="$(readlink "$link")"
           case "$dest" in
-          dotfiles/* | ../dotfiles/* | */dotfiles/*)
-            rm -f "$link"
-            ;;
+            dotfiles/*|../dotfiles/*|*/dotfiles/*)
+              rm -f "$link"
+              ;;
           esac
         done
       done
@@ -468,8 +468,8 @@ install_linuxbrew() {
   if ! command -v brew &>/dev/null; then
     # Linuxbrew requires build-essential/gcc and curl
     case "$PKG_MANAGER" in
-    apt) run_command "sudo apt-get install -y build-essential curl" ;;
-    dnf) run_command "sudo dnf groupinstall -y 'Development Tools' && sudo dnf install -y curl" ;;
+    apt)    run_command "sudo apt-get install -y build-essential curl" ;;
+    dnf)    run_command "sudo dnf groupinstall -y 'Development Tools' && sudo dnf install -y curl" ;;
     pacman) run_command "sudo pacman -S --noconfirm --needed base-devel curl" ;;
     zypper) run_command "sudo zypper install -y -t pattern devel_basis && sudo zypper install -y curl" ;;
     esac
@@ -596,8 +596,8 @@ install_nix() {
       name="$(basename "$flake_dir")"
       if [ "$DRY_RUN" = false ]; then
         print_warning "Locking flake: $name"
-        nix flake lock "$flake_dir" 2>/dev/null &&
-          print_success "Flake $name locked." ||
+        nix flake lock "$flake_dir" 2>/dev/null && \
+          print_success "Flake $name locked." || \
           print_warning "Failed to lock flake $name (will lock on first use)."
       else
         print_warning "[DRY RUN] Would lock flake: $name"
@@ -618,9 +618,9 @@ install_nix() {
 # Returns the platform-specific Qt Creator config directory.
 qtcreator_local_dir() {
   case "$OS_TYPE" in
-  macos) echo "${HOME}/Library/Application Support/QtProject/qtcreator" ;;
-  linux) echo "${HOME}/.config/QtProject/qtcreator" ;;
-  *) echo "" ;;
+  macos)  echo "${HOME}/Library/Application Support/QtProject/qtcreator" ;;
+  linux)  echo "${HOME}/.config/QtProject/qtcreator" ;;
+  *)      echo "" ;;
   esac
 }
 
@@ -1184,7 +1184,16 @@ backup() {
   print_header "Backing up Global NPM Packages..."
   if command -v npm &>/dev/null; then
     if [ "$DRY_RUN" = false ]; then
-      npm list -g --depth=0 --parseable --silent | sed -n 's|.*/node_modules/||p' | grep -vE '^(npm|corepack)$' >"$NPM_GLOBAL_FILE"
+      # Use --json to reliably distinguish real registry packages from
+      # locally-linked directories (e.g. junctions/symlinks from dotfiles
+      # setup). Real packages have a "version" field; file-linked entries
+      # only have "resolved": "file:..." and no version.
+      npm list -g --depth=0 --json --silent 2>/dev/null \
+        | node -e "
+            const j = JSON.parse(require('fs').readFileSync(0,'utf8'));
+            Object.entries(j.dependencies||{}).forEach(([n,v]) => {
+              if (n !== 'npm' && n !== 'corepack' && v.version) console.log(n);
+            });" >"$NPM_GLOBAL_FILE"
       print_success "Global npm packages backed up to $NPM_GLOBAL_FILE."
     else
       print_warning "[DRY RUN] Would backup global npm packages to $NPM_GLOBAL_FILE"

@@ -13,6 +13,7 @@ node_modules/
 .config/lazygit/state.yml
 .config/nushell/history.txt
 .config/raycast/
+.config/raycast-x/
 
 .homebridge/backups/instance-backups/
 
@@ -24,7 +25,7 @@ node_modules/
 .claude/debug
 .claude/file-history
 .claude/paste-cache
-.claude/plugins/cache
+.claude/plugins
 .claude/projects
 .claude/shell-snapshots
 .claude/statsig
@@ -34,6 +35,10 @@ node_modules/
 .claude/.claude.json
 .claude/.claude.json.backup*
 .claude/fetch-claude-usage.js
+.claude/fetch-claude-usage-*.js
+.claude/usage-secrets.json
+.claude/.usage-cache*.json
+.claude/.usage-cookies*.txt
 .claude/history.jsonl
 .claude/powerline/usage/today.json
 .claude/plugins/marketplaces
@@ -79,14 +84,22 @@ node_modules/
 /.gemini/config/.migrated
 /.gemini/config/mcp_config.json
 /.gemini/antigravity-ide
-/.claude/usage-secrets.json
-/.claude/.usage-cookies-1.txt
-/.claude/.usage-cookies-2.txt
-/.claude/9L3aYXI6Yp2hzcWhLzlJYxQEuFTocUMJKDx6WToZ.tmp
-/.claude/elxpNFGzSp3KdMaOiG2zFevg4GC0W8cHBZMoK3Mt.tmp
-/.claude/.usage-cache-1.json
-/.claude/.usage-cache-2.json
-
-# Machine-local API tokens for the Trakt importer. Never belongs in a repo -
-# the real config lives in ~/.local/state/trakt-import/.
-.config/trakt-import/
+/.claude/.last-cleanup
+/.claude/plugins/installed_plugins.json
+/.claude/daemon
+/.claude/daemon.lock
+/.claude/daemon.status.json
+/.claude/jobs/b83be034
+/.claude/plugins
+/.gemini/antigravity-cli/bin
+/.gemini/antigravity-cli/brain/362e223b-fa15-4b5b-b143-ea05f7c85d6e
+/.gemini/antigravity-cli/builtin
+/.gemini/antigravity-cli/conversation_summaries.db
+/.gemini/antigravity-cli/conversations
+/.gemini/antigravity-cli/history.jsonl
+/.gemini/antigravity-cli/implicit
+/.gemini/antigravity-cli/jetski_state.pbtxt
+/.claude/jobs
+/.claude/daemon-auth-cooldown
+/.claude/daemon-auth-status.json
+/.claude/teams

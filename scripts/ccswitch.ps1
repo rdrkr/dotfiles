@@ -65,14 +65,19 @@ function Read-JsonFile {
     param([string]$Path)
     if (-not (Test-Path $Path)) { return $null }
     $raw = Get-Content -Raw -Path $Path -ErrorAction Stop
-    return $raw | ConvertFrom-Json
+    # -AsHashtable is required because Claude's own config (.claude.json) can
+    # contain properties with empty-string names (e.g. nested cache slots), which
+    # ConvertFrom-Json refuses to materialize as a PSCustomObject. The returned
+    # OrderedHashtable preserves key order and round-trips cleanly via ConvertTo-Json.
+    return $raw | ConvertFrom-Json -AsHashtable
 }
 
 function Write-JsonFile {
     param([string]$Path, [object]$Content)
     $json = $Content | ConvertTo-Json -Depth 20
-    # Validate round-trip
-    try { $json | ConvertFrom-Json | Out-Null }
+    # Validate round-trip. -AsHashtable matches Read-JsonFile so configs with
+    # empty-string property names don't fail validation and silently skip writing.
+    try { $json | ConvertFrom-Json -AsHashtable | Out-Null }
     catch { Write-Error "Generated invalid JSON for ${Path}"; return }
 
     $tmp = "${Path}.tmp_$(Get-Random)"
@@ -111,7 +116,7 @@ function Get-ClaudeConfigPath {
     $fallback = Join-Path $HOME '.claude.json'
     if (Test-Path $primary) {
         $obj = Read-JsonFile $primary
-        if ($obj -and $obj.PSObject.Properties['oauthAccount']) {
+        if ($obj -and $obj.Contains('oauthAccount')) {
             return $primary
         }
     }
@@ -287,8 +292,8 @@ function Deploy-UsageScripts {
     $seq = Read-JsonFile $script:SEQUENCE_FILE
     $scriptsDir = Join-Path $script:BACKUP_DIR 'scripts'
     if (-not (Test-Path $scriptsDir)) { New-Item -ItemType Directory -Path $scriptsDir -Force | Out-Null }
-    foreach ($prop in $seq.accounts.PSObject.Properties) {
-        $dst = Join-Path $scriptsDir ".fetch-claude-usage-$($prop.Name)-$($prop.Value.email).js"
+    foreach ($num in @($seq.accounts.Keys)) {
+        $dst = Join-Path $scriptsDir ".fetch-claude-usage-$num-$($seq.accounts[$num].email).js"
         Copy-Item $template $dst -Force
         if ((Get-Platform) -ne 'windows') { chmod 755 $dst }
     }
@@ -302,6 +307,7 @@ function Get-CurrentAccount {
     if (-not (Test-Path $cfgPath)) { return 'none' }
     $obj = Read-JsonFile $cfgPath
     if (-not $obj) { return 'none' }
+    if (-not $obj.Contains('oauthAccount')) { return 'none' }
     $email = $obj.oauthAccount.emailAddress
     if ($email) { return $email }
     return 'none'
@@ -313,9 +319,7 @@ function Get-CurrentAccount {
 function Get-NextAccountNumber {
     if (-not (Test-Path $script:SEQUENCE_FILE)) { return '1' }
     $seq  = Read-JsonFile $script:SEQUENCE_FILE
-    $props = $seq.accounts.PSObject.Properties
-    if (-not $props -or @($props).Count -eq 0) { return '1' }
-    $keys  = @(@($props.Name) | ForEach-Object { [int]$_ })
+    $keys = @($seq.accounts.Keys | ForEach-Object { [int]$_ })
     if ($keys.Count -eq 0) { return '1' }
     return [string](($keys | Measure-Object -Maximum).Maximum + 1)
 }
@@ -324,8 +328,8 @@ function Test-AccountExists {
     param([string]$Email)
     if (-not (Test-Path $script:SEQUENCE_FILE)) { return $false }
     $seq = Read-JsonFile $script:SEQUENCE_FILE
-    foreach ($prop in $seq.accounts.PSObject.Properties) {
-        if ($prop.Value.email -eq $Email) { return $true }
+    foreach ($num in @($seq.accounts.Keys)) {
+        if ($seq.accounts[$num].email -eq $Email) { return $true }
     }
     return $false
 }
@@ -335,8 +339,8 @@ function Resolve-AccountIdentifier {
     if ($Identifier -match '^\d+$') { return $Identifier }
     if (-not (Test-Path $script:SEQUENCE_FILE)) { return '' }
     $seq = Read-JsonFile $script:SEQUENCE_FILE
-    foreach ($prop in $seq.accounts.PSObject.Properties) {
-        if ($prop.Value.email -eq $Identifier) { return $prop.Name }
+    foreach ($num in @($seq.accounts.Keys)) {
+        if ($seq.accounts[$num].email -eq $Identifier) { return $num }
     }
     return ''
 }
@@ -395,10 +399,9 @@ function Invoke-AddAccount {
     $seq = Read-JsonFile $script:SEQUENCE_FILE
     $now = Get-Date -Format 'yyyy-MM-ddTHH:mm:ssZ' -AsUTC
 
-    # Add-Member chokes on numeric-looking strings; assign via PSObject directly
-    $newEntry = [pscustomobject]@{ email = $currentEmail; uuid = $accountUuid; added = $now }
-    $seq.accounts.PSObject.Properties.Add(
-        [System.Management.Automation.PSNoteProperty]::new($accountNum, $newEntry))
+    # accounts is an OrderedHashtable keyed by numeric-string account number.
+    $newEntry = [ordered]@{ email = $currentEmail; uuid = $accountUuid; added = $now }
+    $seq.accounts[$accountNum] = $newEntry
 
     $seq.sequence            = @($seq.sequence) + @([int]$accountNum)
     $seq.activeAccountNumber = [int]$accountNum
@@ -431,13 +434,12 @@ function Invoke-RemoveAccount {
         }
     }
 
-    $seq         = Read-JsonFile $script:SEQUENCE_FILE
-    $accountProp = $seq.accounts.PSObject.Properties[$accountNum]
-    if (-not $accountProp) {
+    $seq = Read-JsonFile $script:SEQUENCE_FILE
+    if (-not $seq.accounts.Contains($accountNum)) {
         Write-Error "Account-$accountNum does not exist"; exit 1
     }
 
-    $email         = $accountProp.Value.email
+    $email         = $seq.accounts[$accountNum].email
     $activeAccount = [string]$seq.activeAccountNumber
 
     if ($activeAccount -eq $accountNum) {
@@ -461,7 +463,7 @@ function Invoke-RemoveAccount {
     Remove-Item (Join-Path $script:BACKUP_DIR 'scripts' ".fetch-claude-usage-${accountNum}-${email}.js")        -Force -ErrorAction SilentlyContinue
 
     # Update sequence.json
-    $seq.accounts.PSObject.Properties.Remove($accountNum)
+    $seq.accounts.Remove($accountNum)
     $seq.sequence    = @($seq.sequence | Where-Object { $_ -ne [int]$accountNum })
     $seq.lastUpdated = Get-Date -Format 'yyyy-MM-ddTHH:mm:ssZ' -AsUTC
 
@@ -481,9 +483,9 @@ function Invoke-List {
 
     $activeAccountNum = ''
     if ($currentEmail -ne 'none') {
-        foreach ($prop in $seq.accounts.PSObject.Properties) {
-            if ($prop.Value.email -eq $currentEmail) {
-                $activeAccountNum = $prop.Name
+        foreach ($num in @($seq.accounts.Keys)) {
+            if ($seq.accounts[$num].email -eq $currentEmail) {
+                $activeAccountNum = $num
                 break
             }
         }
@@ -492,7 +494,7 @@ function Invoke-List {
     Write-Host 'Accounts:'
     foreach ($num in $seq.sequence) {
         $numStr = [string]$num
-        $info   = $seq.accounts.PSObject.Properties[$numStr].Value
+        $info   = $seq.accounts[$numStr]
         if ($numStr -eq $activeAccountNum) {
             Write-Host "  ${numStr}: $($info.email) (active)"
         } else {
@@ -555,7 +557,7 @@ function Invoke-SwitchTo {
     }
 
     $seq = Read-JsonFile $script:SEQUENCE_FILE
-    if (-not $seq.accounts.PSObject.Properties[$targetAccount]) {
+    if (-not $seq.accounts.Contains($targetAccount)) {
         Write-Error "Account-$targetAccount does not exist"; exit 1
     }
 
@@ -567,7 +569,7 @@ function Invoke-PerformSwitch {
 
     $seq            = Read-JsonFile $script:SEQUENCE_FILE
     $currentAccount = [string]$seq.activeAccountNumber
-    $targetEmail    = $seq.accounts.PSObject.Properties[$TargetAccount].Value.email
+    $targetEmail    = $seq.accounts[$TargetAccount].email
     $currentEmail   = Get-CurrentAccount
     $cfgPath        = Get-ClaudeConfigPath
 
@@ -591,11 +593,11 @@ function Invoke-PerformSwitch {
     Write-Credentials $targetCreds
     Restore-AccountScript -AccountNum $TargetAccount -Email $targetEmail
 
-    $targetCfgObj = $targetConfig | ConvertFrom-Json
-    $oauthSection = $targetCfgObj.oauthAccount
-    if (-not $oauthSection) {
+    $targetCfgObj = $targetConfig | ConvertFrom-Json -AsHashtable
+    if (-not $targetCfgObj.Contains('oauthAccount')) {
         Write-Error 'Invalid oauthAccount in backup'; exit 1
     }
+    $oauthSection = $targetCfgObj.oauthAccount
 
     $currentCfgObj = Read-JsonFile $cfgPath
     $currentCfgObj.oauthAccount = $oauthSection
