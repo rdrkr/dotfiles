@@ -13,11 +13,17 @@
     "nikitabobko/tap",
     "oven-sh/bun",
     "rdrkr/tap",
+    "smartthingscommunity/smartthings",
     "steipete/tap",
+    "teipete/tap",
     "touch-tap/tap",
     "vjeantet/tap"
   ],
   "trustedformulae": [
     "smartthingscommunity/smartthings/smartthings"
+  ],
+  "trustedcasks": [
+    "alexstrnik/browserino/browserino",
+    "alexstrnik/browserino/browseros"
   ]
 }
