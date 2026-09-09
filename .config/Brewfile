@@ -339,7 +339,6 @@ cask "sf-symbols"
 cask "staruml"
 # Text editor for code, markup and prose
 cask "sublime-text"
-cask "swipeaerospace"
 # Mesh VPN based on WireGuard
 cask "tailscale-app"
 # Remote access and connectivity software focused on security
