@@ -19,6 +19,8 @@ tap "vjeantet/tap"
 brew "openssl@3"
 # Code searching, linting, rewriting
 brew "ast-grep"
+# Improved shell history for zsh, bash, fish and nushell
+brew "atuin"
 # Bourne-Again SHell, a UNIX command interpreter
 brew "bash"
 # Programmable completion for Bash 3.2
