@@ -86,3 +86,7 @@ node_modules/
 /.claude/elxpNFGzSp3KdMaOiG2zFevg4GC0W8cHBZMoK3Mt.tmp
 /.claude/.usage-cache-1.json
 /.claude/.usage-cache-2.json
+
+# Machine-local API tokens for the Trakt importer. Never belongs in a repo -
+# the real config lives in ~/.local/state/trakt-import/.
+.config/trakt-import/
