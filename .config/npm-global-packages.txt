@@ -1,4 +1,5 @@
 @google/gemini-cli
+@homebridge-plugins/homebridge-camera-ffmpeg
 esbuild
 fastify
 homebridge-androidtv-ultimate
