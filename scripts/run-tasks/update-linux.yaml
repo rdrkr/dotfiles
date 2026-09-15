@@ -1,4 +1,9 @@
 # Copyright (c) 2026, Ronen Druker. All rights reserved.
+#
+# Groups run in parallel within a stage; a stage starts once every group of the previous stage is
+# done. Package managers that replace other tools' binaries (system packages, Homebrew) run in
+# stage 0 so those tools never update themselves while being replaced.
+# A task whose command (or `requires`) is not on PATH is skipped with a warning.
 
 name: update-linux
 description: Update all system tools and packages on Linux
@@ -6,6 +11,7 @@ usage: ua [options]
 
 groups:
   - title: Updating System Packages
+    stage: 0
     tasks:
       - title: Upgrading system packages
         command: bash
@@ -17,104 +23,113 @@ groups:
         verbose: true
 
   - title: Updating Homebrew
+    stage: 0
     tasks:
       - title: Updating Homebrew
-        command: bash
-        args:
-          [
-            -c,
-            'if command -v brew >/dev/null; then brew update; else echo "brew not found"; fi',
-          ]
+        command: brew
+        args: [update]
         verbose: true
       - title: Upgrading Homebrew packages
-        command: bash
-        args:
-          [
-            -c,
-            'if command -v brew >/dev/null; then brew upgrade -y; else echo "brew not found"; fi',
-          ]
+        command: brew
+        args: [upgrade, "-y"]
       - title: Cleaning up Homebrew
-        command: bash
-        args:
-          [
-            -c,
-            'if command -v brew >/dev/null; then brew cleanup --prune=all; else echo "brew not found"; fi',
-          ]
+        command: brew
+        args: [cleanup, "--prune=all"]
 
   - title: Updating global npm packages
+    stage: 1
     tasks:
       - title: Upgrading global npm packages
         command: bash
+        requires: [npm]
         args:
           [
             -c,
-            'f=~/dotfiles/.config/npm-global-packages.txt; if [ ! -f "$f" ]; then echo "npm package list not found: $f"; exit 1; fi; pkgs=$(grep -vE "^[[:space:]]*(#|$)" "$f" | tr -d "\r"); if [ -z "$(echo $pkgs)" ]; then echo "no npm packages to install in $f"; exit 0; fi; npm install -g $pkgs --dangerously-allow-all-scripts',
+            'f=~/dotfiles/.config/npm-global-packages.txt; if [ ! -f "$f" ]; then echo "npm package list not found: $f"; exit 1; fi; pkgs=$(grep -vE "^[[:space:]]*(#|$)" "$f" | tr -d "\r"); if [ -z "$pkgs" ]; then echo "no npm packages to install in $f"; exit 0; fi; npm install -g $pkgs --dangerously-allow-all-scripts',
           ]
         verbose: true
 
   - title: Updating pipx packages
+    stage: 1
     tasks:
       - title: Upgrading pipx packages
-        command: bash
-        args:
-          [
-            -c,
-            'if command -v pipx >/dev/null; then pipx upgrade-all; else echo "pipx not found"; fi',
-          ]
+        command: pipx
+        args: [upgrade-all]
 
-  - title: Updating bun packages
+  - title: Updating bun
+    stage: 1
     tasks:
       - title: Upgrading bun
-        command: bash
-        args:
-          [
-            -c,
-            'if command -v bun >/dev/null; then bun upgrade; else echo "bun not found"; fi',
-          ]
+        command: bun
+        args: [upgrade]
+
+  - title: Updating mise tools
+    stage: 1
+    tasks:
+      # tools are pinned in ~/.config/mise/config.toml (e.g. the remux CLI);
+      # upgrade also uninstalls the versions it replaces
+      - title: Installing missing mise tools
+        command: mise
+        args: [install, --yes]
+      - title: Upgrading mise tools
+        command: mise
+        args: [upgrade, --yes]
 
   - title: Updating zinit
+    stage: 1
     tasks:
       - title: Updating zinit
         command: zsh
-        args: [
+        args:
+          [
             -l,
             -c,
-            'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh"
-            && zinit self-update',
+            'source "${ZINIT_HOME:-$HOME/.local/share/zinit/zinit.git}/zinit.zsh" && zinit self-update',
           ]
       - title: Updating zinit plugins
         command: zsh
-        args: [
+        args:
+          [
             -l,
             -c,
-            'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh"
-            && zinit update --quiet --all',
+            'source "${ZINIT_HOME:-$HOME/.local/share/zinit/zinit.git}/zinit.zsh" && zinit update --quiet --all',
           ]
       - title: Clearing zinit cache
         command: zsh
-        args: [
+        args:
+          [
             -l,
             -c,
-            'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh"
-            && zinit cclear',
+            'source "${ZINIT_HOME:-$HOME/.local/share/zinit/zinit.git}/zinit.zsh" && zinit cclear',
           ]
 
   - title: Updating LazyVim
+    stage: 1
     tasks:
+      # Lazy! sync installs, cleans and updates plugins
       - title: Syncing LazyVim
         command: nvim
         args: [--headless, "+Lazy! sync", +qa]
-      - title: Updating LazyVim
-        command: nvim
-        args: [--headless, "+Lazy! update", +qa]
+      # MasonUpdateAll is asynchronous: quit on its completion event, or fail after 10 minutes
       - title: Updating Mason
         command: nvim
-        args: [--headless, +MasonUpdateAll, +qa]
+        args:
+          [
+            --headless,
+            -c,
+            "autocmd User MasonUpdateAllCompleted quitall",
+            -c,
+            "call timer_start(600000, {-> execute('cquit 1')})",
+            -c,
+            MasonUpdateAll,
+          ]
+      # :TSUpdate is asynchronous on nvim-treesitter's main branch: wait for the update task
       - title: Updating Treesitter
         command: nvim
-        args: [--headless, +TSUpdate, +qa]
+        args: [--headless, -c, "lua require('nvim-treesitter').update():wait(600000)", -c, qa]
 
   - title: Updating pre-commit
+    stage: 1
     tasks:
       - title: Upgrading pre-commit hooks
         command: pre-commit

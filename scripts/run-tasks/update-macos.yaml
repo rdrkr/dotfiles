@@ -1,4 +1,9 @@
 # Copyright (c) 2026, Ronen Druker. All rights reserved.
+#
+# Groups run in parallel within a stage; a stage starts once every group of the previous stage is
+# done. Package managers that replace other tools' binaries (Homebrew upgrading node, neovim, pipx,
+# mise, ...) run in stage 0 so those tools never update themselves while being replaced.
+# A task whose command (or `requires`) is not on PATH is skipped with a warning.
 
 name: update-macos
 description: Update all system tools and packages on macOS
@@ -6,6 +11,7 @@ usage: ua [options]
 
 groups:
   - title: Updating Homebrew
+    stage: 0
     tasks:
       - title: Updating Homebrew
         command: brew
@@ -14,79 +20,120 @@ groups:
       - title: Upgrading Homebrew packages
         command: brew
         args: [upgrade, "-y"]
-      - title: Upgrading App Store apps
-        command: mas
-        args: [upgrade]
       - title: Cleaning up Homebrew
         command: brew
         args: [cleanup, "--prune=all"]
 
-  - title: Updating global npm packages
+  - title: Updating App Store apps
+    stage: 0
     tasks:
+      - title: Upgrading App Store apps
+        command: mas
+        args: [upgrade]
+
+  - title: Updating global npm packages
+    stage: 1
+    tasks:
+      # install scripts are governed by the allow-scripts list in ~/.npmrc
       - title: Upgrading global npm packages
         command: bash
+        requires: [npm]
         args:
           [
             -c,
-            'pkgs=$(grep -v "^#" ~/dotfiles/.config/npm-global-packages.txt | xargs); if [ -n "$pkgs" ]; then npm install -g --allow-scripts=$pkgs; fi',
+            'f=~/dotfiles/.config/npm-global-packages.txt; if [ ! -f "$f" ]; then echo "npm package list not found: $f"; exit 1; fi; pkgs=$(grep -vE "^[[:space:]]*(#|$)" "$f" | tr -d "\r"); if [ -z "$pkgs" ]; then echo "no npm packages to install in $f"; exit 0; fi; npm install -g $pkgs',
           ]
         verbose: true
 
   - title: Updating pipx packages
+    stage: 1
     tasks:
       - title: Upgrading pipx packages
         command: pipx
         args: [upgrade-all]
 
-  - title: Updating bun packages
+  - title: Updating bun
+    stage: 1
     tasks:
       - title: Upgrading bun
         command: bun
         args: [upgrade]
 
+  - title: Updating mise tools
+    stage: 1
+    tasks:
+      # tools are pinned in ~/.config/mise/config.toml (e.g. the remux CLI);
+      # upgrade also uninstalls the versions it replaces
+      - title: Installing missing mise tools
+        command: mise
+        args: [install, --yes]
+      - title: Upgrading mise tools
+        command: mise
+        args: [upgrade, --yes]
+
+  - title: Updating Remux
+    stage: 1
+    tasks:
+      - title: Updating Remux.app
+        command: bash
+        args: [~/dotfiles/scripts/update-remux-app.sh]
+        verbose: true
+
   - title: Updating zinit
+    stage: 1
     tasks:
       - title: Updating zinit
         command: zsh
-        args: [
+        args:
+          [
             -l,
             -c,
-            'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh"
-            && zinit self-update',
+            'source "${ZINIT_HOME:-$HOME/.local/share/zinit/zinit.git}/zinit.zsh" && zinit self-update',
           ]
       - title: Updating zinit plugins
         command: zsh
-        args: [
+        args:
+          [
             -l,
             -c,
-            'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh"
-            && zinit update --quiet --all',
+            'source "${ZINIT_HOME:-$HOME/.local/share/zinit/zinit.git}/zinit.zsh" && zinit update --quiet --all',
           ]
       - title: Clearing zinit cache
         command: zsh
-        args: [
+        args:
+          [
             -l,
             -c,
-            'source "${ZINIT_HOME:-~/.local/share/zinit/zinit.git}/zinit.zsh"
-            && zinit cclear',
+            'source "${ZINIT_HOME:-$HOME/.local/share/zinit/zinit.git}/zinit.zsh" && zinit cclear',
           ]
 
   - title: Updating LazyVim
+    stage: 1
     tasks:
+      # Lazy! sync installs, cleans and updates plugins
       - title: Syncing LazyVim
         command: nvim
         args: [--headless, "+Lazy! sync", +qa]
-      - title: Updating LazyVim
-        command: nvim
-        args: [--headless, "+Lazy! update", +qa]
+      # MasonUpdateAll is asynchronous: quit on its completion event, or fail after 10 minutes
       - title: Updating Mason
         command: nvim
-        args: [--headless, +MasonUpdateAll, +qa]
+        args:
+          [
+            --headless,
+            -c,
+            "autocmd User MasonUpdateAllCompleted quitall",
+            -c,
+            "call timer_start(600000, {-> execute('cquit 1')})",
+            -c,
+            MasonUpdateAll,
+          ]
+      # :TSUpdate is asynchronous on nvim-treesitter's main branch: wait for the update task
       - title: Updating Treesitter
         command: nvim
-        args: [--headless, +TSUpdate, +qa]
+        args: [--headless, -c, "lua require('nvim-treesitter').update():wait(600000)", -c, qa]
 
   - title: Updating pre-commit
+    stage: 1
     tasks:
       - title: Upgrading pre-commit hooks
         command: pre-commit
