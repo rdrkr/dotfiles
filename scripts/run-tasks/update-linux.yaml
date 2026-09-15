@@ -39,13 +39,14 @@ groups:
   - title: Updating global npm packages
     stage: 1
     tasks:
+      # install scripts are governed by the allow-scripts list in ~/.npmrc (stowed from dotfiles)
       - title: Upgrading global npm packages
         command: bash
         requires: [npm]
         args:
           [
             -c,
-            'f=~/dotfiles/.config/npm-global-packages.txt; if [ ! -f "$f" ]; then echo "npm package list not found: $f"; exit 1; fi; pkgs=$(grep -vE "^[[:space:]]*(#|$)" "$f" | tr -d "\r"); if [ -z "$pkgs" ]; then echo "no npm packages to install in $f"; exit 0; fi; npm install -g $pkgs --dangerously-allow-all-scripts',
+            'f=~/dotfiles/.config/npm-global-packages.txt; if [ ! -f "$f" ]; then echo "npm package list not found: $f"; exit 1; fi; pkgs=$(grep -vE "^[[:space:]]*(#|$)" "$f" | tr -d "\r"); if [ -z "$pkgs" ]; then echo "no npm packages to install in $f"; exit 0; fi; npm install -g $pkgs',
           ]
         verbose: true
 

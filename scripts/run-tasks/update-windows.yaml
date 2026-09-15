@@ -36,13 +36,14 @@ groups:
   - title: Updating global npm packages
     stage: 1
     tasks:
+      # install scripts are governed by the allow-scripts list in ~/.npmrc (linked from dotfiles)
       - title: Upgrading global npm packages
         command: powershell
         args:
           [
             -NoProfile,
             -Command,
-            "$pkgs = Get-Content ~/dotfiles/.config/npm-global-packages.txt | Select-String -Pattern '^\\s*(#|$)' -NotMatch | Select-Object -ExpandProperty Line; if ($pkgs) { npm install -g $pkgs --dangerously-allow-all-scripts }",
+            "$pkgs = Get-Content ~/dotfiles/.config/npm-global-packages.txt | Select-String -Pattern '^\\s*(#|$)' -NotMatch | Select-Object -ExpandProperty Line; if ($pkgs) { npm install -g $pkgs }",
           ]
         verbose: true
 
