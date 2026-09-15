@@ -1,4 +1,8 @@
 # Copyright (c) 2026, Ronen Druker. All rights reserved.
+#
+# Groups run in parallel within a stage; a stage starts once every group of the previous stage is
+# done. Package managers that replace other tools' binaries (winget, scoop) run in stage 0 so those
+# tools never update themselves while being replaced.
 
 name: update-windows
 description: Update all system tools and packages on Windows
@@ -6,6 +10,7 @@ usage: ua [options]
 
 groups:
   - title: Updating winget packages
+    stage: 0
     tasks:
       - title: Upgrading winget packages
         command: powershell
@@ -18,6 +23,7 @@ groups:
         verbose: true
 
   - title: Updating scoop packages
+    stage: 0
     tasks:
       - title: Updating scoop
         command: powershell
@@ -28,6 +34,7 @@ groups:
         args: [-NoProfile, -Command, "scoop update *"]
 
   - title: Updating global npm packages
+    stage: 1
     tasks:
       - title: Upgrading global npm packages
         command: powershell
@@ -40,25 +47,26 @@ groups:
         verbose: true
 
   - title: Updating pipx packages
+    stage: 1
     tasks:
       - title: Upgrading pipx packages
         command: powershell
         args: [-NoProfile, -Command, "pipx upgrade-all"]
 
-  - title: Updating bun packages
+  - title: Updating bun
+    stage: 1
     tasks:
       - title: Upgrading bun
         command: powershell
         args: [-NoProfile, -Command, "bun upgrade"]
 
   - title: Updating LazyVim
+    stage: 1
     tasks:
+      # Lazy! sync installs, cleans and updates plugins
       - title: Syncing LazyVim
         command: powershell
         args: [-NoProfile, -Command, "nvim --headless '+Lazy! sync' +qa"]
-      - title: Updating LazyVim
-        command: powershell
-        args: [-NoProfile, -Command, "nvim --headless '+Lazy! update' +qa"]
       - title: Updating Mason
         command: powershell
         args: [-NoProfile, -Command, "nvim --headless +MasonUpdateAll +qa"]
@@ -67,6 +75,7 @@ groups:
         args: [-NoProfile, -Command, "nvim --headless +TSUpdate +qa"]
 
   - title: Updating pre-commit
+    stage: 1
     tasks:
       - title: Upgrading pre-commit hooks
         command: powershell

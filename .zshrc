@@ -214,18 +214,37 @@ alias v='nvim'
 alias lg='lazygit'
 alias ld='lazydocker'
 alias c='clear'
-# update all: prompt for sudo up front on Linux (the parallel task runner ignores
-# child stdin, so an interactive sudo prompt inside a task would hang forever), then
-# keep the sudo timestamp fresh in the background until the run finishes.
+# update all: run the per-OS task list with the task runner's own tsx (installing its
+# dependencies on first use); options such as --verbose or --help are passed through.
+# On Linux, prompt for sudo up front (the parallel task runner ignores child stdin, so an
+# interactive sudo prompt inside a task would hang forever), then keep the sudo timestamp
+# fresh in the background until the run finishes.
 ua() {
-  local _sudo_keepalive=
-  if [[ "$_OS" == "linux" ]]; then
+  setopt localoptions localtraps nomonitor
+  local runner_dir=~/dotfiles/scripts/run-tasks
+  # tsx's CLI runs through node and needs esbuild's binary for this platform: node_modules
+  # synced from another OS lacks both the executable bit and that binary, so reinstall then
+  local tsx="${runner_dir}/node_modules/tsx/dist/cli.mjs"
+  local esbuild="${runner_dir}/node_modules/@esbuild/$(node -p "process.platform + '-' + process.arch")"
+  local sudo_keepalive= rc
+
+  if [[ ! -f "$tsx" || ! -d "$esbuild" ]]; then
+    print -u2 "ua: installing task runner dependencies..."
+    npm ci --prefix "$runner_dir" --silent || return 1
+  fi
+
+  if [[ "$_OS" == "linux" && ${@[(I)(-h|--help)]} -eq 0 ]]; then
     sudo -v || return 1
     ( while true; do sudo -n true; sleep 60; kill -0 "$$" 2>/dev/null || exit; done ) &>/dev/null &
-    _sudo_keepalive=$!
-    trap '[[ -n "$_sudo_keepalive" ]] && kill "$_sudo_keepalive" 2>/dev/null' INT TERM EXIT
+    sudo_keepalive=$!
+    trap 'kill "$sudo_keepalive" 2>/dev/null; return 130' INT TERM
   fi
-  npx tsx ~/dotfiles/scripts/run-tasks/run-tasks.ts ~/dotfiles/scripts/run-tasks/update-${_OS}.yaml
+
+  node "$tsx" "${runner_dir}/run-tasks.ts" "${runner_dir}/update-${_OS}.yaml" "$@"
+  rc=$?
+
+  [[ -n "$sudo_keepalive" ]] && kill "$sudo_keepalive" 2>/dev/null
+  return $rc
 }
 
 ## claude code aliases
@@ -270,6 +289,9 @@ path_dirs+=(
 for p in "${path_dirs[@]}"; do
   export PATH="$p:$PATH"
 done
+
+# mise: tools pinned in ~/.config/mise/config.toml (e.g. the remux CLI)
+command -v mise &>/dev/null && eval "$(mise activate zsh)"
 
 # tmux
 ## generate fun docker-style names

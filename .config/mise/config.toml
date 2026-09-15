@@ -1,0 +1,7 @@
+# Global mise tools, kept current by `ua` (mise install + mise upgrade).
+
+[tools]
+# Remux media server CLI (https://github.com/lostb1t/remux): not in Homebrew, binaries only ship as
+# GitHub release assets. The Remux.app desktop build is updated separately by
+# ~/dotfiles/scripts/update-remux-app.sh. There is no Windows CLI build.
+"github:lostb1t/remux" = { version = "latest", os = ["macos", "linux"] }

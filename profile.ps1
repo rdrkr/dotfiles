@@ -81,7 +81,20 @@ function ld { lazydocker @args }
 function open { start @args }
 function c { Clear-Host }
 
-function ua { npx tsx "$env:USERPROFILE\dotfiles\scripts\run-tasks\run-tasks.ts" "$env:USERPROFILE\dotfiles\scripts\run-tasks\update-$($global:_OS).yaml" }
+# update all: run the per-OS task list with the task runner's own tsx (installing its
+# dependencies on first use); options such as --verbose or --help are passed through.
+function ua {
+    $runner = "$env:USERPROFILE\dotfiles\scripts\run-tasks"
+    $tsx = "$runner\node_modules\tsx\dist\cli.mjs"
+    # esbuild's binary is platform-specific; node_modules synced from another OS lacks it
+    $esbuild = "$runner\node_modules\@esbuild\" + (node -p "process.platform + '-' + process.arch")
+    if (-not (Test-Path $tsx) -or -not (Test-Path $esbuild)) {
+        Write-Host "ua: installing task runner dependencies..."
+        npm ci --prefix $runner --silent
+        if ($LASTEXITCODE -ne 0) { return }
+    }
+    node $tsx "$runner\run-tasks.ts" "$runner\update-$($global:_OS).yaml" @args
+}
 
 # claude code aliases
 function cc { claude --dangerously-skip-permissions @args }
