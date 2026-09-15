@@ -1,7 +1,13 @@
 # Global mise tools, kept current by `ua` (mise install + mise upgrade).
+#
+# Pre-releases: add `prerelease = true` to a tool to let `latest` resolve to its newest release
+# across stable and pre-releases (github, forgejo, aqua and dotnet backends). To opt every tool in,
+# set `prereleases = true` under [settings] instead.
 
 [tools]
 # Remux media server CLI (https://github.com/lostb1t/remux): not in Homebrew, binaries only ship as
-# GitHub release assets. The Remux.app desktop build is updated separately by
-# ~/dotfiles/scripts/update-remux-app.sh. There is no Windows CLI build.
-"github:lostb1t/remux" = { version = "latest", os = ["macos", "linux"] }
+# GitHub release assets. There is no Windows CLI build.
+# prerelease = true also puts Remux.app on the pre-release channel: update-remux-app.sh reads this
+# flag and installs the rolling `nightly` DMG. The CLI itself stays on stable, since the nightly
+# ships no macOS CLI binary and mise cannot track its rolling `nightly` tag.
+"github:lostb1t/remux" = { version = "latest", prerelease = true, os = ["macos", "linux"] }
