@@ -6,10 +6,13 @@
 # `remux` CLI), so `ua` runs this script instead. If the app was running it is stopped with
 # SIGTERM and relaunched, the same way switchbot's relogin watcher restarts it.
 #
-# Release channel: stable by default. Pre-releases (Remux's rolling `nightly` build) are taken when
-# mise opts remux into them, so one flag drives both the CLI and the app:
+# Release channel: official releases. Pre-releases (Remux's rolling `nightly` build) are taken only
+# when mise opts remux into them, so one flag drives both the CLI and the app:
 #   ~/.config/mise/config.toml  "github:lostb1t/remux" = { ..., prerelease = true }
 #   or mise's global setting     [settings] prereleases = true
+# Neither is set, so both follow the tagged releases. Switching channels either way is that one
+# flag: leaving the nightly channel installs the newest stable on the next run, without waiting for
+# it to overtake the nightly - see is_release_newer below for why that needs saying.
 #
 # Environment:
 #   REMUX_APP         app bundle to update (default: /Applications/Remux.app)
@@ -118,8 +121,19 @@ select_release() {
 # $1: installed version
 # $2: release version
 # $3: release publish time (ISO 8601, UTC)
+# $4: true when pre-releases are enabled, false on the stable channel
 is_release_newer() {
   local built published="${3//[-:TZ]/}"
+
+  # Coming off the nightly channel is a channel switch, not a downgrade, and the build-time
+  # comparison below cannot express it: a nightly is built continuously, so it is almost always
+  # newer than the newest tagged release and the machine would sit on it until some later stable
+  # overtook it. 0.32.0-nightly.20260919 was built two and a half minutes after v0.33.0 was
+  # published, which would have stranded it for a whole release. On stable, a nightly always loses.
+  if [[ "$4" == false && "$1" == *-nightly.* ]]; then
+    return 0
+  fi
+
   built="$(bundle_build_time "$APP")"
   if [[ -n "$built" && "$published" =~ ^[0-9]{14}$ ]]; then
     ((10#$published > 10#$built))
@@ -207,7 +221,7 @@ main() {
     echo "Remux $installed is up to date (channel: $channel)"
     return 0
   fi
-  if ! is_release_newer "$installed" "$version" "$published"; then
+  if ! is_release_newer "$installed" "$version" "$published" "$pre"; then
     echo "Remux $installed is newer than the latest $channel build ($version), keeping it"
     return 0
   fi

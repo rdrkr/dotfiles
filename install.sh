@@ -736,58 +736,37 @@ setup_openssh_server() {
   fi
 }
 
-# --- Display sleep muter (macOS) ---
-# Builds and loads the LaunchAgent that mutes the default audio output while the
-# screens are off. scripts/install-display-sleep-mute.sh is itself idempotent -
-# it rebuilds the binary and re-bootstraps the agent - so this only has to guard
-# on the toolchain being present.
-setup_display_sleep_mute() {
-  print_header "Setting up display-sleep muter..."
-
-  local installer="${SCRIPT_DIR}/scripts/install-display-sleep-mute.sh"
-  if [ ! -x "$installer" ]; then
-    print_warning "$installer not found. Skipping."
-    return 0
-  fi
-
-  if ! command -v swiftc &>/dev/null; then
-    print_warning "swiftc not found (install Xcode or the Command Line Tools). Skipping."
-    return 0
-  fi
-
-  run_command "$installer"
-  print_success "Display-sleep muter installed and loaded."
-}
-
-# --- Switchboard (macOS) ---
-# Brings up the self-hosted work-comms stack from the switchboard repo: Synapse
+# --- Switchbot (macOS) ---
+# Brings up the self-hosted work-comms stack from the switchbot repo: Synapse
 # in colima, the Teams bridge, DavMail, the two re-login watchers, and the
 # tailscale serve rules that publish them.
 #
-# The one thing that cannot be automated is switchboard's .env - it holds the
+# The one thing that cannot be automated is switchbot's .env - it holds the
 # identity block and the secrets that Matrix and DavMail are keyed to, so it is
 # in no repo and travels by password manager. Without it every rendered config
 # and plist is missing, so this warns and returns rather than half-building a
 # stack that looks installed.
-setup_switchboard() {
-  print_header "Setting up switchboard (matrix, teams, davmail, tailscale)..."
+setup_switchbot() {
+  print_header "Setting up switchbot (matrix, teams, davmail, tailscale)..."
 
-  local dir="${HOME}/Development/repos/switchboard"
+  local dir="${HOME}/Development/repos/switchbot"
 
   # 1. The checkout itself.
   if [ ! -d "$dir/.git" ]; then
     run_command "mkdir -p '$(dirname "$dir")'"
-    run_command "git clone https://github.com/rdrkr/switchboard.git '$dir'"
-    print_success "switchboard cloned to $dir."
+    run_command "git clone https://github.com/rdrkr/switchbot.git '$dir'"
+    print_success "switchbot cloned to $dir."
   fi
   if [ ! -d "$dir" ] && [ "$DRY_RUN" = true ]; then
-    print_warning "[DRY RUN] switchboard not present; skipping the rest of its setup."
+    print_warning "[DRY RUN] switchbot not present; skipping the rest of its setup."
     return 0
   fi
 
   # 2. Prerequisites the repo's own quick start lists. Homebrew is authoritative
   #    for the Brewfile, but go and gettext are dependencies of other formulae
-  #    there and so never make it into a `brew bundle dump`.
+  #    there and so never make it into a `brew bundle dump`. swiftc is not in
+  #    Homebrew at all - it comes with the Command Line Tools - so it is checked
+  #    separately below rather than added to this list.
   local missing=()
   local tool
   for tool in colima docker docker-compose gettext go python3 shellcheck; do
@@ -796,9 +775,9 @@ setup_switchboard() {
   if [ ${#missing[@]} -gt 0 ]; then
     if command -v brew &>/dev/null; then
       run_command "brew install ${missing[*]}"
-      print_success "Installed switchboard prerequisites: ${missing[*]}."
+      print_success "Installed switchbot prerequisites: ${missing[*]}."
     else
-      print_warning "Missing ${missing[*]} and no brew to install them. Skipping switchboard."
+      print_warning "Missing ${missing[*]} and no brew to install them. Skipping switchbot."
       return 0
     fi
   fi
@@ -814,10 +793,17 @@ setup_switchboard() {
   #    rewrites the rendered files and generates only what is still blank.
   run_command "make -C '$dir' bootstrap"
 
-  # 5. The Teams bridge binary is gitignored, so a fresh checkout has none.
+  # 5. The two compiled artifacts are gitignored, so a fresh checkout has neither.
   if [ ! -x "$dir/bridge/mautrix-teams" ]; then
     run_command "make -C '$dir' build-bridge"
     print_success "Teams bridge built."
+  fi
+  if ! command -v swiftc &>/dev/null; then
+    print_warning "swiftc not found (install the Xcode Command Line Tools)."
+    print_warning "The display-sleep muter will be skipped; everything else still loads."
+  elif [ ! -x "$dir/audio/display-sleep-mute" ]; then
+    run_command "make -C '$dir' build-display-sleep-mute"
+    print_success "Display-sleep muter built."
   fi
 
   # 6. Synapse and its Postgres run in colima's docker.
@@ -842,10 +828,10 @@ setup_switchboard() {
     print_success "Tailscale serve rules applied."
   fi
 
-  # 8. The four launchd agents. install-agents.sh boots each one out first, so
+  # 8. The launchd agents. install-agents.sh boots each one out first, so
   #    this picks up plist changes instead of silently keeping the old ones.
   run_command "make -C '$dir' install-agents"
-  print_success "Switchboard agents loaded. 'make -C $dir status' shows what they are doing."
+  print_success "Switchbot agents loaded. 'make -C $dir status' shows what they are doing."
 
   # Sign-ins are device-code flows that need a phone, so they stay manual.
   print_warning "If a service reports signed out, sign in once:"
@@ -889,7 +875,7 @@ setup_homebridge() {
 }
 
 # --- Media apps (macOS) ---
-# Jellyfin serves the library and Remux is the client for it; switchboard's
+# Jellyfin serves the library and Remux is the client for it; switchbot's
 # tailscale-serve.sh publishes both over the tailnet with TLS. Neither is a
 # launchd job - Jellyfin is a menu-bar app started as a login item and Remux is
 # launched by hand - so all this has to do is install them and make sure
@@ -1146,8 +1132,7 @@ restore() {
   #     warning when a prerequisite - or a secret it has no way to generate - is
   #     missing, so restore stays runnable on a machine that has neither.
   if [ "$OS_TYPE" = "macos" ]; then
-    setup_display_sleep_mute
-    setup_switchboard
+    setup_switchbot
     setup_homebridge
     setup_media_apps
   fi
