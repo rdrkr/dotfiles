@@ -793,17 +793,23 @@ setup_switchbot() {
   #    rewrites the rendered files and generates only what is still blank.
   run_command "make -C '$dir' bootstrap"
 
-  # 5. The two compiled artifacts are gitignored, so a fresh checkout has neither.
+  # 5. The compiled artifacts are gitignored, so a fresh checkout has none.
   if [ ! -x "$dir/bridge/mautrix-teams" ]; then
     run_command "make -C '$dir' build-bridge"
     print_success "Teams bridge built."
   fi
   if ! command -v swiftc &>/dev/null; then
     print_warning "swiftc not found (install the Xcode Command Line Tools)."
-    print_warning "The display-sleep muter will be skipped; everything else still loads."
-  elif [ ! -x "$dir/audio/display-sleep-mute" ]; then
-    run_command "make -C '$dir' build-display-sleep-mute"
-    print_success "Display-sleep muter built."
+    print_warning "The two Swift agents will be skipped; everything else still loads."
+  else
+    if [ ! -x "$dir/audio/display-sleep-mute" ]; then
+      run_command "make -C '$dir' build-display-sleep-mute"
+      print_success "Display-sleep muter built."
+    fi
+    if [ ! -x "$dir/display/ard-display-helper" ]; then
+      run_command "make -C '$dir' build-ard-display"
+      print_success "ARD display helper built."
+    fi
   fi
 
   # 6. Synapse and its Postgres run in colima's docker.
