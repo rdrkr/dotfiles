@@ -7,7 +7,7 @@
 [tools]
 # Remux media server CLI (https://github.com/lostb1t/remux): not in Homebrew, binaries only ship as
 # GitHub release assets. There is no Windows CLI build.
-# prerelease = true also puts Remux.app on the pre-release channel: update-remux-app.sh reads this
-# flag and installs the rolling `nightly` DMG. The CLI itself stays on stable, since the nightly
-# ships no macOS CLI binary and mise cannot track its rolling `nightly` tag.
-"github:lostb1t/remux" = { version = "latest", prerelease = true, os = ["macos", "linux"] }
+# Official releases only. This flag drives Remux.app as well: update-remux-app.sh reads it and
+# installs the tagged DMG rather than the rolling `nightly` one. Adding `prerelease = true` back
+# puts both on the nightly channel again, and nothing else has to change.
+"github:lostb1t/remux" = { version = "latest", os = ["macos", "linux"] }
