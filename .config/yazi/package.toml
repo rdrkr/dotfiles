@@ -2,6 +2,6 @@
 deps = []
 
 [[flavor.deps]]
-use = "bennyyip/gruvbox-dark"
-rev = "619fdc5"
-hash = "d4c7003ec6dc4efd5d3a050d5c2f2575"
+use = "matt-dong-123/gruvbox-material"
+rev = "e0fd2d8"
+hash = "8f46ca96c0bbe1bdfb4fa201dd5eed4b"
