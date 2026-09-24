@@ -289,6 +289,8 @@ cask "google-drive"
 cask "hammerspoon"
 # Open-source video transcoder
 cask "handbrake-app"
+# Homebrew's official GUI
+cask "homebrew-app"
 # Keyboard shortcuts for every button on your screen
 cask "homerow"
 # Free and open-source media player
@@ -351,6 +353,8 @@ cask "touch-portal"
 cask "tuist"
 # AI image upscaler
 cask "upscayl"
+# Multimedia player
+cask "vlc"
 # Video communication and virtual meeting platform
 cask "webex"
 # Video communication and virtual meeting platform
