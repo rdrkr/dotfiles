@@ -565,6 +565,9 @@ alias ccl="ccs --list"
 alias cc1="ccs --switch-to 1 && cc"
 alias cc2="ccs --switch-to 2 && cc"
 
+## dotfiles-sync: keep this repo and the work one in sync (see scripts/dotfiles-sync.sh)
+alias dotfiles-sync="~/scripts/dotfiles-sync.sh"
+
 # shell integrations (cached, see _cache_init)
 _cache_init fzf fzf -- fzf --zsh && source "$REPLY"
 _cache_init zoxide zoxide -- zoxide init zsh && source "$REPLY"
@@ -620,3 +623,6 @@ if [[ -n "$TMUX" ]]; then
     ssh-add ~/.ssh/dell-wsl 2>/dev/null || true
   fi
 fi
+
+# machine-specific settings kept outside the repo (see .syncignore)
+[[ -r ~/.zshrc.local ]] && source ~/.zshrc.local

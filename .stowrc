@@ -6,4 +6,5 @@
 --ignore=.markdownlint-cli2.yaml
 --ignore=.pre-commit-config.yaml
 --ignore=.gitattributes
+--ignore=\.syncignore
 

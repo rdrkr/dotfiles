@@ -512,3 +512,7 @@ if (Get-Module PSReadLine) {
     Set-PSReadLineKeyHandler -Key 'Ctrl+r' -Function ReverseSearchHistory
     Set-PSReadLineKeyHandler -Key 'Ctrl+s' -Function ForwardSearchHistory
 }
+
+# machine-specific settings kept outside the repo (see .syncignore)
+$localProfile = Join-Path $env:USERPROFILE 'profile.local.ps1'
+if (Test-Path -LiteralPath $localProfile) { . $localProfile }
