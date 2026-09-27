@@ -111,6 +111,8 @@ brew "lazygit"
 brew "lazysql"
 # Graphical front-end for GCC's coverage testing tool (gcov)
 brew "lcov"
+# Scalable, high-performance WebRTC server
+brew "livekit"
 # Next-gen compiler infrastructure
 brew "llvm"
 # Powerful, lightweight programming language
