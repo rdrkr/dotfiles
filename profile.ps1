@@ -37,99 +37,12 @@ if (Test-Path $env:STARSHIP_CONFIG) {
         }
     }
 }
-if (Get-Command starship -ErrorAction SilentlyContinue) {
-    & starship init powershell | Out-String | Invoke-Expression
-}
-
 # fzf
 $env:FZF_DEFAULT_OPTS = '--color=bg:#282828,bg+:#3c3836 --color=fg:#ebdbb2,fg+:#fbf1c7 --color=hl:#83a598,hl+:#8ec07c --color=info:#fabd2f,prompt:#fabd2f,pointer:#fe8019 --color=marker:#b8bb26,spinner:#8ec07c,header:#83a598 --layout=reverse-list'
-
-# yazi
-function y {
-    $tmp = New-TemporaryFile
-    try {
-        yazi @args --cwd-file="$tmp"
-        $cwd = Get-Content $tmp -Raw
-        if (-not [string]::IsNullOrWhiteSpace($cwd) -and $cwd.Trim() -ne (Get-Location).Path) {
-            Set-Location $cwd.Trim()
-        }
-    } finally {
-        Remove-Item $tmp -Force -ErrorAction SilentlyContinue
-    }
-}
 
 # editor
 $env:EDITOR = "nvim"
 $env:VISUAL = $env:EDITOR
-
-# aliases
-if (Test-Path Alias:ls) { Remove-Item Alias:ls -Force -ErrorAction SilentlyContinue }
-if (Get-Command nu -ErrorAction SilentlyContinue) {
-    function l { nu -c "ls -a $($args -join ' ')" }
-}
-
-if (Get-Command eza -ErrorAction SilentlyContinue) {
-    function ls { eza --color=always @args }
-} else {
-    function ls { Get-ChildItem @args }
-}
-
-function vim { nvim @args }
-function v { nvim @args }
-function lg { lazygit @args }
-function ld { lazydocker @args }
-function open { start @args }
-function c { Clear-Host }
-
-# update all: run the per-OS task list with the task runner's own tsx (installing its
-# dependencies on first use); options such as --verbose or --help are passed through.
-function ua {
-    $runner = "$env:USERPROFILE\dotfiles\scripts\run-tasks"
-    $tsx = "$runner\node_modules\tsx\dist\cli.mjs"
-    # esbuild's binary is platform-specific; node_modules synced from another OS lacks it
-    $esbuild = "$runner\node_modules\@esbuild\" + (node -p "process.platform + '-' + process.arch")
-    if (-not (Test-Path $tsx) -or -not (Test-Path $esbuild)) {
-        Write-Host "ua: installing task runner dependencies..."
-        npm ci --prefix $runner --silent
-        if ($LASTEXITCODE -ne 0) { return }
-    }
-    node $tsx "$runner\run-tasks.ts" "$runner\update-$($global:_OS).yaml" @args
-}
-
-# claude code aliases
-function cc { claude --dangerously-skip-permissions @args }
-function ccs { & "$env:USERPROFILE\dotfiles\scripts\ccswitch.ps1" @args }
-function ccl { ccs --list }
-function cc1 { ccs --switch-to 1; cc @args }
-function cc2 { ccs --switch-to 2; cc @args }
-
-# shell integrations
-if (Get-Command fzf -ErrorAction SilentlyContinue) {
-    try { 
-        $out = & fzf --powershell 2>$null | Out-String
-        if (-not [string]::IsNullOrWhiteSpace($out)) { Invoke-Expression $out }
-    } catch { }
-}
-if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-    try {
-        $out = & zoxide init powershell 2>$null | Out-String
-        if (-not [string]::IsNullOrWhiteSpace($out)) { Invoke-Expression $out }
-    } catch { }
-}
-if (Get-Command mole -ErrorAction SilentlyContinue) {
-    try { 
-        $out = & mole completion powershell 2>$null | Out-String
-        if (-not [string]::IsNullOrWhiteSpace($out)) { Invoke-Expression $out }
-    } catch { }
-}
-if (Get-Command carapace -ErrorAction SilentlyContinue) {
-    try {
-        $env:CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense' # optional
-        Set-PSReadLineOption -Colors @{ "Selection" = "`e[7m" }
-        Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete
-        carapace _carapace powershell | Out-String | Invoke-Expression
-    } catch { }
-}
 
 # paths
 $pathDirs = @(
@@ -276,36 +189,24 @@ function Start-PsmuxStatsDaemon {
     )
 }
 
-## inside a session: persist the cwd and refresh the status line on every
-## directory change - the equivalent of the chpwd hook in .zshrc. The previous
-## handler is captured and called first so this chains onto zoxide's hook rather
-## than replacing it.
-if ($env:TMUX -and $env:PSMUX_SESSION) {
-    try { Start-PsmuxStatsDaemon } catch { }
-
-    $global:_PsmuxPwdFile          = Get-PsmuxPwdFile $env:PSMUX_SESSION
-    $global:_PsmuxPrevLocationHook = $ExecutionContext.SessionState.InvokeCommand.LocationChangedAction
-
-    $ExecutionContext.SessionState.InvokeCommand.LocationChangedAction = {
-        param($Source, $EventArgs)
-
-        if ($global:_PsmuxPrevLocationHook) {
-            try { & $global:_PsmuxPrevLocationHook $Source $EventArgs } catch { }
-        }
-        try {
-            Set-Content -LiteralPath $global:_PsmuxPwdFile -Value $EventArgs.NewPath.Path -Encoding utf8
-            & psmux refresh-client -S 2>$null | Out-Null
-        } catch { }
-    }
-}
-
 ## auto-start psmux when opening a new Windows Terminal tab, mirroring the WSL
 ## auto-launch block in .zshrc. Skipped inside an existing session (psmux sets
 ## TMUX in its panes), outside Windows Terminal, and in non-interactive hosts.
+##
+## This runs before starship and the shell integrations are initialised: the
+## shell that starts psmux only waits for it, so initialising all of that first
+## made every new tab pay the profile's startup cost twice (once here, once in
+## the pane). If this shell carries on after psmux exits, the rest loads then.
 if ($env:WT_SESSION -and
     -not $env:TMUX -and
     $Host.Name -eq 'ConsoleHost' -and
     (Get-Command psmux -ErrorAction SilentlyContinue)) {
+
+    # the psmux server inherits this shell's environment, so give it the
+    # carapace bridges the integration below sets for every other shell
+    if (Get-Command carapace -ErrorAction SilentlyContinue) {
+        $env:CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense' # optional
+    }
 
     try {
         $detached     = @(Get-PsmuxDetachedSession)
@@ -345,6 +246,117 @@ if ($env:WT_SESSION -and
     catch {
         # A broken auto-launch must never cost the user their shell.
         Write-Warning "psmux auto-launch skipped: $($_.Exception.Message)"
+    }
+}
+
+# starship prompt
+if (Get-Command starship -ErrorAction SilentlyContinue) {
+    & starship init powershell | Out-String | Invoke-Expression
+}
+
+# yazi
+function y {
+    $tmp = New-TemporaryFile
+    try {
+        yazi @args --cwd-file="$tmp"
+        $cwd = Get-Content $tmp -Raw
+        if (-not [string]::IsNullOrWhiteSpace($cwd) -and $cwd.Trim() -ne (Get-Location).Path) {
+            Set-Location $cwd.Trim()
+        }
+    } finally {
+        Remove-Item $tmp -Force -ErrorAction SilentlyContinue
+    }
+}
+
+# aliases
+if (Test-Path Alias:ls) { Remove-Item Alias:ls -Force -ErrorAction SilentlyContinue }
+if (Get-Command nu -ErrorAction SilentlyContinue) {
+    function l { nu -c "ls -a $($args -join ' ')" }
+}
+
+if (Get-Command eza -ErrorAction SilentlyContinue) {
+    function ls { eza --color=always @args }
+} else {
+    function ls { Get-ChildItem @args }
+}
+
+function vim { nvim @args }
+function v { nvim @args }
+function lg { lazygit @args }
+function ld { lazydocker @args }
+function open { start @args }
+function c { Clear-Host }
+
+# update all: run the per-OS task list with the task runner's own tsx (installing its
+# dependencies on first use); options such as --verbose or --help are passed through.
+function ua {
+    $runner = "$env:USERPROFILE\dotfiles\scripts\run-tasks"
+    $tsx = "$runner\node_modules\tsx\dist\cli.mjs"
+    # esbuild's binary is platform-specific; node_modules synced from another OS lacks it
+    $esbuild = "$runner\node_modules\@esbuild\" + (node -p "process.platform + '-' + process.arch")
+    if (-not (Test-Path $tsx) -or -not (Test-Path $esbuild)) {
+        Write-Host "ua: installing task runner dependencies..."
+        npm ci --prefix $runner --silent
+        if ($LASTEXITCODE -ne 0) { return }
+    }
+    node $tsx "$runner\run-tasks.ts" "$runner\update-$($global:_OS).yaml" @args
+}
+
+# claude code aliases
+function cc { claude --dangerously-skip-permissions @args }
+function ccs { & "$env:USERPROFILE\dotfiles\scripts\ccswitch.ps1" @args }
+function ccl { ccs --list }
+function cc1 { ccs --switch-to 1; cc @args }
+function cc2 { ccs --switch-to 2; cc @args }
+
+# shell integrations
+if (Get-Command fzf -ErrorAction SilentlyContinue) {
+    try { 
+        $out = & fzf --powershell 2>$null | Out-String
+        if (-not [string]::IsNullOrWhiteSpace($out)) { Invoke-Expression $out }
+    } catch { }
+}
+if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+    try {
+        $out = & zoxide init powershell 2>$null | Out-String
+        if (-not [string]::IsNullOrWhiteSpace($out)) { Invoke-Expression $out }
+    } catch { }
+}
+if (Get-Command mole -ErrorAction SilentlyContinue) {
+    try { 
+        $out = & mole completion powershell 2>$null | Out-String
+        if (-not [string]::IsNullOrWhiteSpace($out)) { Invoke-Expression $out }
+    } catch { }
+}
+if (Get-Command carapace -ErrorAction SilentlyContinue) {
+    try {
+        $env:CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense' # optional
+        Set-PSReadLineOption -Colors @{ "Selection" = "`e[7m" }
+        Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete
+        carapace _carapace powershell | Out-String | Invoke-Expression
+    } catch { }
+}
+
+## inside a session: persist the cwd and refresh the status line on every
+## directory change - the equivalent of the chpwd hook in .zshrc. The previous
+## handler is captured and called first so this chains onto zoxide's hook rather
+## than replacing it.
+if ($env:TMUX -and $env:PSMUX_SESSION) {
+    try { Start-PsmuxStatsDaemon } catch { }
+
+    $global:_PsmuxPwdFile          = Get-PsmuxPwdFile $env:PSMUX_SESSION
+    $global:_PsmuxPrevLocationHook = $ExecutionContext.SessionState.InvokeCommand.LocationChangedAction
+
+    $ExecutionContext.SessionState.InvokeCommand.LocationChangedAction = {
+        param($Source, $EventArgs)
+
+        if ($global:_PsmuxPrevLocationHook) {
+            try { & $global:_PsmuxPrevLocationHook $Source $EventArgs } catch { }
+        }
+        try {
+            Set-Content -LiteralPath $global:_PsmuxPwdFile -Value $EventArgs.NewPath.Path -Encoding utf8
+            & psmux refresh-client -S 2>$null | Out-Null
+        } catch { }
     }
 }
 
