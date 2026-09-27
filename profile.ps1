@@ -189,6 +189,83 @@ function Start-PsmuxStatsDaemon {
     )
 }
 
+function Start-PsmuxAutosave {
+    <#
+    .SYNOPSIS
+        Ensures the periodic psmux-resurrect save loop is running.
+    .DESCRIPTION
+        The psmux counterpart of tmux-continuum's periodic save; see
+        scripts/psmux-autosave.ps1 for why it is started from a pane shell
+        rather than from ~/.psmux.conf. The loop holds a machine-wide mutex, so
+        the check below is an in-process handle open - no spawn - and only a
+        pane with no loop running starts one.
+    .EXAMPLE
+        Start-PsmuxAutosave
+    #>
+    $existing = $null
+    if ([System.Threading.Mutex]::TryOpenExisting('Local\psmux-autosave', [ref]$existing)) {
+        $existing.Dispose()
+        return
+    }
+
+    $autosave = Join-Path $env:USERPROFILE 'dotfiles\scripts\psmux-autosave.ps1'
+    if (-not (Test-Path -LiteralPath $autosave)) { return }
+
+    Start-Process -FilePath 'pwsh' -WindowStyle Hidden -ArgumentList @(
+        '-NoProfile'
+        '-NonInteractive'
+        '-File', $autosave
+        '-Worker'
+    )
+}
+
+function Restore-PsmuxAfterBoot {
+    <#
+    .SYNOPSIS
+        Brings back, once per boot, the psmux sessions psmux-resurrect saved
+        last, before a new tab picks a session to attach to.
+    .DESCRIPTION
+        The counterpart of _tmux_restore_after_boot in .zshrc. Acts only on the
+        first call after a reboot, and only when psmux has no sessions yet, so
+        sessions closed during a boot are not brought back by the next tab.
+        The restore runs in a child process: restore.ps1 sets environment
+        variables and calls `exit`, and neither should reach this shell (or the
+        psmux server it is about to start).
+    .EXAMPLE
+        Restore-PsmuxAfterBoot
+    #>
+    # boot time in epoch seconds; recomputed values jitter by a few ms, so two
+    # values within a couple of minutes are the same boot
+    try {
+        $uptimeMs = [Environment]::TickCount64
+    } catch {
+        $uptimeMs = ((Get-Date) - (Get-CimInstance Win32_OperatingSystem).LastBootUpTime).TotalMilliseconds
+    }
+    $bootTime = [long]([DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - [math]::Floor($uptimeMs / 1000))
+
+    $marker   = Join-Path $env:USERPROFILE '.psmux\restored-boot'
+    $restored = [long]0
+    if (Test-Path -LiteralPath $marker) {
+        [void][long]::TryParse((Get-Content -LiteralPath $marker -Raw).Trim(), [ref]$restored)
+    }
+    if ([math]::Abs($bootTime - $restored) -le 120) { return }
+
+    # record the boot first, so a failed restore is not retried in every tab
+    New-Item -ItemType Directory -Path (Split-Path $marker) -Force | Out-Null
+    Set-Content -LiteralPath $marker -Value $bootTime
+
+    # sessions already running: nothing was lost
+    $running = & psmux ls 2>$null
+    if ($LASTEXITCODE -eq 0 -and $running) { return }
+
+    $restore = Join-Path $env:USERPROFILE '.psmux\plugins\psmux-resurrect\scripts\restore.ps1'
+    $last    = Join-Path $env:USERPROFILE '.psmux\resurrect\last'
+    if (-not (Test-Path -LiteralPath $restore) -or -not (Test-Path -LiteralPath $last)) { return }
+
+    Write-Host 'psmux: restoring saved sessions...'
+    & (Get-Process -Id $PID).Path -NoProfile -NonInteractive -File $restore *> $null
+}
+
 ## auto-start psmux when opening a new Windows Terminal tab, mirroring the WSL
 ## auto-launch block in .zshrc. Skipped inside an existing session (psmux sets
 ## TMUX in its panes), outside Windows Terminal, and in non-interactive hosts.
@@ -209,6 +286,8 @@ if ($env:WT_SESSION -and
     }
 
     try {
+        try { Restore-PsmuxAfterBoot } catch { }
+
         $detached     = @(Get-PsmuxDetachedSession)
         $psmuxSession = ''
 
@@ -343,6 +422,7 @@ if (Get-Command carapace -ErrorAction SilentlyContinue) {
 ## than replacing it.
 if ($env:TMUX -and $env:PSMUX_SESSION) {
     try { Start-PsmuxStatsDaemon } catch { }
+    try { Start-PsmuxAutosave } catch { }
 
     $global:_PsmuxPwdFile          = Get-PsmuxPwdFile $env:PSMUX_SESSION
     $global:_PsmuxPrevLocationHook = $ExecutionContext.SessionState.InvokeCommand.LocationChangedAction

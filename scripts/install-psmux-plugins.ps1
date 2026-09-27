@@ -15,6 +15,7 @@
     Installed into $HOME\.psmux\plugins:
       ppm         - plugin manager (equivalent of tpm)
       psmux-cpu   - publishes @cpu_percentage / @ram_percentage for status-right
+      psmux-resurrect - saves/restores sessions (driven by profile.ps1)
 
     Safe to re-run: the repo is re-cloned into a temp directory each time and the
     plugin directories are replaced, which doubles as the update path.
@@ -35,7 +36,7 @@ $ErrorActionPreference = 'Stop'
 
 # Plugins to install. Keep in sync with the `set -g @plugin` lines in .psmux.conf.
 $script:PLUGIN_REPO  = 'https://github.com/psmux/psmux-plugins.git'
-$script:PLUGINS      = @('ppm', 'psmux-cpu')
+$script:PLUGINS      = @('ppm', 'psmux-cpu', 'psmux-resurrect')
 $script:PLUGINS_DIR  = Join-Path $HOME '.psmux\plugins'
 
 function Write-Step {

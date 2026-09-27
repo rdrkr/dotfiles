@@ -222,6 +222,49 @@ function _tmux_pick_session() {
 }
 
 ##
+# Brings back, once per boot, the tmux sessions that were open when the machine
+# went down, before a new terminal picks a session to attach to.
+#
+# Sessions are saved by tmux-persist (see tmux.conf). This only acts on the
+# first call after a reboot, and only when tmux has no sessions yet: it starts
+# the server with a throwaway session so the plugins load, runs tmux-persist's
+# restore of every saved session synchronously, then drops the throwaway one.
+# Sessions closed on purpose were already forgotten when they closed, and a
+# server that dies within a boot (kill-server, crash) is not restored
+# automatically - use prefix + C-r per session, or its `restore.sh all`.
+##
+function _tmux_restore_after_boot() {
+  local marker="${XDG_STATE_HOME:-${HOME}/.local/state}/tmux/restored-boot"
+  local boot restored script
+
+  if [[ -r /proc/sys/kernel/random/boot_id ]]; then
+    boot="$(</proc/sys/kernel/random/boot_id)"
+  elif [[ "$_OS" == "macos" ]]; then
+    boot="$(sysctl -n kern.boottime 2>/dev/null)"
+  fi
+  [[ -n "$boot" ]] || return 0
+
+  [[ -r "$marker" ]] && IFS= read -r restored < "$marker"
+  [[ "$restored" == "$boot" ]] && return 0
+  # record the boot first, so a failed restore is not retried in every window
+  [[ -d "${marker:h}" ]] || mkdir -p "${marker:h}"
+  print -r -- "$boot" >| "$marker"
+
+  # sessions already running: nothing was lost
+  [[ -n "$(tmux list-sessions -F x 2>/dev/null)" ]] && return 0
+
+  tmux new-session -d -s __persist_restore 2>/dev/null || return 0
+  script="$(tmux show-options -gqv @persist-restore-script-path)"
+  if [[ -x "$script" ]]; then
+    print -u2 "tmux: restoring saved sessions..."
+    # through run-shell, which waits for it: the script finds its server
+    # through $TMUX, and that is only set for commands tmux itself runs
+    tmux run-shell "${(q)script} quiet all" >/dev/null 2>&1
+  fi
+  tmux kill-session -t '=__persist_restore' 2>/dev/null
+}
+
+##
 # Attaches to the oldest detached tmux session, or starts a new one, and then
 # moves this shell into the directory the session was last in.
 #
@@ -288,6 +331,8 @@ if [[ -z "$TMUX" && -o interactive ]] &&
     # the tmux server inherits this shell's environment, so put mise's tool
     # paths in it before starting tmux (see the mise section)
     command -v mise &>/dev/null && eval "$(mise activate zsh)"
+
+    _tmux_restore_after_boot
 
     if [[ -n "${SSH_CONNECTION}" ]]; then
       selection=$(_tmux_pick_session)
