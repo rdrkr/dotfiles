@@ -1,22 +1,22 @@
-tap "alexstrnik/browserino", "https://github.com/AlexStrNik/homebrew-Browserino", trusted: true
-tap "barutsrb/tap", "https://github.com/BarutSRB/homebrew-tap", trusted: true
-tap "blacktop/tap", trusted: true
-tap "felixkratz/formulae", "https://github.com/FelixKratz/homebrew-formulae", trusted: true
-tap "gentleman-programming/tap", "https://github.com/Gentleman-Programming/homebrew-tap", trusted: true
-tap "glzr-io/tap", trusted: true
-tap "hamed-elfayome/claude-usage", trusted: true
-tap "machlit/tap", trusted: true
-tap "mediosz/tap", trusted: true
-tap "mocki-toki/formulae", trusted: true
-tap "nikitabobko/tap", trusted: true
-tap "oven-sh/bun", trusted: true
-tap "rdrkr/tap", trusted: true
-tap "smartthingscommunity/smartthings", trusted: true
-tap "steipete/tap", trusted: true
-tap "touch-tap/tap", trusted: true
-tap "vjeantet/tap", trusted: true
+tap "alexstrnik/browserino", "https://github.com/AlexStrNik/homebrew-Browserino"
+tap "barutsrb/tap", "https://github.com/BarutSRB/homebrew-tap"
+tap "blacktop/tap"
+tap "felixkratz/formulae", "https://github.com/FelixKratz/homebrew-formulae"
+tap "gentleman-programming/tap", "https://github.com/Gentleman-Programming/homebrew-tap"
+tap "glzr-io/tap"
+tap "hamed-elfayome/claude-usage"
+tap "machlit/tap"
+tap "mediosz/tap"
+tap "mocki-toki/formulae"
+tap "nikitabobko/tap"
+tap "oven-sh/bun"
+tap "rdrkr/tap"
+tap "smartthingscommunity/smartthings"
+tap "steipete/tap"
+tap "touch-tap/tap"
+tap "vjeantet/tap"
 # Cryptography and SSL/TLS Toolkit
-brew "openssl@3"
+brew "openssl@3", link: true
 # Code searching, linting, rewriting
 brew "ast-grep"
 # Improved shell history for zsh, bash, fish and nushell
@@ -241,26 +241,8 @@ brew "yamlfmt"
 brew "yazi"
 # Shell extension to navigate your filesystem faster
 brew "zoxide"
-# A window border system for macOS
-brew "felixkratz/formulae/borders", args: ["HEAD"]
-# Interactive TUI installer for Gentleman.Dots development environment
-brew "gentleman-programming/tap/gentleman-dots"
-# Powerful, declarative settings management for your Mac, with speed.
-brew "machlit/tap/cutler"
-# Incredibly fast JavaScript runtime, bundler, transpiler and package manager - all in one.
-brew "oven-sh/bun/bun"
-# Command-line Interface for the SmartThings APIs
-brew "smartthingscommunity/smartthings/smartthings", trusted: true
-# Grep the GIF. Stick the landing
-brew "steipete/tap/gifgrep"
-# Fast CLI for Apple Reminders
-brew "steipete/tap/remindctl"
-# Command-line ElevenLabs TTS with mac-style flags
-brew "steipete/tap/sag"
-# macOS notification CLI — send native notifications and capture user interactions
-brew "vjeantet/tap/alerter"
-# AeroSpace is an i3-like tiling window manager for macOS
-cask "nikitabobko/tap/aerospace"
+cask "aerospace"
+cask "aerospacebar"
 # Enable Windows-like alt-tab
 cask "alt-tab"
 # iOS App Store alternative
@@ -277,12 +259,10 @@ cask "beeper"
 cask "betterdisplay"
 # Compare files and folders
 cask "beyond-compare@4"
-# Browserino is a tiny browser selector for MacOS written in SwiftUI
-cask "alexstrnik/browserino/browserino", trusted: true
+cask "browserino"
 # Terminal-based AI coding assistant
 cask "claude-code"
-# Native macOS menu bar app for monitoring Claude AI usage limits
-cask "hamed-elfayome/claude-usage/claude-usage-tracker"
+cask "claude-usage-tracker"
 # Server and cloud storage browser
 cask "cyberduck"
 # Voice and text chat software
@@ -401,8 +381,9 @@ mas "WhatsApp", id: 310633997
 mas "Windows App", id: 1295203466
 mas "Xcode", id: 497799835
 mas "Xmind", id: 1327661892
-go "cmd/go"
-go "cmd/gofmt"
+go "github.com/golangci/golangci-lint/v2/cmd/golangci-lint"
+go "golang.org/x/tools/gopls"
+go "honnef.co/go/tools/cmd/staticcheck"
 cargo "tmuxpanel"
 npm "@google/gemini-cli"
 npm "@homebridge-plugins/homebridge-camera-ffmpeg"
