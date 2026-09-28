@@ -1,48 +1,13 @@
 {
   "settings": [
     {
-      "domain": "com.apple.dock",
-      "key": "autohide-time-modifier",
-      "original_value": null
-    },
-    {
-      "domain": "com.apple.spaces",
-      "key": "spans-displays",
-      "original_value": false
-    },
-    {
-      "domain": "com.apple.dock",
-      "key": "autohide-delay",
-      "original_value": 0.0
-    },
-    {
       "domain": "com.apple.menuextra.clock",
       "key": "ShowSeconds",
       "original_value": null
     },
     {
       "domain": "NSGlobalDomain",
-      "key": "NSAutomaticSpellingCorrectionEnabled",
-      "original_value": null
-    },
-    {
-      "domain": "NSGlobalDomain",
       "key": "NSDocumentSaveNewDocumentsToCloud",
-      "original_value": null
-    },
-    {
-      "domain": "NSGlobalDomain",
-      "key": "NSAutomaticInlinePredictionEnabled",
-      "original_value": null
-    },
-    {
-      "domain": "com.apple.finder",
-      "key": "_FXSortFoldersFirst",
-      "original_value": false
-    },
-    {
-      "domain": "com.apple.menuextra.clock",
-      "key": "Show24Hour",
       "original_value": null
     },
     {
@@ -54,6 +19,21 @@
       "domain": "com.apple.dock",
       "key": "orientation",
       "original_value": null
+    },
+    {
+      "domain": "NSGlobalDomain",
+      "key": "NSAutomaticSpellingCorrectionEnabled",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.dock",
+      "key": "static-only",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.finder",
+      "key": "_FXSortFoldersFirst",
+      "original_value": false
     },
     {
       "domain": "com.apple.finder",
@@ -71,6 +51,41 @@
       "original_value": 47.0
     },
     {
+      "domain": "com.apple.screencapture",
+      "key": "show-thumbnail",
+      "original_value": null
+    },
+    {
+      "domain": "NSGlobalDomain",
+      "key": "com.apple.mouse.scaling",
+      "original_value": 3.0
+    },
+    {
+      "domain": "NSGlobalDomain",
+      "key": "NSAutomaticInlinePredictionEnabled",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.finder",
+      "key": "AppleShowAllFiles",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.spaces",
+      "key": "spans-displays",
+      "original_value": false
+    },
+    {
+      "domain": "com.apple.dock",
+      "key": "autohide-time-modifier",
+      "original_value": null
+    },
+    {
+      "domain": "com.apple.menuextra.clock",
+      "key": "Show24Hour",
+      "original_value": null
+    },
+    {
       "domain": "com.apple.HIToolbox",
       "key": "AppleFnUsageType",
       "original_value": null
@@ -82,28 +97,13 @@
     },
     {
       "domain": "com.apple.dock",
-      "key": "static-only",
-      "original_value": null
+      "key": "autohide-delay",
+      "original_value": 0.0
     },
     {
       "domain": "com.apple.menuextra.clock",
       "key": "ShowAMPM",
       "original_value": true
-    },
-    {
-      "domain": "NSGlobalDomain",
-      "key": "com.apple.mouse.scaling",
-      "original_value": 3.0
-    },
-    {
-      "domain": "com.apple.screencapture",
-      "key": "show-thumbnail",
-      "original_value": null
-    },
-    {
-      "domain": "com.apple.finder",
-      "key": "AppleShowAllFiles",
-      "original_value": null
     }
   ],
   "exec_run_count": 1,
