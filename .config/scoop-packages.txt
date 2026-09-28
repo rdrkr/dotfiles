@@ -4,3 +4,4 @@ extras/psreadline
 kotlin
 maven
 pipx
+resvg

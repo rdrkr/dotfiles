@@ -1,6 +1,7 @@
 .DS_Store
 *.keystore
 *.log
+*.tmp
 node_modules/
 
 .colima/_*
@@ -106,3 +107,12 @@ node_modules/
 /.claude/daemon-auth-cooldown
 /.claude/daemon-auth-status.json
 /.claude/teams
+/.claude/.last-update-result.json
+/.claude/VSi0nQcnuYnyt8YXjrI732jn2lzIPfXS68DgchYr.tmp
+/.claude/skills/synced
+/.claude/state/mcp-discover-verdicts.json
+/.config/.copilot/config.json
+/.gemini/config/plugins
+/.claude/*.tmp
+/.claude/chrome/chrome-native-host.bat
+/.gemini/antigravity-cli

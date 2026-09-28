@@ -1,367 +1,334 @@
 {
-    "$help": "https://aka.ms/terminal-documentation",
-    "$schema": "https://aka.ms/terminal-profiles-schema",
-    "actions": 
-    [
-        {
-            "command": 
-            {
-                "action": "newWindow",
-                "profile": "PowerShell"
-            },
-            "id": "User.newWindow.5DEADB41",
-            "name": "Open PowerShell in new window"
-        },
-        {
-            "command": 
-            {
-                "action": "newWindow",
-                "profile": "{0bc1d5d8-b69e-531c-9d55-7588894835da}"
-            },
-            "id": "User.newWindow.5DEADB42",
-            "name": "Open Ubuntu-26.04 in new window"
-        },
-        {
-            "command": 
-            {
-                "action": "newWindow",
-                "profile": "Ubuntu-24.04"
-            },
-            "id": "User.newWindow.5DEADB43",
-            "name": "Open Ubuntu-24.04 in new window"
-        },
-        {
-            "command": 
-            {
-                "action": "newTab",
-                "profile": "Nushell"
-            },
-            "id": "User.newTab.B1939205",
-            "name": "Open Nushell in new tab"
-        },
-        {
-            "command": 
-            {
-                "action": "newWindow",
-                "profile": "zsh"
-            },
-            "id": "User.newWindow.5DEADB47",
-            "name": "Open zsh in new window"
-        },
-        {
-            "command": 
-            {
-                "action": "newWindow",
-                "profile": "Ubuntu-22.04"
-            },
-            "id": "User.newWindow.5DEADB44",
-            "name": "Open Ubuntu-22.04 in new window"
-        },
-        {
-            "command": 
-            {
-                "action": "newWindow",
-                "profile": "{0bc1d5d8-b69e-531c-9d55-7588894835da}"
-            },
-            "id": "User.newWindow.2950570F"
-        },
-        {
-            "command": 
-            {
-                "action": "newTab",
-                "profile": "PowerShell"
-            },
-            "id": "User.newTab.B1939203",
-            "name": "Open PowerShell in new tab"
-        },
-        {
-            "command": 
-            {
-                "action": "newWindow",
-                "profile": "Command Prompt"
-            },
-            "id": "User.newWindow.5DEADB45",
-            "name": "Open Command Prompt in new window"
-        },
-        {
-            "command": 
-            {
-                "action": "newTab",
-                "profile": "zsh"
-            },
-            "id": "User.newTab.B1939208",
-            "name": "Open zsh in new tab"
-        },
-        {
-            "command": 
-            {
-                "action": "newWindow",
-                "profile": "Nushell"
-            },
-            "id": "User.newWindow.5DEADB46",
-            "name": "Open Nushell in new window"
-        },
-        {
-            "command": 
-            {
-                "action": "newTab",
-                "profile": "Ubuntu-26.04"
-            },
-            "id": "User.newTab.B1939200",
-            "name": "Open Ubuntu-26.04 in new tab"
-        },
-        {
-            "command": 
-            {
-                "action": "newTab",
-                "profile": "Ubuntu-24.04"
-            },
-            "id": "User.newTab.B1939201",
-            "name": "Open Ubuntu-24.04 in new tab"
-        },
-        {
-            "command": 
-            {
-                "action": "newTab",
-                "profile": "Ubuntu-22.04"
-            },
-            "id": "User.newTab.B1939202",
-            "name": "Open Ubuntu-22.04 in new tab"
-        },
-        {
-            "command": 
-            {
-                "action": "newTab",
-                "profile": "Command Prompt"
-            },
-            "id": "User.newTab.B1939204",
-            "name": "Open Command Prompt in new tab"
-        },
-        {
-            "command":
-            {
-                "action": "sendInput",
-                "input": "\u0001n"
-            },
-            "id": "User.muxNextWindow",
-            "name": "psmux/tmux: next window"
-        },
-        {
-            "command":
-            {
-                "action": "sendInput",
-                "input": "\u0001p"
-            },
-            "id": "User.muxPreviousWindow",
-            "name": "psmux/tmux: previous window"
-        }
-    ],
-    "alwaysShowTabs": false,
-    "copyFormatting": "none",
-    "copyOnSelect": true,
-    "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
-    "keybindings": 
-    [
-        {
-            "id": "Terminal.FindText",
-            "keys": "ctrl+shift+f"
-        },
-        {
-            "id": "Terminal.PasteFromClipboard",
-            "keys": "ctrl+v"
-        },
-        {
-            "id": "Terminal.CopyToClipboard",
-            "keys": "win+c"
-        },
-        {
-            "id": "Terminal.ClosePane",
-            "keys": "ctrl+w"
-        },
-        {
-            "id": "Terminal.CopyToClipboard",
-            "keys": "ctrl+c"
-        },
-        {
-            "id": "Terminal.OpenNewTab",
-            "keys": "ctrl+t"
-        },
-        {
-            "id": "Terminal.ClearBuffer",
-            "keys": "ctrl+k"
-        },
-        {
-            "id": "Terminal.PasteFromClipboard",
-            "keys": "win+v"
-        },
-        {
-            "id": "Terminal.DuplicatePaneAuto",
-            "keys": "alt+shift+d"
-        },
-        {
-            "id": "Terminal.OpenNewWindow",
-            "keys": "ctrl+n"
-        },
-        {
-            "id": "User.newWindow.2950570F",
-            "keys": "ctrl+shift+n"
-        },
-        {
-            "id": "User.muxNextWindow",
-            "keys": "ctrl+tab"
-        },
-        {
-            "id": "User.muxPreviousWindow",
-            "keys": "ctrl+shift+tab"
-        }
-    ],
-    "launchMode": "focus",
-    "newTabMenu": 
-    [
-        {
-            "type": "remainingProfiles"
-        }
-    ],
-    "profiles": 
+  "$help": "https://aka.ms/terminal-documentation",
+  "$schema": "https://aka.ms/terminal-profiles-schema",
+  "actions": [
     {
-        "defaults": 
-        {
-            "bellStyle": "none",
-            "colorScheme": "Gruvbox",
-            "cursorShape": "filledBox",
-            "elevate": true,
-            "experimental.retroTerminalEffect": false,
-            "font": 
-            {
-                "face": "JetBrainsMono Nerd Font Mono",
-                "size": 9
-            },
-            "scrollbarState": "hidden"
-        },
-        "list": 
-        [
-            {
-                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
-                "hidden": false,
-                "name": "PowerShell",
-                "source": "Windows.Terminal.PowershellCore"
-            },
-            {
-                "guid": "{0bc1d5d8-b69e-531c-9d55-7588894835da}",
-                "hidden": false,
-                "name": "Ubuntu-26.04",
-                "source": "Microsoft.WSL"
-            },
-            {
-                "guid": "{046b6939-21aa-5ba3-99e5-b0434d99ea09}",
-                "hidden": false,
-                "name": "Ubuntu-24.04",
-                "source": "Microsoft.WSL"
-            },
-            {
-                "guid": "{1a3f2171-2b05-5ddb-a70f-d537daa12b2a}",
-                "hidden": false,
-                "name": "Ubuntu-22.04",
-                "source": "Microsoft.WSL"
-            },
-            {
-                "commandline": "%SystemRoot%\\System32\\cmd.exe",
-                "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
-                "hidden": false,
-                "name": "Command Prompt"
-            },
-            {
-                "guid": "{47302f9c-1ac4-566c-aa3e-8cf29889d6ab}",
-                "hidden": false,
-                "name": "Nushell",
-                "source": "nu"
-            },
-            {
-                "altGrAliasing": true,
-                "antialiasingMode": "grayscale",
-                "closeOnExit": "automatic",
-                "commandline": "C:/msys64/msys2_shell.cmd -defterm -here -no-start -clangarm64 -full-path -shell zsh",
-                "guid": "{507f783f-9554-4b54-a3a4-33d3f833796d}",
-                "hidden": false,
-                "historySize": 9001,
-                "icon": "C:\\msys64\\clangarm64.ico",
-                "name": "zsh",
-                "padding": "8, 8, 8, 8",
-                "snapOnInput": true,
-                "startingDirectory": "%USERPROFILE%",
-                "useAcrylic": false
-            },
-            {
-                "commandline": "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
-                "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
-                "hidden": false,
-                "name": "Windows PowerShell"
-            },
-            {
-                "guid": "{5fa74b51-e275-58ed-9126-1d8494204443}",
-                "hidden": false,
-                "name": "Developer Command Prompt for VS 2022",
-                "source": "Windows.Terminal.VisualStudio"
-            },
-            {
-                "guid": "{ea73c78b-8260-567e-b1aa-58b79618014a}",
-                "hidden": false,
-                "name": "Developer PowerShell for VS 2022",
-                "source": "Windows.Terminal.VisualStudio"
-            },
-            {
-                "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
-                "hidden": false,
-                "name": "Azure Cloud Shell",
-                "source": "Windows.Terminal.Azure"
-            },
-            {
-                "guid": "{16208362-94fc-5b1f-a491-5b2624d5ab56}",
-                "hidden": true,
-                "name": "Visual Studio Debug Console",
-                "source": "VSDebugConsole"
-            },
-            {
-                "guid": "{3397d317-0037-54de-8e84-3e56aa3ceae9}",
-                "hidden": false,
-                "name": "Developer Command Prompt for VS 18",
-                "source": "Windows.Terminal.VisualStudio"
-            },
-            {
-                "guid": "{3a25041a-a15f-5d43-b1c6-dedf445a6802}",
-                "hidden": false,
-                "name": "Developer PowerShell for VS 18",
-                "source": "Windows.Terminal.VisualStudio"
-            }
-        ]
+      "command": {
+        "action": "newWindow",
+        "profile": "PowerShell"
+      },
+      "id": "User.newWindow.5DEADB41",
+      "name": "Open PowerShell in new window"
     },
-    "schemes": 
-    [
-        {
-            "background": "#282828",
-            "black": "#928374",
-            "blue": "#458588",
-            "brightBlack": "#A89984",
-            "brightBlue": "#83A598",
-            "brightCyan": "#8EC07C",
-            "brightGreen": "#B8BB26",
-            "brightPurple": "#D3869B",
-            "brightRed": "#FB4934",
-            "brightWhite": "#F2F2F2",
-            "brightYellow": "#FABD2F",
-            "cursorColor": "#EBDBB2",
-            "cyan": "#689D6A",
-            "foreground": "#EBDBB2",
-            "green": "#98971A",
-            "name": "Gruvbox",
-            "purple": "#B16286",
-            "red": "#CC241D",
-            "selectionBackground": "#D79921",
-            "white": "#CCCCCC",
-            "yellow": "#D79921"
-        }
-    ],
-    "showTabsInTitlebar": true,
-    "theme": "dark",
-    "themes": []
+    {
+      "command": {
+        "action": "newWindow",
+        "profile": "{0bc1d5d8-b69e-531c-9d55-7588894835da}"
+      },
+      "id": "User.newWindow.5DEADB42",
+      "name": "Open Ubuntu-26.04 in new window"
+    },
+    {
+      "command": {
+        "action": "sendInput",
+        "input": "\u0001n"
+      },
+      "id": "User.muxNextWindow",
+      "name": "psmux/tmux: next window"
+    },
+    {
+      "command": {
+        "action": "newWindow",
+        "profile": "Ubuntu-24.04"
+      },
+      "id": "User.newWindow.5DEADB43",
+      "name": "Open Ubuntu-24.04 in new window"
+    },
+    {
+      "command": {
+        "action": "newTab",
+        "profile": "Nushell"
+      },
+      "id": "User.newTab.B1939205",
+      "name": "Open Nushell in new tab"
+    },
+    {
+      "command": {
+        "action": "newWindow",
+        "profile": "zsh"
+      },
+      "id": "User.newWindow.5DEADB47",
+      "name": "Open zsh in new window"
+    },
+    {
+      "command": {
+        "action": "newWindow",
+        "profile": "Ubuntu-22.04"
+      },
+      "id": "User.newWindow.5DEADB44",
+      "name": "Open Ubuntu-22.04 in new window"
+    },
+    {
+      "command": {
+        "action": "newTab",
+        "profile": "PowerShell"
+      },
+      "id": "User.newTab.B1939203",
+      "name": "Open PowerShell in new tab"
+    },
+    {
+      "command": {
+        "action": "newWindow",
+        "profile": "{0bc1d5d8-b69e-531c-9d55-7588894835da}"
+      },
+      "id": "User.newWindow.2950570F"
+    },
+    {
+      "command": {
+        "action": "newWindow",
+        "profile": "Command Prompt"
+      },
+      "id": "User.newWindow.5DEADB45",
+      "name": "Open Command Prompt in new window"
+    },
+    {
+      "command": {
+        "action": "newTab",
+        "profile": "zsh"
+      },
+      "id": "User.newTab.B1939208",
+      "name": "Open zsh in new tab"
+    },
+    {
+      "command": {
+        "action": "newWindow",
+        "profile": "Nushell"
+      },
+      "id": "User.newWindow.5DEADB46",
+      "name": "Open Nushell in new window"
+    },
+    {
+      "command": {
+        "action": "newTab",
+        "profile": "Ubuntu-26.04"
+      },
+      "id": "User.newTab.B1939200",
+      "name": "Open Ubuntu-26.04 in new tab"
+    },
+    {
+      "command": {
+        "action": "newTab",
+        "profile": "Ubuntu-24.04"
+      },
+      "id": "User.newTab.B1939201",
+      "name": "Open Ubuntu-24.04 in new tab"
+    },
+    {
+      "command": {
+        "action": "newTab",
+        "profile": "Ubuntu-22.04"
+      },
+      "id": "User.newTab.B1939202",
+      "name": "Open Ubuntu-22.04 in new tab"
+    },
+    {
+      "command": {
+        "action": "newTab",
+        "profile": "Command Prompt"
+      },
+      "id": "User.newTab.B1939204",
+      "name": "Open Command Prompt in new tab"
+    },
+    {
+      "command": {
+        "action": "sendInput",
+        "input": "\u0001p"
+      },
+      "id": "User.muxPreviousWindow",
+      "name": "psmux/tmux: previous window"
+    }
+  ],
+  "alwaysShowTabs": false,
+  "copyFormatting": "none",
+  "copyOnSelect": true,
+  "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+  "keybindings": [
+    {
+      "id": "Terminal.PasteFromClipboard",
+      "keys": "ctrl+v"
+    },
+    {
+      "id": "Terminal.FindText",
+      "keys": "ctrl+shift+f"
+    },
+    {
+      "id": "Terminal.CopyToClipboard",
+      "keys": "win+c"
+    },
+    {
+      "id": "Terminal.ClosePane",
+      "keys": "ctrl+w"
+    },
+    {
+      "id": "Terminal.CopyToClipboard",
+      "keys": "ctrl+c"
+    },
+    {
+      "id": "User.muxPreviousWindow",
+      "keys": "ctrl+shift+tab"
+    },
+    {
+      "id": "Terminal.OpenNewTab",
+      "keys": "ctrl+t"
+    },
+    {
+      "id": "Terminal.ClearBuffer",
+      "keys": "ctrl+k"
+    },
+    {
+      "id": "Terminal.PasteFromClipboard",
+      "keys": "win+v"
+    },
+    {
+      "id": "Terminal.DuplicatePaneAuto",
+      "keys": "alt+shift+d"
+    },
+    {
+      "id": "Terminal.OpenNewWindow",
+      "keys": "ctrl+n"
+    },
+    {
+      "id": "User.newWindow.2950570F",
+      "keys": "ctrl+shift+n"
+    },
+    {
+      "id": "User.newWindow.5DEADB52",
+      "keys": "ctrl+alt+shift+n"
+    },
+    {
+      "id": "User.muxNextWindow",
+      "keys": "ctrl+tab"
+    }
+  ],
+  "launchMode": "focus",
+  "newTabMenu": [
+    {
+      "type": "remainingProfiles"
+    }
+  ],
+  "profiles": {
+    "defaults": {
+      "bellStyle": "none",
+      "colorScheme": "Gruvbox",
+      "cursorShape": "filledBox",
+      "elevate": true,
+      "experimental.retroTerminalEffect": false,
+      "font": {
+        "face": "JetBrainsMono Nerd Font Mono",
+        "size": 9
+      },
+      "scrollbarState": "hidden"
+    },
+    "list": [
+      {
+        "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+        "hidden": false,
+        "name": "PowerShell",
+        "source": "Windows.Terminal.PowershellCore"
+      },
+      {
+        "guid": "{0bc1d5d8-b69e-531c-9d55-7588894835da}",
+        "hidden": false,
+        "name": "Ubuntu-26.04",
+        "source": "Microsoft.WSL"
+      },
+      {
+        "commandline": "%SystemRoot%\\System32\\cmd.exe",
+        "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+        "hidden": false,
+        "name": "Command Prompt"
+      },
+      {
+        "guid": "{47302f9c-1ac4-566c-aa3e-8cf29889d6ab}",
+        "hidden": false,
+        "name": "Nushell",
+        "source": "nu"
+      },
+      {
+        "altGrAliasing": true,
+        "antialiasingMode": "grayscale",
+        "closeOnExit": "automatic",
+        "commandline": "C:/msys64/msys2_shell.cmd -defterm -here -no-start -clangarm64 -full-path -shell zsh",
+        "guid": "{507f783f-9554-4b54-a3a4-33d3f833796d}",
+        "hidden": false,
+        "historySize": 9001,
+        "icon": "C:\\msys64\\clangarm64.ico",
+        "name": "zsh",
+        "padding": "8, 8, 8, 8",
+        "snapOnInput": true,
+        "startingDirectory": "%USERPROFILE%",
+        "useAcrylic": false
+      },
+      {
+        "commandline": "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+        "hidden": false,
+        "name": "Windows PowerShell"
+      },
+      {
+        "guid": "{5fa74b51-e275-58ed-9126-1d8494204443}",
+        "hidden": false,
+        "name": "Developer Command Prompt for VS 2022",
+        "source": "Windows.Terminal.VisualStudio"
+      },
+      {
+        "guid": "{ea73c78b-8260-567e-b1aa-58b79618014a}",
+        "hidden": false,
+        "name": "Developer PowerShell for VS 2022",
+        "source": "Windows.Terminal.VisualStudio"
+      },
+      {
+        "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
+        "hidden": false,
+        "name": "Azure Cloud Shell",
+        "source": "Windows.Terminal.Azure"
+      },
+      {
+        "guid": "{16208362-94fc-5b1f-a491-5b2624d5ab56}",
+        "hidden": true,
+        "name": "Visual Studio Debug Console",
+        "source": "VSDebugConsole"
+      },
+      {
+        "guid": "{3397d317-0037-54de-8e84-3e56aa3ceae9}",
+        "hidden": false,
+        "name": "Developer Command Prompt for VS 18",
+        "source": "Windows.Terminal.VisualStudio"
+      },
+      {
+        "guid": "{3a25041a-a15f-5d43-b1c6-dedf445a6802}",
+        "hidden": false,
+        "name": "Developer PowerShell for VS 18",
+        "source": "Windows.Terminal.VisualStudio"
+      }
+    ]
+  },
+  "schemes": [
+    {
+      "background": "#282828",
+      "black": "#928374",
+      "blue": "#458588",
+      "brightBlack": "#A89984",
+      "brightBlue": "#83A598",
+      "brightCyan": "#8EC07C",
+      "brightGreen": "#B8BB26",
+      "brightPurple": "#D3869B",
+      "brightRed": "#FB4934",
+      "brightWhite": "#F2F2F2",
+      "brightYellow": "#FABD2F",
+      "cursorColor": "#EBDBB2",
+      "cyan": "#689D6A",
+      "foreground": "#EBDBB2",
+      "green": "#98971A",
+      "name": "Gruvbox",
+      "purple": "#B16286",
+      "red": "#CC241D",
+      "selectionBackground": "#D79921",
+      "white": "#CCCCCC",
+      "yellow": "#D79921"
+    }
+  ],
+  "showTabsInTitlebar": true,
+  "theme": "dark",
+  "themes": []
 }

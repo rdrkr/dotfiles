@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Tab Group Nav",
+  "version": "1.1.0",
+  "description": "Previous/next tab that steps into collapsed tab groups (expanding them); groups without the active tab stay collapsed.",
+  "permissions": ["tabGroups"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "commands": {
+    "previous-tab": {
+      "suggested_key": { "default": "Alt+Shift+Comma" },
+      "description": "Previous tab (enters collapsed groups)"
+    },
+    "next-tab": {
+      "suggested_key": { "default": "Alt+Shift+Period" },
+      "description": "Next tab (enters collapsed groups)"
+    }
+  }
+}

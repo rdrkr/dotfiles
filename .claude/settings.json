@@ -137,6 +137,7 @@
   },
   "alwaysThinkingEnabled": true,
   "effortLevel": "high",
+  "autoUpdatesChannel": "latest",
   "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
   "theme": "dark",

@@ -2,7 +2,6 @@
 
 # --- Configuration ---
 DOTFILES_DIR="${HOME}/dotfiles"
-# repo to clone; override with DOTFILES_REPO (e.g. a work copy of these dotfiles)
 DOTFILES_REPO="${DOTFILES_REPO:-https://github.com/rdrkr/dotfiles.git}"
 DRY_RUN=false
 

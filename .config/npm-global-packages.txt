@@ -1,3 +1,4 @@
+@github/copilot
 @google/gemini-cli
 @homebridge-plugins/homebridge-camera-ffmpeg
 esbuild
@@ -8,9 +9,13 @@ homebridge-dreo
 homebridge-shortcuts-buttons
 homebridge-smartthings-oauth
 homebridge
+9router
+better-sqlite3
 lighthouse
 mcporter
 neovim
 node-pty
 pnpm
 tsx
+opencode-ai
+sql.js
