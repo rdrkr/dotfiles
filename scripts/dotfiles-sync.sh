@@ -30,6 +30,8 @@
 # out of the repo, since the patterns themselves are what must not leak.
 #
 # The repo defaults to ~/dotfiles; set DOTFILES_SYNC_REPO or pass -C DIR.
+# Under WSL it drives the Windows Tailscale client (tailscale.exe) and picks up
+# files Taildrop saved to the Windows Downloads folder.
 
 set -euo pipefail
 
@@ -130,14 +132,53 @@ exclude_apply_opts() {
 }
 
 ##
+# Succeeds when running inside WSL.
+##
+is_wsl() {
+  [ -n "${WSL_DISTRO_NAME:-}" ] || grep -qi microsoft /proc/version 2>/dev/null
+}
+
+##
 # Prints the path of the tailscale CLI, or nothing when it is not installed.
-# The macOS app ships its CLI inside the app bundle.
+# The macOS app ships its CLI inside the app bundle; under WSL the device is
+# usually the Windows host, reached through the Windows client's tailscale.exe.
 ##
 tailscale_bin() {
   if command -v tailscale >/dev/null 2>&1; then
     command -v tailscale
   elif [ -x /Applications/Tailscale.app/Contents/MacOS/Tailscale ]; then
     printf '%s\n' /Applications/Tailscale.app/Contents/MacOS/Tailscale
+  elif is_wsl && command -v tailscale.exe >/dev/null 2>&1; then
+    command -v tailscale.exe
+  elif is_wsl && [ -x "/mnt/c/Program Files/Tailscale/tailscale.exe" ]; then
+    printf '%s\n' "/mnt/c/Program Files/Tailscale/tailscale.exe"
+  fi
+}
+
+##
+# Prints a path in the form the tailscale CLI expects: unchanged, or converted
+# to a Windows path when the CLI is the Windows tailscale.exe.
+# @param $1 tailscale CLI path
+# @param $2 path to convert
+##
+ts_path() {
+  case "$1" in
+    *.exe) wslpath -w "$2" ;;
+    *) printf '%s\n' "$2" ;;
+  esac
+}
+
+##
+# Prints the folders Taildrop may have saved incoming files to on its own: the
+# macOS and Windows clients drop them into the user's Downloads folder (under
+# WSL, the Windows one).
+##
+download_dirs() {
+  local win_profile
+  printf '%s\n' "$HOME/Downloads"
+  if is_wsl; then
+    win_profile="$(cd / && cmd.exe /c 'echo %USERPROFILE%' 2>/dev/null | tr -d '\r')"
+    [ -n "$win_profile" ] && printf '%s/Downloads\n' "$(wslpath -u "$win_profile")"
   fi
 }
 
@@ -201,7 +242,7 @@ deliver() {
   ts="$(tailscale_bin)"
   [ -n "$ts" ] || die "tailscale CLI not found; rerun with --no-send"
   info "sending $(basename "$file") to $peer over Taildrop"
-  if "$ts" file cp "$file" "${peer}:"; then
+  if "$ts" file cp "$(ts_path "$ts" "$file")" "${peer}:"; then
     mv "$file" "$(dirname "$file")/sent/"
     return 0
   fi
@@ -397,10 +438,13 @@ collect_incoming() {
     return 0
   fi
   ts="$(tailscale_bin)"
-  [ -n "$ts" ] && "$ts" file get --conflict=rename "$inbox" >/dev/null 2>&1 || true
-  for f in "$HOME"/Downloads/dotfiles-sync-*.patch "$HOME"/Downloads/dotfiles-sync-*.snapshot.tar; do
-    [ -f "$f" ] && mv "$f" "$inbox/"
-  done
+  [ -n "$ts" ] && "$ts" file get --conflict=rename "$(ts_path "$ts" "$inbox")" >/dev/null 2>&1 || true
+  local dl
+  while IFS= read -r dl; do
+    for f in "$dl"/dotfiles-sync-*.patch "$dl"/dotfiles-sync-*.snapshot.tar; do
+      [ -f "$f" ] && mv "$f" "$inbox/"
+    done
+  done < <(download_dirs)
   for f in "$inbox"/dotfiles-sync-*; do
     [ -f "$f" ] && printf '%s\n' "$f"
   done | sort
