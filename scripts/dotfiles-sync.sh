@@ -107,12 +107,30 @@ ask() {
 }
 
 ##
+# Prints the non-empty, non-comment lines of a pattern file, without the CRLF
+# line endings and UTF-8 BOM that files written from Windows can carry.
+# @param $1 file (missing is fine)
+##
+pattern_lines() {
+  local line
+  [ -f "$1" ] || return 0
+  while IFS= read -r line || [ -n "$line" ]; do
+    line="${line%$'\r'}"
+    line="${line#$'\xef\xbb\xbf'}"
+    line="${line%%#*}"
+    line="${line%"${line##*[![:space:]]}"}"
+    line="${line#"${line%%[![:space:]]*}"}"
+    [ -n "$line" ] && printf '%s\n' "$line"
+  done <"$1"
+  return 0
+}
+
+##
 # Prints the .syncignore patterns, plus .syncignore itself, one per line.
 ##
 syncignore_patterns() {
   printf '%s\n' '.syncignore'
-  [ -f "$REPO/.syncignore" ] || return 0
-  sed -e 's/[[:space:]]*#.*$//' -e 's/[[:space:]]*$//' "$REPO/.syncignore" | grep -v '^$' || true
+  pattern_lines "$REPO/.syncignore"
 }
 
 ##
@@ -239,11 +257,9 @@ scan_outgoing() {
   local p
   for p in "${builtin[@]}"; do args+=(-e "$p"); done
   blocklist="$(state_dir)/blocklist"
-  if [ -s "$blocklist" ]; then
-    while IFS= read -r p; do
-      [ -n "$p" ] && [ "${p#\#}" = "$p" ] && args+=(-e "$p")
-    done <"$blocklist"
-  fi
+  while IFS= read -r p; do
+    args+=(-e "$p")
+  done < <(pattern_lines "$blocklist")
 
   hits="$(grep -rnI -E "${args[@]}" "$target" 2>/dev/null | cut -c1-200 || true)"
   if [ -n "$hits" ]; then
