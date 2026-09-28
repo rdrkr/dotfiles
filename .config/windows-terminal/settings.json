@@ -275,7 +275,7 @@
                 "source": "Microsoft.WSL"
             },
             {
-                "commandline": "\"C:\\Users\\user\\AppData\\Local\\Microsoft\\WindowsApps\\Microsoft.PowerShell_8wekyb3d8bbwe\\pwsh.exe\" -c \"ssh ${env:USERNAME}@work-host\"",
+                "commandline": "pwsh.exe -c \"ssh ${env:USERNAME}@work-host\"",
                 "guid": "{3dfde28d-1fb7-4441-a1f1-877db1b2390c}",
                 "hidden": false,
                 "icon": "\ud83d\udda5\ufe0f",

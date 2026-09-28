@@ -79,7 +79,8 @@ if ($needsAdmin -and -not $Help -and -not $DryRun) {
 }
 
 $DotfilesDir = Join-Path $env:USERPROFILE "dotfiles"
-$DotfilesRepo = "https://github.com/rdrkr/dotfiles.git"
+# repo to clone; override with $env:DOTFILES_REPO (e.g. a work copy of these dotfiles)
+$DotfilesRepo = if ($env:DOTFILES_REPO) { $env:DOTFILES_REPO } else { 'https://github.com/rdrkr/dotfiles.git' }
 
 # Force wsl.exe to emit UTF-8 instead of UTF-16 LE. Without this, commands
 # like `wsl --list --quiet` return strings riddled with NUL bytes that break

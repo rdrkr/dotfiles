@@ -56,6 +56,7 @@ node_modules/
 /.claude/chrome/chrome-native-host
 /.claude/chrome/chrome-native-host.bat
 /.claude/*.tmp
+/.config/uv/uv-receipt.json
 /.claude/sessions
 
 .env
