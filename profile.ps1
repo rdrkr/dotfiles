@@ -388,6 +388,44 @@ function ccl { ccs --list }
 function cc1 { ccs --switch-to 1; cc @args }
 function cc2 { ccs --switch-to 2; cc @args }
 
+# dotfiles-sync: keep this repo and the other one in sync (see scripts/dotfiles-sync.sh)
+function dotfiles-sync {
+    <#
+    .SYNOPSIS
+        Runs scripts/dotfiles-sync.sh from PowerShell.
+    .DESCRIPTION
+        The sync script is bash, so on Windows it runs in the bash that ships
+        with Git for Windows (found next to git.exe, or in Program Files). The
+        repo is $env:DOTFILES_SYNC_REPO when set - put it in profile.local.ps1
+        when the repo does not live at ~\dotfiles - and ~\dotfiles otherwise.
+        Arguments are passed through: dotfiles-sync export, dotfiles-sync import...
+    .EXAMPLE
+        dotfiles-sync status
+    #>
+    $repo = if ($env:DOTFILES_SYNC_REPO) { $env:DOTFILES_SYNC_REPO } else { Join-Path $HOME 'dotfiles' }
+    $script = Join-Path $repo 'scripts/dotfiles-sync.sh'
+    if (-not (Test-Path -LiteralPath $script)) {
+        Write-Error "dotfiles-sync: $script not found (set `$env:DOTFILES_SYNC_REPO)"
+        return
+    }
+
+    $bash = 'bash'
+    if ($global:_OS -eq 'windows') {
+        $git = Get-Command git -ErrorAction SilentlyContinue
+        $bash = @(
+            $(if ($git) { Join-Path (Split-Path (Split-Path $git.Source)) 'bin\bash.exe' })
+            (Join-Path $env:ProgramFiles 'Git\bin\bash.exe')
+        ) | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | Select-Object -First 1
+        if (-not $bash) {
+            Write-Error 'dotfiles-sync: Git for Windows bash.exe not found'
+            return
+        }
+    }
+
+    # forward slashes: Git Bash takes C:/... paths as they are
+    & $bash ($script -replace '\\', '/') -C ($repo -replace '\\', '/') @args
+}
+
 # shell integrations
 if (Get-Command fzf -ErrorAction SilentlyContinue) {
     try { 

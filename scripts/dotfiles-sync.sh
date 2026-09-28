@@ -31,7 +31,8 @@
 #
 # The repo defaults to ~/dotfiles; set DOTFILES_SYNC_REPO or pass -C DIR.
 # Under WSL it drives the Windows Tailscale client (tailscale.exe) and picks up
-# files Taildrop saved to the Windows Downloads folder.
+# files Taildrop saved to the Windows Downloads folder. On native Windows it runs
+# in Git for Windows' bash; profile.ps1 wraps it as a `dotfiles-sync` command.
 
 set -euo pipefail
 
@@ -39,6 +40,17 @@ PATCH_HEADER='# dotfiles-sync patch v1'
 TRAILER='Dotfiles-Sync-Source'
 
 REPO="${DOTFILES_SYNC_REPO:-${HOME}/dotfiles}"
+
+# Where prompts are read from and written to: the controlling terminal when
+# there is one; otherwise (e.g. Git Bash started from PowerShell, where
+# /dev/tty may not open) the script's own stdin and stderr.
+if (exec </dev/tty) 2>/dev/null; then
+  TTY_IN=/dev/tty
+  TTY_OUT=/dev/tty
+else
+  TTY_IN=/dev/stdin
+  TTY_OUT=/dev/stderr
+fi
 
 ##
 # Prints an error and exits.
@@ -78,7 +90,7 @@ cfg() {
 ##
 state_dir() {
   local dir
-  dir="$(g rev-parse --absolute-git-dir)/dotfiles-sync"
+  dir="$(posix_path "$(g rev-parse --absolute-git-dir)")/dotfiles-sync"
   mkdir -p "$dir/outbox/sent" "$dir/inbox/done"
   printf '%s\n' "$dir"
 }
@@ -89,9 +101,8 @@ state_dir() {
 ##
 ask() {
   local answer=''
-  [ -r /dev/tty ] || die "needs a terminal to confirm (or pass --yes where supported)"
-  printf '%s ' "$1" >/dev/tty
-  IFS= read -r answer </dev/tty || true
+  printf '%s ' "$1" >"$TTY_OUT"
+  IFS= read -r answer <"$TTY_IN" || true
   printf '%s\n' "$answer"
 }
 
@@ -132,6 +143,27 @@ exclude_apply_opts() {
 }
 
 ##
+# Succeeds when running under Git Bash / MSYS on Windows.
+##
+is_msys() {
+  case "${OSTYPE:-}" in msys* | cygwin*) return 0 ;; esac
+  return 1
+}
+
+##
+# Prints a path in the POSIX form this script works with; Git for Windows
+# reports paths as "C:/...", which tar and globbing do not treat as local.
+# @param $1 path
+##
+posix_path() {
+  if is_msys && command -v cygpath >/dev/null 2>&1; then
+    cygpath -u "$1"
+  else
+    printf '%s\n' "$1"
+  fi
+}
+
+##
 # Succeeds when running inside WSL.
 ##
 is_wsl() {
@@ -152,20 +184,25 @@ tailscale_bin() {
     command -v tailscale.exe
   elif is_wsl && [ -x "/mnt/c/Program Files/Tailscale/tailscale.exe" ]; then
     printf '%s\n' "/mnt/c/Program Files/Tailscale/tailscale.exe"
+  elif is_msys && [ -x "/c/Program Files/Tailscale/tailscale.exe" ]; then
+    printf '%s\n' "/c/Program Files/Tailscale/tailscale.exe"
   fi
 }
 
 ##
-# Prints a path in the form the tailscale CLI expects: unchanged, or converted
-# to a Windows path when the CLI is the Windows tailscale.exe.
+# Prints a path in the form the tailscale CLI expects: a Windows path for the
+# Windows client (from WSL or Git Bash), unchanged otherwise.
 # @param $1 tailscale CLI path
 # @param $2 path to convert
 ##
 ts_path() {
-  case "$1" in
-    *.exe) wslpath -w "$2" ;;
-    *) printf '%s\n' "$2" ;;
-  esac
+  if is_wsl && [ "${1%.exe}" != "$1" ]; then
+    wslpath -w "$2"
+  elif is_msys && command -v cygpath >/dev/null 2>&1; then
+    cygpath -w "$2"
+  else
+    printf '%s\n' "$2"
+  fi
 }
 
 ##
@@ -386,7 +423,7 @@ cmd_export() {
 
   if [ "$yes" != yes ]; then
     answer="$(ask "Review the full patch in a pager first? [Y/n]")"
-    case "$answer" in n|N) ;; *) ${PAGER:-less -R} "$out" </dev/tty >/dev/tty ;; esac
+    case "$answer" in n|N) ;; *) ${PAGER:-less -R} "$out" <"$TTY_IN" >"$TTY_OUT" ;; esac
     answer="$(ask "Send these $n change(s)? [y/N]")"
     case "$answer" in y|Y) ;; *) rm -f "$out"; info "not sent"; return 0 ;; esac
   fi
@@ -512,11 +549,11 @@ import_patch() {
     tail -n +3 "$chunk" >"$body"
 
     while :; do
-      printf '\n--- from %s: %s (%s)\n' "$from" "$subject" "${sha:0:10}" >/dev/tty
-      git -C "$REPO" apply --stat "${apply_opts[@]}" "$body" >/dev/tty 2>&1 || true
+      printf '\n--- from %s: %s (%s)\n' "$from" "$subject" "${sha:0:10}" >"$TTY_OUT"
+      git -C "$REPO" apply --stat "${apply_opts[@]}" "$body" >"$TTY_OUT" 2>&1 || true
       answer="$(ask "Apply? [y]es / [n]o, skip for good / [s]how diff / [q]uit")"
       case "$answer" in
-        s|S) ${PAGER:-less -R} "$body" </dev/tty >/dev/tty; continue ;;
+        s|S) ${PAGER:-less -R} "$body" <"$TTY_IN" >"$TTY_OUT"; continue ;;
         n|N) printf '%s\n' "$key" >>"$skipped"; break ;;
         q|Q) rm -rf "$dir"; return 1 ;;
         y|Y)
@@ -560,7 +597,7 @@ cmd_import() {
     || die "the repo has uncommitted changes to tracked files; commit or stash them first"
   state="$(state_dir)"
 
-  while IFS= read -r f; do
+  while IFS= read -r f <&3; do
     [ -n "$f" ] || continue
     n=$((n + 1))
     info "incoming: $(basename "$f")"
@@ -575,7 +612,7 @@ cmd_import() {
         case "$f" in "$state/inbox/"*) mv "$f" "$state/inbox/done/" ;; esac
         ;;
     esac
-  done < <(collect_incoming "$@")
+  done 3< <(collect_incoming "$@")
   [ "$n" -gt 0 ] || info "nothing received"
 }
 
@@ -609,6 +646,7 @@ main() {
   fi
   [ -d "$REPO" ] || die "repo not found: $REPO (set DOTFILES_SYNC_REPO or pass -C DIR)"
   REPO="$(cd "$REPO" && git rev-parse --show-toplevel)" || die "not a git repo: $REPO"
+  REPO="$(posix_path "$REPO")"
 
   local cmd="${1:-status}"
   [ $# -gt 0 ] && shift
