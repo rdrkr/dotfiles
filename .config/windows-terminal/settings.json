@@ -43,15 +43,6 @@
             "command": 
             {
                 "action": "newWindow",
-                "profile": "{3dfde28d-1fb7-4441-a1f1-877db1b2390c}"
-            },
-            "id": "User.newWindow.5DEADB52",
-            "name": "Open work-host (Ubuntu-24.04) in new window"
-        },
-        {
-            "command": 
-            {
-                "action": "newWindow",
                 "profile": "zsh"
             },
             "id": "User.newWindow.5DEADB47",
@@ -149,15 +140,6 @@
         {
             "command":
             {
-                "action": "newTab",
-                "profile": "{3dfde28d-1fb7-4441-a1f1-877db1b2390c}"
-            },
-            "id": "User.newTab.B1939206",
-            "name": "Open work-host (Ubuntu-24.04) in new tab"
-        },
-        {
-            "command":
-            {
                 "action": "sendInput",
                 "input": "\u0001n"
             },
@@ -225,10 +207,6 @@
             "keys": "ctrl+shift+n"
         },
         {
-            "id": "User.newWindow.5DEADB52",
-            "keys": "ctrl+alt+shift+n"
-        },
-        {
             "id": "User.muxNextWindow",
             "keys": "ctrl+tab"
         },
@@ -273,14 +251,6 @@
                 "hidden": false,
                 "name": "Ubuntu-26.04",
                 "source": "Microsoft.WSL"
-            },
-            {
-                "commandline": "pwsh.exe -c \"ssh ${env:USERNAME}@work-host\"",
-                "guid": "{3dfde28d-1fb7-4441-a1f1-877db1b2390c}",
-                "hidden": false,
-                "icon": "\ud83d\udda5\ufe0f",
-                "name": "work-host (Ubuntu 24.04)",
-                "startingDirectory": "%USERPROFILE%"
             },
             {
                 "guid": "{046b6939-21aa-5ba3-99e5-b0434d99ea09}",
