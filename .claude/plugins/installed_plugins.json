@@ -4,11 +4,11 @@
     "frontend-design@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/frontend-design/fa59bc903774",
-        "version": "fa59bc903774",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/frontend-design/fbe07fb6ce7d",
+        "version": "fbe07fb6ce7d",
         "installedAt": "2026-01-31T09:18:47.057Z",
-        "lastUpdated": "2026-09-26T17:19:12.900Z",
-        "gitCommitSha": "fa59bc9037741ecfa131aa27938272605710d7b2"
+        "lastUpdated": "2026-09-28T17:53:03.071Z",
+        "gitCommitSha": "fbe07fb6ce7d51d8e86ca6efdf050059894cdb80"
       }
     ],
     "typescript-lsp@claude-plugins-official": [
@@ -24,11 +24,11 @@
     "commit-commands@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/commit-commands/fa59bc903774",
-        "version": "fa59bc903774",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/commit-commands/fbe07fb6ce7d",
+        "version": "fbe07fb6ce7d",
         "installedAt": "2026-01-31T09:18:47.110Z",
-        "lastUpdated": "2026-09-26T17:19:12.901Z",
-        "gitCommitSha": "fa59bc9037741ecfa131aa27938272605710d7b2"
+        "lastUpdated": "2026-09-28T17:53:03.070Z",
+        "gitCommitSha": "fbe07fb6ce7d51d8e86ca6efdf050059894cdb80"
       }
     ],
     "claude-md-management@claude-plugins-official": [
@@ -84,11 +84,11 @@
     "skill-creator@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/skill-creator/fa59bc903774",
-        "version": "fa59bc903774",
+        "installPath": "/Users/ronendruker/.claude/plugins/cache/claude-plugins-official/skill-creator/fbe07fb6ce7d",
+        "version": "fbe07fb6ce7d",
         "installedAt": "2026-03-06T10:02:33.773Z",
-        "lastUpdated": "2026-09-26T17:19:12.902Z",
-        "gitCommitSha": "fa59bc9037741ecfa131aa27938272605710d7b2"
+        "lastUpdated": "2026-09-28T17:53:03.072Z",
+        "gitCommitSha": "fbe07fb6ce7d51d8e86ca6efdf050059894cdb80"
       }
     ],
     "code-simplifier@claude-plugins-official": [
