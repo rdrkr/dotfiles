@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * Universal multi-account Claude Usage Fetcher (hardened for the TLS-inspecting corporate
- * proxy + Cloudflare). This single script is deployed unchanged to every account
+ * Universal multi-account Claude Usage Fetcher (hardened for a TLS-inspecting
+ * corporate proxy + Cloudflare). This single script is deployed unchanged to every account
  * location; it figures out which account it represents at runtime:
  *
  *   - When run as a per-account backup script

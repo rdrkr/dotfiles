@@ -46,7 +46,7 @@
       zstd
       zlib
       # Qt 6 xcb platform plugin (libqxcb.so) is dlopened, so its deps do not
-      # show up in `ldd app`; add the full xcb/X set up front.
+      # show up in the app's `ldd` output; add the full xcb/X set up front.
       xorg.libX11
       xorg.libXext
       xorg.libXrender

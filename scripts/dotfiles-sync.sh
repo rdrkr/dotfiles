@@ -252,19 +252,30 @@ scan_outgoing() {
     'xox[abprs]-[A-Za-z0-9-]{10,}'
     'glpat-[A-Za-z0-9_-]{20,}'
     'sk-(ant-)?[A-Za-z0-9_-]{20,}'
+    # any browser cookie-jar line (Netscape format), whatever the cookie holds
+    $'(TRUE|FALSE)\t/[^\t]*\t(TRUE|FALSE)\t[0-9]+\t[^\t]+\t[^\t]+'
   )
-  local -a args=()
+  local -a args=() redact=()
   local p
-  for p in "${builtin[@]}"; do args+=(-e "$p"); done
+  for p in "${builtin[@]}"; do
+    args+=(-e "$p")
+    redact+=(-e "s#${p}#[redacted]#g")
+  done
   blocklist="$(state_dir)/blocklist"
   while IFS= read -r p; do
     args+=(-e "$p")
   done < <(pattern_lines "$blocklist")
 
-  hits="$(grep -rnI -E "${args[@]}" "$target" 2>/dev/null | cut -c1-200 || true)"
+  # report file:line with the secrets themselves masked, so a failed scan never
+  # puts them on screen (blocklist hits are shown, they are this machine's own)
+  if [ -d "$target" ]; then
+    hits="$(cd "$target" && grep -rnI -E "${args[@]}" . 2>/dev/null || true)"
+  else
+    hits="$(grep -nI -E "${args[@]}" "$target" 2>/dev/null || true)"
+  fi
   if [ -n "$hits" ]; then
-    printf '%s\n' "$hits" >&2
-    die "outgoing changes match a secret or blocklist pattern - nothing was sent. Move the file to .syncignore or change it, then retry."
+    printf '%s\n' "$hits" | sed -E "${redact[@]}" | cut -c1-160 >&2
+    die "outgoing changes match a secret or blocklist pattern (above) - nothing was sent. Untrack or fix those files, or list them in .syncignore, then retry."
   fi
 
   if command -v gitleaks >/dev/null 2>&1; then
