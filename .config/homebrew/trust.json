@@ -24,6 +24,7 @@
   ],
   "trustedcasks": [
     "alexstrnik/browserino/browserino",
-    "alexstrnik/browserino/browseros"
+    "alexstrnik/browserino/browseros",
+    "rdrkr/tap/aerospacebar"
   ]
 }
