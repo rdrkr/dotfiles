@@ -201,6 +201,8 @@ brew "ssh-copy-id"
 brew "starship"
 # Organize software neatly under a single directory tree (e.g. /usr/local)
 brew "stow"
+# Pretty fancy and modern terminal file manager
+brew "superfile"
 # Formatting tool for reformatting Swift code
 brew "swiftformat"
 # Tool to enforce Swift style and conventions

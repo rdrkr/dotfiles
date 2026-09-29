@@ -105,3 +105,4 @@ TheQtCompanyLtd.QtCreator
 Uncrustify.Uncrustify
 VideoLAN.VLC
 WinDirStat.WinDirStat
+yorukot.superfile

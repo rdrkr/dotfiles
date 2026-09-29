@@ -523,6 +523,8 @@ alias ls='ls --color=always'
 alias vim='nvim'
 alias v='nvim'
 alias lg='lazygit'
+# superfile
+alias s='spf'
 alias ld='lazydocker'
 alias c='clear'
 # update all: run the per-OS task list with the task runner's own tsx (installing its

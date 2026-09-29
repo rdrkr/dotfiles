@@ -362,6 +362,11 @@ if (Get-Command eza -ErrorAction SilentlyContinue) {
 function vim { nvim @args }
 function v { nvim @args }
 function lg { lazygit @args }
+<#
+.SYNOPSIS
+    Launches superfile (spf), passing through all arguments.
+#>
+function s { spf @args }
 function ld { lazydocker @args }
 function open { start @args }
 function c { Clear-Host }

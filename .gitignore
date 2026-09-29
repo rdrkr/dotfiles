@@ -116,3 +116,7 @@ node_modules/
 /.claude/*.tmp
 /.claude/chrome/chrome-native-host.bat
 /.gemini/antigravity-cli
+
+# superfile rewrites its built-in themes on every version bump; keep only the custom one
+.config/superfile/theme/*
+!.config/superfile/theme/gruvbox-material-dark-medium.toml
