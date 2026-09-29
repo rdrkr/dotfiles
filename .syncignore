@@ -10,3 +10,5 @@
 #   ~/.config/tmux/local.conf        (sourced at the end of tmux.conf)
 #   ~/profile.local.ps1              (dot-sourced at the end of profile.ps1)
 # A repo that does track them (e.g. the work one) lists them here.
+.config/gh/hosts.yml
+.config/*-packages-windows.txt
