@@ -1103,9 +1103,13 @@ function Get-IgnoredPathExcludes {
     foreach ($m in [regex]::Matches($Diff, '(?m)^diff --git a/(\S+) b/(\S+)\r?$')) {
         foreach ($g in 1, 2) { if (-not $Tracked.Contains($m.Groups[$g].Value)) { $null = $paths.Add($m.Groups[$g].Value) } }
     }
-    if ($paths.Count -eq 0) { return }
-    $ignored = [string[]]@($paths) | & git -C $script:Repo check-ignore --stdin 2>$null
-    foreach ($p in @($ignored | Where-Object { $_ })) { "--exclude=$p" }
+    # paths as arguments, in batches: piping them to --stdin would send CRLF line ends
+    $list = [string[]]@($paths)
+    for ($i = 0; $i -lt $list.Count; $i += 100) {
+        $batch = $list[$i..([Math]::Min($i + 99, $list.Count - 1))]
+        $ignored = & git -C $script:Repo check-ignore -- @batch 2>$null
+        foreach ($p in @($ignored | Where-Object { $_ })) { "--exclude=$p" }
+    }
 }
 
 <#
