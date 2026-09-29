@@ -136,7 +136,8 @@ function Get-SyncedTree {
     foreach ($line in Invoke-TestGit $Repo ls-tree -r HEAD) {
         if ($line -match '^\S+ \S+ (\S+)\t(.*)$') {
             $path = $Matches[2]
-            if ($path -eq '.syncignore' -or $path -like 'work-only/*' -or $path -eq 'anchored-only.txt' -or $path -eq 'leak.txt') { continue }
+            if ($path -eq '.syncignore' -or $path -like 'work-only/*' -or $path -eq 'anchored-only.txt' -or $path -eq 'leak.txt' -or
+                $path -like 'peer-tracked/*' -or $path -like 'win-tracked/*') { continue }
             $map[$path] = $Matches[1]
         }
     }
@@ -458,6 +459,24 @@ try {
     }
     $r = Invoke-AutoA; $r = Invoke-AutoB
     Assert-That ((Compare-Repos) -eq '') 'repos converge after the retries' (Compare-Repos)
+
+    Write-Host "`n[paths the receiving side ignores and does not track are skipped]"
+    foreach ($side in @(
+            @{ Name = 'PowerShell'; To = $script:RepoB; From = $script:RepoA; Send = { Invoke-AutoA }; Recv = { Invoke-AutoB }; Dir = 'peer-tracked' }
+            @{ Name = 'bash'; To = $script:RepoA; From = $script:RepoB; Send = { Invoke-AutoB }; Recv = { Invoke-AutoA }; Dir = 'win-tracked' })) {
+        Add-Content -LiteralPath (Join-Path $side.To '.git\info\exclude') -Value "$($side.Dir)/"
+        Set-RepoFile $side.From "$($side.Dir)/state.txt" "v1`n"
+        $null = & $side.Send
+        $r = & $side.Recv
+        Assert-That (-not (Test-Path (Join-Path $side.To "$($side.Dir)/state.txt")) -and (Get-StateText $side.To 'last-run') -match ' ok') "$($side.Name): a new file it ignores is skipped" ($r.Out + (Get-StateText $side.To 'last-run'))
+        Set-RepoFile $side.From "$($side.Dir)/state.txt" "v2`n"
+        Set-RepoFile $side.From "alongside-$($side.Name).txt" "applies`n"
+        $null = & $side.Send
+        $r = & $side.Recv
+        Assert-That ((Test-Path (Join-Path $side.To "alongside-$($side.Name).txt")) -and -not (Test-Path (Join-Path $side.To "$($side.Dir)/state.txt")) -and (Get-StateText $side.To 'last-run') -match ' ok') "$($side.Name): edits to it are skipped, the rest of the change applies" ($r.Out + (Get-StateText $side.To 'last-run'))
+    }
+    $r = Invoke-AutoA; $r = Invoke-AutoB
+    Assert-That ((Compare-Repos) -eq '') 'repos converge apart from the locally ignored files' (Compare-Repos)
 
     Write-Host "`n[locking]"
     $lockPath = Join-Path $script:RepoB '.git\dotfiles-sync\lock'

@@ -853,6 +853,20 @@ import_snapshot() {
 }
 
 ##
+# Prints `git apply --exclude` options for the paths a change touches that this
+# repo deliberately does not track: ignored by .gitignore (or info/exclude) and
+# not in the index. The peer may still track such files - e.g. from before they
+# were ignored - and applying them here would fail or start tracking them.
+# @param $1 the change's diff file
+# @param $2 file listing every path in this repo's index
+##
+ignored_path_excludes() {
+  awk '/^diff --git a\// { a = $3; b = $4; sub(/^a\//, "", a); sub(/^b\//, "", b); print a; print b }' "$1" \
+    | sort -u | grep -vxF -f "$2" | g check-ignore --stdin 2>/dev/null | sed 's/^/--exclude=/'
+  return 0
+}
+
+##
 # Walks the changes in one patch file. Interactively it asks to apply or skip
 # each one; with --auto it applies them all and stops at the first that does
 # not apply cleanly. Applied changes are committed with a trailer naming their
@@ -863,7 +877,7 @@ import_snapshot() {
 #   patch), 2 when --auto hit a change that needs a human
 ##
 import_patch() {
-  local file="$1" how="$2" from dir state done_list skipped key sha subject body answer rc
+  local file="$1" how="$2" from dir state done_list skipped key sha subject body answer rc tracked
   state="$(state_dir)"
   [ "$(head -n 1 "$file")" = "$PATCH_HEADER" ] || { info "not a dotfiles-sync patch: $file"; return 1; }
   from="$(sed -n 's/^# from: //p' "$file" | head -n 1)"
@@ -876,11 +890,14 @@ import_patch() {
     n { print >> f }
   ' "$file"
 
-  local -a apply_opts=()
+  local -a apply_opts=() opts=()
   local o
   while IFS= read -r o; do apply_opts+=("$o"); done < <(exclude_apply_opts)
 
   done_list="$(g log --format="%(trailers:key=${TRAILER},valueonly)" HEAD)"
+  # a dot-file, so the "$dir"/* loop below never takes it for a change
+  tracked="$dir/.tracked"
+  g ls-files >"$tracked"
   skipped="$state/skipped"
   touch "$skipped"
 
@@ -895,10 +912,12 @@ import_patch() {
     fi
     body="${chunk}.diff"
     tail -n +3 "$chunk" >"$body"
+    opts=("${apply_opts[@]}")
+    while IFS= read -r o; do opts+=("$o"); done < <(ignored_path_excludes "$body" "$tracked")
 
     if [ "$how" = auto ]; then
       rc=0
-      g apply --3way --index --whitespace=nowarn "${apply_opts[@]}" "$body" >&2 || rc=$?
+      g apply --3way --index --whitespace=nowarn "${opts[@]}" "$body" >&2 || rc=$?
       if [ "$rc" -ne 0 ]; then
         # the cycle started from a clean, committed tree: drop the partial apply
         g reset -q --hard HEAD
@@ -923,7 +942,7 @@ import_patch() {
 
     while :; do
       printf '\n--- from %s: %s (%s)\n' "$from" "$subject" "${sha:0:10}" >"$TTY_OUT"
-      git -C "$REPO" apply --stat "${apply_opts[@]}" "$body" >"$TTY_OUT" 2>&1 || true
+      git -C "$REPO" apply --stat "${opts[@]}" "$body" >"$TTY_OUT" 2>&1 || true
       answer="$(ask "Apply? [y]es / [n]o, skip for good / [s]how diff / [q]uit")" || exit 1
       case "$answer" in
         s|S) ${PAGER:-less -R} "$body" <"$TTY_IN" >"$TTY_OUT"; continue ;;
@@ -931,7 +950,7 @@ import_patch() {
         q|Q) rm -rf "$dir"; return 1 ;;
         y|Y)
           rc=0
-          g apply --3way --index --whitespace=nowarn "${apply_opts[@]}" "$body" || rc=$?
+          g apply --3way --index --whitespace=nowarn "${opts[@]}" "$body" || rc=$?
           if [ "$rc" -ne 0 ]; then
             if g diff --quiet && g diff --cached --quiet; then
               info "this change does not apply here (the files differ too much); answer n to skip it"

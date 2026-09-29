@@ -1087,6 +1087,29 @@ function Split-SyncPatch {
 
 <#
 .SYNOPSIS
+    Returns git apply --exclude options for the paths a change touches that this
+    repo deliberately does not track: ignored by .gitignore (or info/exclude)
+    and not in the index. The peer may still track such files - e.g. from
+    before they were ignored - and applying them here would fail or start
+    tracking them.
+.PARAMETER Diff
+    The change's diff text.
+.PARAMETER Tracked
+    Every path in this repo's index.
+#>
+function Get-IgnoredPathExcludes {
+    param([Parameter(Mandatory)][AllowEmptyString()][string]$Diff, [Parameter(Mandatory)][Collections.Generic.HashSet[string]]$Tracked)
+    $paths = [Collections.Generic.HashSet[string]]::new()
+    foreach ($m in [regex]::Matches($Diff, '(?m)^diff --git a/(\S+) b/(\S+)\r?$')) {
+        foreach ($g in 1, 2) { if (-not $Tracked.Contains($m.Groups[$g].Value)) { $null = $paths.Add($m.Groups[$g].Value) } }
+    }
+    if ($paths.Count -eq 0) { return }
+    $ignored = [string[]]@($paths) | & git -C $script:Repo check-ignore --stdin 2>$null
+    foreach ($p in @($ignored | Where-Object { $_ })) { "--exclude=$p" }
+}
+
+<#
+.SYNOPSIS
     Walks the changes in one patch file. Interactively it asks to apply or skip
     each one; with -Auto it applies them all and stops at the first that does
     not apply cleanly. Applied changes are committed with the trailer.
@@ -1112,6 +1135,7 @@ function Import-SyncPatch {
     if ($from -eq (Get-SyncConfig label)) { Write-Info "skipping ${File}: it came from this side"; return 0 }
 
     $applyOpts = @(Get-ExcludeApplyOptions)
+    $tracked = [Collections.Generic.HashSet[string]]::new([string[]]@(Invoke-Git -GitArgs @('ls-files') | Where-Object { $_ }))
     $fmt = "--format=%(trailers:key=$($script:Trailer),valueonly)"
     $done = [Collections.Generic.HashSet[string]]::new([string[]]@(Invoke-Git -GitArgs @('log', $fmt, 'HEAD') | Where-Object { $_ }))
     $skippedFile = Join-Path $state 'skipped'
@@ -1124,11 +1148,12 @@ function Import-SyncPatch {
             $key = "$from $($change.Sha)"
             if ($done.Contains($key) -or $skipped.Contains($key)) { continue }
             [IO.File]::WriteAllText($body, $change.Body, $script:Latin1)
+            $opts = @($applyOpts) + @(Get-IgnoredPathExcludes -Diff $change.Body -Tracked $tracked)
             $shortSha = $change.Sha.Substring(0, [Math]::Min(10, $change.Sha.Length))
             $message = "sync(${from}): $($change.Subject)"
 
             if ($Auto) {
-                & git -C $script:Repo apply --3way --index --whitespace=nowarn @applyOpts $body 2>&1 |
+                & git -C $script:Repo apply --3way --index --whitespace=nowarn @opts $body 2>&1 |
                     ForEach-Object { [Console]::Error.WriteLine([string]$_) }
                 if ($LASTEXITCODE -ne 0) {
                     # the cycle started from a clean, committed tree: drop the partial apply
@@ -1155,13 +1180,13 @@ function Import-SyncPatch {
             $handled = $false
             while (-not $handled) {
                 Write-Host "`n--- from ${from}: $($change.Subject) ($shortSha)"
-                & git -C $script:Repo apply --stat @applyOpts $body 2>&1 | ForEach-Object { Write-Host ([string]$_) }
+                & git -C $script:Repo apply --stat @opts $body 2>&1 | ForEach-Object { Write-Host ([string]$_) }
                 $answer = Read-Answer 'Apply? [y]es / [n]o, skip for good / [s]how diff / [q]uit'
                 if ($answer -match '^[sS]$') { Show-InPager $body }
                 elseif ($answer -match '^[nN]$') { Write-StateFile $skippedFile $key -Append; $handled = $true }
                 elseif ($answer -match '^[qQ]$') { return 1 }
                 elseif ($answer -match '^[yY]$') {
-                    & git -C $script:Repo apply --3way --index --whitespace=nowarn @applyOpts $body 2>&1 |
+                    & git -C $script:Repo apply --3way --index --whitespace=nowarn @opts $body 2>&1 |
                         ForEach-Object { Write-Host ([string]$_) }
                     if ($LASTEXITCODE -ne 0) {
                         if ((Test-Git @('diff', '--quiet')) -and (Test-Git @('diff', '--cached', '--quiet'))) {
