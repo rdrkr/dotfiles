@@ -1,0 +1,49 @@
+# lazygit configuration
+# Theme: Gruvbox Material, dark, medium background, "material" foreground palette,
+# using the same colour roles as the Stylus browser themes (blue accent, green/red for diffs).
+gui:
+  theme:
+    # borders of the focused panel / other panels / panel being searched
+    activeBorderColor:
+      - "#7daea3"
+      - bold
+    inactiveBorderColor:
+      - "#5a524c"
+    searchingActiveBorderColor:
+      - "#d8a657"
+      - bold
+    # key-binding hints in the status bar
+    optionsTextColor:
+      - "#7daea3"
+    # selected line in the focused panel, and in unfocused panels
+    selectedLineBgColor:
+      - "#45403d"
+    inactiveViewSelectedLineBgColor:
+      - "#32302f"
+    # commits marked for cherry-pick
+    cherryPickedCommitFgColor:
+      - "#89b482"
+    cherryPickedCommitBgColor:
+      - "#374141"
+    # base commit marked for rebase
+    markedBaseCommitFgColor:
+      - "#7daea3"
+    markedBaseCommitBgColor:
+      - "#4f422e"
+    # files with unstaged changes
+    unstagedChangesColor:
+      - "#ea6962"
+    # default text
+    defaultFgColor:
+      - "#d4be98"
+  # commit author colours in the commits panel
+  authorColors:
+    "*": "#d3869b"
+  # branch-name colours by prefix
+  branchColorPatterns:
+    "^feature/": "#a9b665"
+    "^bugfix/": "#ea6962"
+    "^hotfix/": "#ea6962"
+    "^release/": "#d8a657"
+    "^develop$": "#7daea3"
+    "^(main|master)$": "#e78a4e"
