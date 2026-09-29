@@ -767,9 +767,8 @@ function Show-InPager {
     param([Parameter(Mandatory)][string]$Path)
     # Start-Process hands the pager the real console; '&' inside a function
     # whose output is captured would pipe it into a variable instead
-    $parts = if ($env:PAGER) { @($env:PAGER -split '\s+' | Where-Object { $_ }) }
-    elseif (Get-Command less -ErrorAction SilentlyContinue) { @('less', '-R') }
-    else { @() }
+    $parts = @(if ($env:PAGER) { $env:PAGER -split '\s+' | Where-Object { $_ } }
+        elseif (Get-Command less -ErrorAction SilentlyContinue) { 'less', '-R' })
     if ($parts.Count -gt 0) {
         $pagerArgs = @($parts | Select-Object -Skip 1) + "`"$Path`""
         Start-Process -FilePath $parts[0] -ArgumentList $pagerArgs -NoNewWindow -Wait
@@ -1534,7 +1533,8 @@ function Invoke-Main {
         $argList.RemoveRange(0, 2)
     }
     $command = if ($argList.Count -gt 0) { $argList[0] } else { 'status' }
-    $rest = if ($argList.Count -gt 1) { [string[]]$argList.GetRange(1, $argList.Count - 1).ToArray() } else { [string[]]@() }
+    # typed variable: an 'if' expression would unwrap a single argument into a plain string
+    [string[]]$rest = @($argList | Select-Object -Skip 1)
 
     if ($command -in '-h', '--help', 'help') { Show-Usage; return }
     try {
