@@ -438,6 +438,27 @@ try {
     Assert-That ($r.Code -eq 0) 'A takes the re-sent and the new change' $r.Out
     Assert-That ((Compare-Repos) -eq '') 'repos still match' ((Compare-Repos) + "`n" + $r.Out)
 
+    Write-Host "`n[a failing import commit leaves nothing staged and is retried]"
+    foreach ($side in @(
+            @{ Name = 'PowerShell'; To = $script:RepoB; From = $script:RepoA; Send = { Invoke-AutoA }; Recv = { Invoke-AutoB }; Label = 'personal' }
+            @{ Name = 'bash'; To = $script:RepoA; From = $script:RepoB; Send = { Invoke-AutoB }; Recv = { Invoke-AutoA }; Label = 'work' })) {
+        $hook = Join-Path $side.To '.git\hooks\pre-commit'
+        [IO.File]::WriteAllText($hook, "#!/bin/sh`necho 'hook says no' >&2`nexit 1`n")
+        Set-RepoFile $side.From "commit-fail-$($side.Name).txt" "x`n"
+        $null = & $side.Send
+        $r = & $side.Recv
+        $pending = @(Get-ChildItem (Join-Path $side.To '.git\dotfiles-sync\inbox') -File -Filter 'dotfiles-sync-*')
+        $dirty = Invoke-TestGit $side.To status --porcelain
+        Assert-That (-not $dirty -and $pending.Count -eq 1) "$($side.Name): nothing left staged, patch kept in the inbox" ($r.Out + "`n" + ($dirty -join "`n"))
+        Assert-That ((Get-StateText $side.To 'sync.log') -match 'hook says no') "$($side.Name): the commit's error reaches sync.log"
+        Remove-Item -LiteralPath $hook
+        $r = & $side.Recv
+        $trailer = [string](Invoke-TestGit $side.To log -1 '--format=%(trailers:key=Dotfiles-Sync-Source,valueonly)')
+        Assert-That ((Test-Path (Join-Path $side.To "commit-fail-$($side.Name).txt")) -and $trailer -match "^$($side.Label) ") "$($side.Name): next run applies it with the trailer" $r.Out
+    }
+    $r = Invoke-AutoA; $r = Invoke-AutoB
+    Assert-That ((Compare-Repos) -eq '') 'repos converge after the retries' (Compare-Repos)
+
     Write-Host "`n[locking]"
     $lockPath = Join-Path $script:RepoB '.git\dotfiles-sync\lock'
     $held = [IO.File]::Open($lockPath, 'OpenOrCreate', 'ReadWrite', 'None')

@@ -145,6 +145,28 @@ g() {
 }
 
 ##
+# Commits what is staged, retrying a few times: a commit can fail for a moment
+# while another program (an editor's git integration, a backup) holds the index
+# lock or touches the working tree during the pre-commit hook. git's error
+# output is logged.
+# @param $@ git commit arguments (e.g. -m MESSAGE -m TRAILER)
+# @return 0 when committed, 1 when every attempt failed
+##
+commit_with_retry() {
+  local attempt out
+  for attempt in 1 2 3; do
+    if out="$(g commit -q "$@" 2>&1)"; then
+      [ -z "$out" ] || printf '%s\n' "$out" >&2
+      return 0
+    fi
+    printf '%s\n' "$out" >&2
+    log "git commit failed (attempt $attempt): $(printf '%s' "$out" | tr '\n' ' ' | cut -c1-400)"
+    sleep $((3 * attempt))
+  done
+  return 1
+}
+
+##
 # Prints a dotfiles-sync.* setting from the repo's local git config.
 # @param $1 setting name without the "dotfiles-sync." prefix
 ##
@@ -887,9 +909,14 @@ import_patch() {
       if g diff --cached --quiet; then
         info "already present or ignored here: $subject"
         printf '%s\n' "$key" >>"$skipped"
-      else
-        g commit -q -m "sync(${from}): ${subject}" -m "${TRAILER}: ${key}"
+      elif commit_with_retry -m "sync(${from}): ${subject}" -m "${TRAILER}: ${key}"; then
         info "applied from $from: $subject ($(g log -1 --format=%h))"
+      else
+        # never leave it staged: the next cycle would commit it as a local
+        # change, without the trailer, and send it back
+        g reset -q --hard HEAD
+        rm -rf "$dir"
+        die "could not commit the change from $from ($subject); the patch stays in the inbox and is retried on the next run"
       fi
       continue
     fi
@@ -921,9 +948,14 @@ import_patch() {
           if g diff --cached --quiet; then
             info "nothing left to change (already present or ignored here)"
             printf '%s\n' "$key" >>"$skipped"
-          else
-            g commit -q -m "sync(${from}): ${subject}" -m "${TRAILER}: ${key}"
+          elif commit_with_retry -m "sync(${from}): ${subject}" -m "${TRAILER}: ${key}"; then
             info "committed $(g log -1 --format=%h)"
+          else
+            printf '%s\n' "$key" >"$state/resolving"
+            info "the commit failed (reason above). Fix it, then commit the staged change yourself:"
+            info "  git -C $REPO commit -m $(printf '%q' "sync(${from}): ${subject}") -m '${TRAILER}: ${key}'"
+            rm -rf "$dir"
+            exit 1
           fi
           break
           ;;
@@ -1039,7 +1071,8 @@ cmd_auto() {
   # 1. local changes become a commit made with this repo's own identity
   if [ -n "$(g status --porcelain)" ]; then
     g add -A
-    g commit -q -m "$AUTO_COMMIT_MSG"
+    # staged local changes are safe to leave: the next cycle commits them
+    commit_with_retry -m "$AUTO_COMMIT_MSG" || die "could not commit local changes; retrying on the next run"
     info "committed local changes ($(g log -1 --format=%h))"
   fi
 

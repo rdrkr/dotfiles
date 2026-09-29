@@ -212,12 +212,46 @@ if (Get-Module -ListAvailable -Name BurntToast) {
 #>
 function Invoke-Git {
     param([Parameter(Mandatory)][string[]]$GitArgs, [switch]$AllowFail, [switch]$Quiet)
-    if ($Quiet) { $out = & git -C $script:Repo @GitArgs 2>$null }
-    else { $out = & git -C $script:Repo @GitArgs }
-    if ($LASTEXITCODE -ne 0 -and -not $AllowFail) {
-        Stop-Sync "git $($GitArgs -join ' ') failed (exit $LASTEXITCODE)"
+    # stderr goes to a file so a failure's reason reaches sync.log (scheduled
+    # runs have no console to show it on)
+    $errFile = [IO.Path]::GetTempFileName()
+    try {
+        $out = & git -C $script:Repo @GitArgs 2> $errFile
+        $code = $LASTEXITCODE
+        $err = ([IO.File]::ReadAllText($errFile)).Trim()
+    }
+    finally { Remove-Item -LiteralPath $errFile -Force -ErrorAction SilentlyContinue }
+    if ($err -and -not $Quiet) {
+        [Console]::Error.WriteLine($err)
+        if ($code -ne 0) { Write-SyncLog "git $($GitArgs[0]) exited ${code}: $($err -replace '\s*\r?\n\s*', ' | ')" }
+    }
+    $global:LASTEXITCODE = $code
+    if ($code -ne 0 -and -not $AllowFail) {
+        Stop-Sync "git $($GitArgs -join ' ') failed (exit $code)$(if ($err) { ": $($err -replace '\s*\r?\n\s*', ' | ')" })"
     }
     return $out
+}
+
+<#
+.SYNOPSIS
+    Commits what is staged, retrying a few times: a commit can fail for a moment
+    while another program (an editor's git integration, a backup) holds the
+    index lock or touches the working tree during the pre-commit hook.
+.PARAMETER Messages
+    Commit message paragraphs (one -m each).
+.OUTPUTS
+    $true when committed, $false when every attempt failed (reasons are in sync.log).
+#>
+function Invoke-SyncCommit {
+    param([Parameter(Mandatory)][string[]]$Messages)
+    $commitArgs = @('commit', '-q')
+    foreach ($m in $Messages) { $commitArgs += '-m', $m }
+    for ($attempt = 1; $attempt -le 3; $attempt++) {
+        $null = Invoke-Git -GitArgs $commitArgs -AllowFail
+        if ($LASTEXITCODE -eq 0) { return $true }
+        Start-Sleep -Seconds (3 * $attempt)
+    }
+    return $false
 }
 
 <#
@@ -1106,9 +1140,14 @@ function Import-SyncPatch {
                     Write-Info "already present or ignored here: $($change.Subject)"
                     Write-StateFile $skippedFile $key -Append
                 }
-                else {
-                    $null = Invoke-Git -GitArgs @('commit', '-q', '-m', $message, '-m', "$($script:Trailer): $key")
+                elseif (Invoke-SyncCommit @($message, "$($script:Trailer): $key")) {
                     Write-Info "applied from ${from}: $($change.Subject) ($(Invoke-Git -GitArgs @('log', '-1', '--format=%h')))"
+                }
+                else {
+                    # never leave it staged: the next cycle would commit it as a
+                    # local change, without the trailer, and send it back
+                    $null = Invoke-Git -GitArgs @('reset', '-q', '--hard', 'HEAD')
+                    Stop-Sync "could not commit the change from $from ($($change.Subject)); the patch stays in the inbox and is retried on the next run (see sync.log)"
                 }
                 continue
             }
@@ -1140,9 +1179,14 @@ function Import-SyncPatch {
                         Write-Info 'nothing left to change (already present or ignored here)'
                         Write-StateFile $skippedFile $key -Append
                     }
-                    else {
-                        $null = Invoke-Git -GitArgs @('commit', '-q', '-m', $message, '-m', "$($script:Trailer): $key")
+                    elseif (Invoke-SyncCommit @($message, "$($script:Trailer): $key")) {
                         Write-Info "committed $(Invoke-Git -GitArgs @('log', '-1', '--format=%h'))"
+                    }
+                    else {
+                        Write-StateFile (Join-Path $state 'resolving') $key
+                        Write-Info 'the commit failed (reason above). Fix it, then commit the staged change yourself:'
+                        Write-Info "  git -C $($script:Repo) commit -m `"$($message -replace '"', '\"')`" -m `"$($script:Trailer): $key`""
+                        Stop-Sync 'import stopped: commit failed'
                     }
                     $handled = $true
                 }
@@ -1272,7 +1316,10 @@ function Invoke-Auto {
     # 1. local changes become a commit made with this repo's own identity
     if (Invoke-Git -GitArgs @('status', '--porcelain')) {
         $null = Invoke-Git -GitArgs @('add', '-A')
-        $null = Invoke-Git -GitArgs @('commit', '-q', '-m', $script:AutoCommitMsg)
+        if (-not (Invoke-SyncCommit @($script:AutoCommitMsg))) {
+            # staged local changes are safe to leave: the next cycle commits them
+            Stop-Sync 'could not commit local changes (see sync.log); retrying on the next run'
+        }
         Write-Info "committed local changes ($(Invoke-Git -GitArgs @('log', '-1', '--format=%h')))"
     }
 
