@@ -16,7 +16,7 @@ tap "steipete/tap"
 tap "touch-tap/tap"
 tap "vjeantet/tap"
 # Cryptography and SSL/TLS Toolkit
-brew "openssl@3", link: true
+brew "openssl@3"
 # Code searching, linting, rewriting
 brew "ast-grep"
 # Improved shell history for zsh, bash, fish and nushell
