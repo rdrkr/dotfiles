@@ -10,6 +10,21 @@ Komorebic(cmd) {
 	RunWait(format("*RunAs komorebic.exe {}", cmd), , "Hide")
 }
 
+; Whether komorebi tiling and its WM hotkeys are active. Enabled on every
+; start/reload; flipped by ToggleKomorebi (like AeroSpace's `enable toggle`).
+global gKomorebiEnabled := true
+
+; Toggle komorebi on/off. While off, komorebi is paused (windows are left where
+; they are and no longer managed) and the WM hotkeys guarded by
+; `#HotIf gKomorebiEnabled` pass through to the active app untouched.
+ToggleKomorebi() {
+	global gKomorebiEnabled
+	gKomorebiEnabled := !gKomorebiEnabled
+	Komorebic("toggle-pause")
+	ToolTip(gKomorebiEnabled ? "komorebi enabled" : "komorebi disabled")
+	SetTimer(() => ToolTip(), -1500)
+}
+
 ; State maintained by komorebi-nav-subscriber.ps1 and cached for fast access.
 global gNavStateFile := EnvGet("LOCALAPPDATA") "\komorebi-nav-state.txt"
 global gNavBits := ""        ; last-known population bitmap ("1"=populated)
@@ -94,6 +109,17 @@ LWin & Tab::AltTab
 +!Tab:: return
 
 ; Window tabs
+; Chrome only: Alt+Shift+Comma/Period are the previous/next-tab commands of the
+; Tab Group Nav extension (.config/chrome/tab-group-nav), which, unlike Ctrl+Tab,
+; steps into collapsed tab groups and re-collapses them on exit.
+#HotIf WinActive("ahk_exe chrome.exe")
+#!Left:: Send("!+,")
+#!Right:: Send("!+.")
++#[:: Send("!+,")
++#]:: Send("!+.")
+#HotIf
+; All other applications:
+; Preserve the existing Ctrl+Tab behavior.
 #!Left:: Send("^+{Tab}")
 #!Right:: Send("^{Tab}")
 +#[:: Send("^+{Tab}")
@@ -130,6 +156,7 @@ LWin & Tab::AltTab
 +!Up:: Send("+^{Up}")
 +!Down:: Send("+^{Down}")
 
+#HotIf gKomorebiEnabled
 ^Left:: Komorebic("focus left")
 ^Right:: Komorebic("focus right")
 ^Up:: Komorebic("focus up")
@@ -138,6 +165,7 @@ LWin & Tab::AltTab
 +^Right:: Komorebic("move right")
 +^Up:: Komorebic("move up")
 +^Down:: Komorebic("move down")
+#HotIf
 
 ; Essential Mac shortcuts (Cmd+C, Cmd+V, etc.) mapped from Win (#)
 #HotIf WinActive("ahk_exe ms-teams.exe")
@@ -194,6 +222,9 @@ LWin & Tab::AltTab
 +#3:: Send("#{PrintScreen}")
 +#4:: Send("#+s")
 
+; WM hotkeys below are only active while komorebi is enabled (see ToggleKomorebi)
+#HotIf gKomorebiEnabled
+
 ; Focus windows
 !^#Left:: Komorebic("focus left")
 !^#Down:: Komorebic("focus down")
@@ -238,10 +269,33 @@ LWin & Tab::AltTab
 
 ; Close
 !+q:: Komorebic("close")
+#HotIf
 
 ; Disable mouse zoom
 ^WheelUp:: return
 ^WheelDown:: return
+
+; Cmd + left click -> Ctrl + left click (macOS-style multi-select, open link in
+; a new tab, etc.). The Win key is released first so the target app only sees
+; Ctrl, and the button is held for as long as the physical button is held so
+; Ctrl+drag selections keep working.
+#LButton:: {
+	Send("{LWin up}{RWin up}{Ctrl down}")
+	Click("Down")
+	KeyWait("LButton")
+	Click("Up")
+	Send("{Ctrl up}")
+}
++#LButton:: {
+	Send("{LWin up}{RWin up}{Ctrl down}{Shift down}")
+	Click("Down")
+	KeyWait("LButton")
+	Click("Up")
+	Send("{Shift up}{Ctrl up}")
+}
+
+; Enable/disable komorebi (like AeroSpace's `enable toggle`)
+!+p:: ToggleKomorebi()
 
 ; WM Exit
 !+e:: {

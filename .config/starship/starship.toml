@@ -5,6 +5,7 @@ format = """$all$fill$shell$time$line_break\
 $character"""
 
 add_newline = false
+scan_timeout = 5000
 
 [line_break]
 disabled = false
