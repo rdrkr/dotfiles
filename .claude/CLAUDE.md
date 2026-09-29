@@ -1,4 +1,5 @@
 - All functions, properties, objects must be documented in the language standard in-code documentation.
+- Never create pull requests, in any project or repo. Only the user opens PRs. Stop after pushing the branch and hand over the branch name.
 
 ## gstack
 
