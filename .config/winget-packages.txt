@@ -84,6 +84,7 @@ Ninja-build.Ninja
 NSIS.NSIS
 Nushell.Nushell
 Nvidia.PhysX
+OliverBetz.ExifTool
 OpenJS.NodeJS
 oschwartz10612.Poppler
 Oven-sh.Bun

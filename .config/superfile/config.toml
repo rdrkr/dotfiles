@@ -160,15 +160,15 @@ border_middle_right = '┤'
 
 #-- Detailed Metadata
 # Requires: exiftool
-metadata = false
+metadata = true
 
 #-- MD5 Checksum Generation
 # Requires: md5sum
-enable_md5_checksum = false
+enable_md5_checksum = true
 #
 #-- Zoxide Support - Smart directory navigation!
 # Requires: zoxide
-zoxide_support = false
+zoxide_support = true
 
 #-- File opening rules
 # Map file extensions to commands used to open them.
