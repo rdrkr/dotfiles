@@ -100,9 +100,23 @@ cd "$SCRIPT_DIR" || exit
 # no longer exists, e.g. symlink changes during stow in WSL).
 trap 'cd "$ORIGINAL_DIR" 2>/dev/null || true' EXIT
 
-NPM_GLOBAL_FILE="${SCRIPT_DIR}/.config/npm-global-packages.txt"
-PIPX_PACKAGES_FILE="${SCRIPT_DIR}/.config/pipx-packages.txt"
-BUN_PACKAGES_FILE="${SCRIPT_DIR}/.config/bun-packages.txt"
+# npm/pipx/bun lists are per OS (npm-global-packages-macos.txt, ...-linux.txt):
+# each machine's backup would otherwise overwrite the other's list whenever
+# dotfiles-sync carries it across. Set by set_package_list_files once the
+# platform is known.
+NPM_GLOBAL_FILE=""
+PIPX_PACKAGES_FILE=""
+BUN_PACKAGES_FILE=""
+
+##
+# Points NPM_GLOBAL_FILE, PIPX_PACKAGES_FILE and BUN_PACKAGES_FILE at this
+# platform's lists (needs OS_TYPE from detect_platform).
+##
+set_package_list_files() {
+  NPM_GLOBAL_FILE="${SCRIPT_DIR}/.config/npm-global-packages-${OS_TYPE}.txt"
+  PIPX_PACKAGES_FILE="${SCRIPT_DIR}/.config/pipx-packages-${OS_TYPE}.txt"
+  BUN_PACKAGES_FILE="${SCRIPT_DIR}/.config/bun-packages-${OS_TYPE}.txt"
+}
 
 # --- Colors ---
 NC="\033[0m" # No Color
@@ -846,7 +860,7 @@ setup_switchbot() {
 }
 
 # --- Homebridge (macOS) ---
-# The homebridge packages themselves come from npm-global-packages.txt earlier in
+# The homebridge packages themselves come from npm-global-packages-macos.txt earlier in
 # restore; what that cannot do is register the service. hb-service writes a root
 # LaunchDaemon, so this is the one part of restore that needs sudo, and it only
 # asks when the daemon is actually absent.
@@ -1229,17 +1243,33 @@ backup() {
   run_stow "backup"
 
   if [ "$DRY_RUN" = false ]; then
-    if [ -n "$(git status --porcelain)" ]; then
-      print_warning "Changes detected. Committing and pushing..."
-      run_command "git add ."
-      run_command "git commit -m 'chore(backup): automated backup of dotfiles changes'"
-      run_command "git pull origin main --rebase"
-      run_command "git push origin main"
-      run_command "\"${SCRIPT_DIR}/scripts/notify.sh\" --title 'Dotfiles' --message 'Changes detected. dotfiles updated'"
-      print_success "Changes committed and pushed."
-    else
-      print_success "No changes detected. Nothing to commit."
-    fi
+    # an automatic dotfiles-sync cycle must never run in the middle of this
+    bash "${SCRIPT_DIR}/scripts/dotfiles-sync.sh" -C "$SCRIPT_DIR" with-lock bash "${SCRIPT_DIR}/install.sh" __commit-backup \
+      || print_warning "Backup commit skipped (dotfiles-sync lock busy or git failed)."
+  fi
+}
+
+# --- Backup commit ---
+# Commits and pushes the backup; called through 'dotfiles-sync.sh with-lock'.
+# dotfiles-sync commits on its own, so there can be commits to push even when
+# the tree is clean.
+commit_backup() {
+  local status unpushed
+  status="$(git status --porcelain)"
+  unpushed="$(git rev-list '@{u}..HEAD' 2>/dev/null || true)"
+  if [ -n "$status" ]; then
+    print_warning "Changes detected. Committing and pushing..."
+    run_command "git add ."
+    run_command "git commit -m 'chore(backup): automated backup of dotfiles changes'"
+  fi
+  if [ -n "$status" ] || [ -n "$unpushed" ]; then
+    [ -n "$status" ] || print_warning "Unpushed commits found. Pushing..."
+    run_command "git pull origin main --rebase"
+    run_command "git push origin main"
+    run_command "\"${SCRIPT_DIR}/scripts/notify.sh\" --title 'Dotfiles' --message 'Changes detected. dotfiles updated'"
+    print_success "Changes committed and pushed."
+  else
+    print_success "No changes detected. Nothing to commit."
   fi
 }
 
@@ -1281,7 +1311,8 @@ backup_linux_packages() {
 }
 
 # --- Schedule ---
-# Registers an hourly cron job that runs the backup command.
+# Registers an hourly cron job that runs the backup command, plus the
+# dotfiles-sync job (launchd on macOS) when dotfiles-sync is set up here.
 schedule() {
   print_header "Scheduling Hourly Backups..."
 
@@ -1324,6 +1355,18 @@ schedule() {
   else
     print_success "Backup is already scheduled."
   fi
+
+  # continuous dotfiles-sync with the peer machine (see scripts/dotfiles-sync.sh);
+  # WSL is skipped - the Windows side runs its own sync
+  if [ "$IS_WSL" = true ]; then
+    return
+  elif ! git config --get dotfiles-sync.label >/dev/null 2>&1; then
+    print_warning "dotfiles-sync is not set up here; skipping it (run: dotfiles-sync setup --label NAME --peer DEVICE)"
+  elif bash "${SCRIPT_DIR}/scripts/dotfiles-sync.sh" -C "$SCRIPT_DIR" schedule; then
+    print_success "dotfiles-sync scheduled."
+  else
+    print_error "Failed to schedule dotfiles-sync."
+  fi
 }
 
 # --- Argument Parsing ---
@@ -1340,7 +1383,7 @@ while [[ $# -gt 0 ]]; do
     DRY_RUN=true
     shift
     ;;
-  restore | backup | schedule)
+  restore | backup | schedule | __commit-backup)
     COMMAND=$key
     shift
     ;;
@@ -1359,8 +1402,15 @@ if [ -z "$COMMAND" ]; then
   exit 1
 fi
 
+# internal: the backup's commit step, re-entered under the dotfiles-sync lock
+if [ "$COMMAND" = "__commit-backup" ]; then
+  commit_backup
+  exit $?
+fi
+
 # Detect platform before running any command
 detect_platform
+set_package_list_files
 detect_package_manager
 
 # In WSL, Windows PATH entries are appended by default (appendWindowsPath).

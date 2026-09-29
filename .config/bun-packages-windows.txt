@@ -1,0 +1,5 @@
+@types/bun
+js-yaml
+typescript
+vscode-json-languageserver
+yaml-language-server

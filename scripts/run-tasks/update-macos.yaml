@@ -41,7 +41,7 @@ groups:
         args:
           [
             -c,
-            'f=~/dotfiles/.config/npm-global-packages.txt; if [ ! -f "$f" ]; then echo "npm package list not found: $f"; exit 1; fi; pkgs=$(grep -vE "^[[:space:]]*(#|$)" "$f" | tr -d "\r"); if [ -z "$pkgs" ]; then echo "no npm packages to install in $f"; exit 0; fi; npm install -g $pkgs',
+            'f=~/dotfiles/.config/npm-global-packages-macos.txt; if [ ! -f "$f" ]; then echo "npm package list not found: $f"; exit 1; fi; pkgs=$(grep -vE "^[[:space:]]*(#|$)" "$f" | tr -d "\r"); if [ -z "$pkgs" ]; then echo "no npm packages to install in $f"; exit 0; fi; npm install -g $pkgs',
           ]
         verbose: true
 

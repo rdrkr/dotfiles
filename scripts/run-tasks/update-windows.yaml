@@ -43,7 +43,7 @@ groups:
           [
             -NoProfile,
             -Command,
-            "$pkgs = Get-Content ~/dotfiles/.config/npm-global-packages.txt | Select-String -Pattern '^\\s*(#|$)' -NotMatch | Select-Object -ExpandProperty Line; if ($pkgs) { npm install -g $pkgs }",
+            "$pkgs = Get-Content ~/dotfiles/.config/npm-global-packages-windows.txt | Select-String -Pattern '^\\s*(#|$)' -NotMatch | Select-Object -ExpandProperty Line; if ($pkgs) { npm install -g $pkgs }",
           ]
         verbose: true
 

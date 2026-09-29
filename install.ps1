@@ -215,9 +215,11 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $WingetPackagesFile = Join-Path $ScriptDir ".config\winget-packages.txt"
 $ScoopBucketsFile = Join-Path $ScriptDir ".config\scoop-buckets.txt"
 $ScoopPackagesFile = Join-Path $ScriptDir ".config\scoop-packages.txt"
-$NpmGlobalFile = Join-Path $ScriptDir ".config\npm-global-packages.txt"
-$PipxPackagesFile = Join-Path $ScriptDir ".config\pipx-packages.txt"
-$BunPackagesFile = Join-Path $ScriptDir ".config\bun-packages.txt"
+# npm/pipx/bun lists are per OS: each machine's backup would otherwise
+# overwrite the other's list whenever dotfiles-sync carries it across
+$NpmGlobalFile = Join-Path $ScriptDir ".config\npm-global-packages-windows.txt"
+$PipxPackagesFile = Join-Path $ScriptDir ".config\pipx-packages-windows.txt"
+$BunPackagesFile = Join-Path $ScriptDir ".config\bun-packages-windows.txt"
 $PersonalizationRegFile = Join-Path $ScriptDir ".config\windows-personalization.reg"
 $StartupRegFile = Join-Path $ScriptDir ".config\windows-startup.reg"
 $StartupFolderDir = Join-Path $ScriptDir ".config\windows-startup"
@@ -2305,18 +2307,70 @@ function Invoke-Backup {
     Invoke-WslInstall -Subcommand 'backup'
 
     if (-not $DryRun) {
-        $status = git -C $ScriptDir status --porcelain
-        if ($status) {
-            Print-Warning "Changes detected. Committing and pushing..."
-            Run-Command "git -C '$ScriptDir' add ."
-            Run-Command "git -C '$ScriptDir' commit -m 'chore(backup): automated backup of dotfiles changes'"
-            Run-Command "git -C '$ScriptDir' pull origin main --rebase"
-            Run-Command "git -C '$ScriptDir' push origin main"
-            Print-Success "Changes committed and pushed."
+        # an automatic dotfiles-sync cycle must never run in the middle of this
+        $lock = Enter-DotfilesSyncLock -WaitSeconds 300
+        if (-not $lock) {
+            Print-Warning "dotfiles-sync has held its lock for 5 minutes; skipping the commit this time."
+            return
         }
-        else {
-            Print-Success "No changes detected. Nothing to commit."
+        try {
+            $status = git -C $ScriptDir status --porcelain
+            # dotfiles-sync commits on its own, so there can be commits to push with a clean tree
+            $unpushed = git -C $ScriptDir rev-list '@{u}..HEAD' 2>$null
+            if ($status) {
+                Print-Warning "Changes detected. Committing and pushing..."
+                Run-Command "git -C '$ScriptDir' add ."
+                Run-Command "git -C '$ScriptDir' commit -m 'chore(backup): automated backup of dotfiles changes'"
+            }
+            if ($status -or $unpushed) {
+                if (-not $status) { Print-Warning "Unpushed commits found. Pushing..." }
+                Run-Command "git -C '$ScriptDir' pull origin main --rebase"
+                Run-Command "git -C '$ScriptDir' push origin main"
+                Print-Success "Changes committed and pushed."
+            }
+            else {
+                Print-Success "No changes detected. Nothing to commit."
+            }
         }
+        finally {
+            $lock.Dispose()
+        }
+    }
+}
+
+function Enter-DotfilesSyncLock {
+    <#
+    .SYNOPSIS
+        Takes the dotfiles-sync lock (an exclusive handle on
+        .git\dotfiles-sync\lock, the same one scripts\dotfiles-sync.ps1 uses),
+        also waiting while the bash implementation holds lock.d - e.g. the
+        WSL cron's install.sh backup, which runs on this same repo.
+    .PARAMETER WaitSeconds
+        How long to wait for a running sync cycle to finish.
+    .OUTPUTS
+        The open lock handle (dispose it to release), or $null on timeout.
+    #>
+    param([int]$WaitSeconds = 300)
+    $gitDir = git -C $ScriptDir rev-parse --absolute-git-dir
+    $dir = Join-Path $gitDir 'dotfiles-sync'
+    $null = New-Item -ItemType Directory -Force -Path $dir
+    $path = Join-Path $dir 'lock'
+    $bashLock = Join-Path $dir 'lock.d'
+    $deadline = (Get-Date).AddSeconds($WaitSeconds)
+    while ($true) {
+        try {
+            $stream = [IO.File]::Open($path, 'OpenOrCreate', 'ReadWrite', 'None')
+            # a lock.d older than 30 minutes was left behind; no bash run holds it that long
+            if ((Test-Path -LiteralPath $bashLock) -and
+                ((Get-Date) - (Get-Item -LiteralPath $bashLock).LastWriteTime).TotalMinutes -ge 30) {
+                Remove-Item -LiteralPath $bashLock -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            if (-not (Test-Path -LiteralPath $bashLock)) { return $stream }
+            $stream.Dispose()
+        }
+        catch [IO.IOException] { }
+        if ((Get-Date) -ge $deadline) { return $null }
+        Start-Sleep -Seconds 1
     }
 }
 
@@ -2324,7 +2378,9 @@ function Invoke-Backup {
 function Invoke-Schedule {
     <#
     .SYNOPSIS
-        Registers a Windows Task Scheduler task that runs backup hourly.
+        Registers a Windows Task Scheduler task that runs backup hourly, plus
+        the dotfiles-sync tasks (continuous sync with the peer) when
+        dotfiles-sync is set up in this clone.
     #>
     Print-Header "Scheduling Hourly Backups (Task Scheduler)..."
 
@@ -2356,6 +2412,20 @@ function Invoke-Schedule {
             Print-Error "Failed to create scheduled task."
             exit 1
         }
+    }
+
+    # continuous dotfiles-sync with the peer machine (see scripts\dotfiles-sync.ps1)
+    $syncScript = Join-Path $ScriptDir 'scripts\dotfiles-sync.ps1'
+    if (-not (git -C $ScriptDir config --get dotfiles-sync.label)) {
+        Print-Warning "dotfiles-sync is not set up here; skipping its tasks (run: dotfiles-sync setup --label NAME --peer DEVICE)"
+    }
+    elseif (-not (Get-Command pwsh -ErrorAction SilentlyContinue)) {
+        Print-Warning "dotfiles-sync needs PowerShell 7 (pwsh); skipping its tasks"
+    }
+    else {
+        pwsh -NoProfile -File $syncScript -C $ScriptDir schedule
+        if ($LASTEXITCODE -eq 0) { Print-Success "dotfiles-sync scheduled (DotfilesSyncWatch, DotfilesSyncTick)." }
+        else { Print-Error "Failed to schedule dotfiles-sync." }
     }
 }
 
