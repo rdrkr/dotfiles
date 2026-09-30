@@ -19,7 +19,6 @@ case "$OSTYPE" in
 esac
 
 # homebrew (macOS Apple Silicon, macOS Intel, or Linuxbrew)
-export HOMEBREW_NO_REQUIRE_TAP_TRUST=1
 export HOMEBREW_CURLRC=1
 
 ## brew is a shell script and slow to start, so `brew shellenv` is skipped when
