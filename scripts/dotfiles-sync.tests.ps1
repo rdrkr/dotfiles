@@ -137,7 +137,7 @@ function Get-SyncedTree {
         if ($line -match '^\S+ \S+ (\S+)\t(.*)$') {
             $path = $Matches[2]
             if ($path -eq '.syncignore' -or $path -like 'work-only/*' -or $path -eq 'anchored-only.txt' -or $path -eq 'leak.txt' -or
-                $path -like 'peer-tracked/*' -or $path -like 'win-tracked/*') { continue }
+                $path -like 'peer-tracked/*' -or $path -like 'win-tracked/*' -or $path -like 'many-ignored-*/*') { continue }
             $map[$path] = $Matches[1]
         }
     }
@@ -474,6 +474,15 @@ try {
         $null = & $side.Send
         $r = & $side.Recv
         Assert-That ((Test-Path (Join-Path $side.To "alongside-$($side.Name).txt")) -and -not (Test-Path (Join-Path $side.To "$($side.Dir)/state.txt")) -and (Get-StateText $side.To 'last-run') -match ' ok') "$($side.Name): edits to it are skipped, the rest of the change applies" ($r.Out + (Get-StateText $side.To 'last-run'))
+
+        # one --exclude per ignored path would pass Windows' 32767-character command-line limit
+        $dir = "many-ignored-$($side.Name)"
+        Add-Content -LiteralPath (Join-Path $side.To '.git\info\exclude') -Value "$dir/"
+        foreach ($i in 1..400) { Set-RepoFile $side.From "$dir/$('x' * 80)-$i.txt" "$i`n" }
+        Set-RepoFile $side.From "alongside-many-$($side.Name).txt" "applies`n"
+        $null = & $side.Send
+        $r = & $side.Recv
+        Assert-That ((Test-Path (Join-Path $side.To "alongside-many-$($side.Name).txt")) -and -not (Test-Path (Join-Path $side.To $dir)) -and (Get-StateText $side.To 'last-run') -match ' ok') "$($side.Name): a change touching hundreds of ignored paths applies" ($r.Out + (Get-StateText $side.To 'last-run'))
     }
     $r = Invoke-AutoA; $r = Invoke-AutoB
     Assert-That ((Compare-Repos) -eq '') 'repos converge apart from the locally ignored files' (Compare-Repos)
