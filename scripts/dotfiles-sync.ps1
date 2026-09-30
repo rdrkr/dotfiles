@@ -24,6 +24,7 @@
       dotfiles-sync watch [--debounce S] [--poll S] [--max-wait S]
                                                   run 'auto' whenever the repo changes
       dotfiles-sync schedule | unschedule         run 'watch' at logon (+ 15-min fallback)
+      dotfiles-sync secrets [status|init|show-key|set-key|push [--all] [--no-send]]
       dotfiles-sync status
 
     Continuous sync: 'schedule' registers two Task Scheduler tasks for the
@@ -48,11 +49,24 @@
     Files that must never cross are listed in .syncignore; patterns that must
     never leave this machine go in .git\dotfiles-sync\blocklist.
 
+    Secret files both machines need but git must never hold (e.g.
+    .claude\usage-secrets.json, which the status line's usage fetcher reads)
+    are listed in .syncsecrets and must be gitignored. 'auto' sends the ones
+    that changed as a bundle encrypted with AES-256-GCM
+    (scripts\dotfiles-sync-secrets.js, which needs node) under a key both clones
+    keep in .git\dotfiles-sync\secrets.key: create it with 'secrets init' on one
+    machine, print it there with 'secrets show-key' and paste it into 'secrets
+    set-key' on the other. A received bundle only writes paths this repo's own
+    .syncsecrets lists, the newest copy of each file wins, and bundles are
+    deleted once sent or applied. One that fails authentication (wrong key,
+    altered) is moved to inbox\rejected\.
+
     The repo defaults to ~\dotfiles; set $env:DOTFILES_SYNC_REPO or pass -C DIR.
     $env:DOTFILES_SYNC_TAILSCALE overrides the tailscale CLI,
     $env:DOTFILES_SYNC_DOWNLOADS (";"-separated) the folders searched for
     Taildrop files, and $env:DOTFILES_SYNC_NO_NOTIFY=1 turns notifications off
-    (the tests use these).
+    (the tests use these); $env:DOTFILES_SYNC_NODE points at node when it is
+    not on PATH.
 
 .EXAMPLE
     pwsh -File scripts\dotfiles-sync.ps1 status
@@ -299,7 +313,7 @@ function Get-SyncTrailer {
 function Get-StateDir {
     $gitDir = [string](Invoke-Git -GitArgs @('rev-parse', '--absolute-git-dir'))
     $dir = Join-Path $gitDir 'dotfiles-sync'
-    foreach ($sub in 'outbox\sent', 'outbox\manual', 'inbox\done', 'inbox\held') {
+    foreach ($sub in 'outbox\sent', 'outbox\manual', 'inbox\done', 'inbox\held', 'inbox\rejected') {
         $null = New-Item -ItemType Directory -Force -Path (Join-Path $dir $sub)
     }
     return $dir
@@ -618,7 +632,9 @@ function Send-Outbox {
             Write-Info "Taildrop failed; $($f.Name) stays queued and is retried on the next run"
             return $false
         }
-        Move-Item -LiteralPath $f.FullName -Destination $sent -Force
+        # a secrets bundle is as good as the files it holds: never keep a copy
+        if ($f.Name -like '*.secrets') { Remove-Item -LiteralPath $f.FullName -Force }
+        else { Move-Item -LiteralPath $f.FullName -Destination $sent -Force }
     }
     return $true
 }
@@ -976,7 +992,7 @@ function Receive-Incoming {
     foreach ($dl in Get-DownloadDirs) {
         if (-not (Test-Path -LiteralPath $dl -PathType Container)) { continue }
         Get-ChildItem -LiteralPath $dl -File -Filter 'dotfiles-sync-*' |
-            Where-Object { $_.Name -like '*.patch' -or $_.Name -like '*.snapshot.tar' } |
+            Where-Object { $_.Name -like '*.patch' -or $_.Name -like '*.snapshot.tar' -or $_.Name -like '*.secrets' } |
             ForEach-Object { Move-Item -LiteralPath $_.FullName -Destination $inbox -Force }
     }
 }
@@ -1297,6 +1313,11 @@ function Invoke-Import {
         $name = Split-Path -Leaf $f
         $parent = (Split-Path -Parent $f).TrimEnd('\')
         Write-Info "incoming: $name"
+        if ($name -like '*.secrets') {
+            # 'auto' applies these itself before importing, even while patches are held
+            if (-not $auto) { $null = Import-SecretBundle $f }
+            continue
+        }
         if ($name -like '*.snapshot.tar') {
             if ($auto) {
                 Move-Item -LiteralPath $f -Destination $heldDir -Force
@@ -1325,6 +1346,177 @@ function Invoke-Import {
             }
             default { return }
         }
+    }
+}
+
+# --- secret files ----------------------------------------------------------------
+
+<#
+.SYNOPSIS
+    Returns the path of node, or $null when it cannot be found.
+#>
+function Get-NodePath {
+    if ($env:DOTFILES_SYNC_NODE) { return $env:DOTFILES_SYNC_NODE }
+    $cmd = Get-Command node -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($cmd) { return $cmd.Source }
+    return $null
+}
+
+<#
+.SYNOPSIS
+    Runs scripts\dotfiles-sync-secrets.js for this clone. Its stderr goes
+    straight to the console.
+.PARAMETER Command
+    Helper command (init, show-key, set-key, status, pack, unpack).
+.PARAMETER HelperArgs
+    Further helper arguments.
+.PARAMETER InputText
+    Text written to the helper's stdin (set-key reads the key from there).
+.OUTPUTS
+    Object with Code (0 done, 1 error, 2 bundle rejected, 3 nothing to send,
+    4 not configured; 1 as well when node is missing) and Lines (stdout lines).
+#>
+function Invoke-SecretsHelper {
+    param([Parameter(Mandatory)][string]$Command, [string[]]$HelperArgs = @(), [string]$InputText)
+    $node = Get-NodePath
+    if (-not $node) {
+        Write-Info 'node not found - secret files need it (set $env:DOTFILES_SYNC_NODE)'
+        return [pscustomobject]@{ Code = 1; Lines = @() }
+    }
+    $helper = Join-Path $script:Repo 'scripts\dotfiles-sync-secrets.js'
+    $all = @($helper, $Command, '--repo', $script:Repo, '--state', (Get-StateDir)) + $HelperArgs
+    if ($PSBoundParameters.ContainsKey('InputText')) { $lines = $InputText | & $node @all }
+    else { $lines = & $node @all }
+    return [pscustomobject]@{ Code = $LASTEXITCODE; Lines = @($lines | Where-Object { $_ }) }
+}
+
+<#
+.SYNOPSIS
+    Packs the secret files that changed since they were last sent or received
+    into an encrypted bundle and queues it like any other sync file. Does
+    nothing when no .syncsecrets exists; the helper says why when there is no
+    key yet.
+.PARAMETER Keep
+    Do not send; keep for a manual transfer.
+.PARAMETER All
+    Send unchanged files too.
+.OUTPUTS
+    $true when sent, kept, or nothing to do; $false when packing or the send failed.
+#>
+function Export-Secrets {
+    param([switch]$Keep, [switch]$All)
+    if (-not (Test-Path -LiteralPath (Join-Path $script:Repo '.syncsecrets'))) { return $true }
+    $label = Get-SyncConfig label
+    $out = Join-Path (Get-StateDir) ("dotfiles-sync-$label-{0}.secrets" -f (Get-Date -Format "yyyyMMdd'T'HHmmss"))
+    $extra = @('--label', $label, '--out', $out)
+    if ($All) { $extra += '--all' }
+    $r = Invoke-SecretsHelper pack $extra
+    switch ($r.Code) {
+        0 {
+            Write-Info "secret file(s) to send: $($r.Lines -join ' ')"
+            return (Submit-SyncFile -File $out -Keep:$Keep)
+        }
+        3 {
+            if (-not $script:AutoRun) { Write-Info 'no secret file changed since it was last synced (--all resends them)' }
+            return $true
+        }
+        4 { return $true }
+        default {
+            Remove-Item -LiteralPath $out -Force -ErrorAction SilentlyContinue
+            return $false
+        }
+    }
+}
+
+<#
+.SYNOPSIS
+    Applies one encrypted secrets bundle. Once applied it is deleted when it
+    sat in this clone's inbox; one that fails authentication is moved to
+    inbox\rejected\ with a notification; without a key (or node) it stays where
+    it is and is retried on the next run.
+.PARAMETER File
+    Bundle file.
+.OUTPUTS
+    $true when applied, $false otherwise.
+#>
+function Import-SecretBundle {
+    param([Parameter(Mandatory)][string]$File)
+    $state = Get-StateDir
+    $r = Invoke-SecretsHelper unpack @('--label', (Get-SyncConfig label), $File)
+    foreach ($line in $r.Lines) { Write-Info "secrets: $line" }
+    # GetFullPath evens out the "C:/" (git) and "C:\" (PowerShell) spellings
+    $parent = [IO.Path]::GetFullPath((Split-Path -Parent ([IO.Path]::GetFullPath($File)))).TrimEnd('\', '/')
+    $inInbox = $parent -in @('inbox', 'inbox\held' | ForEach-Object { [IO.Path]::GetFullPath((Join-Path $state $_)).TrimEnd('\', '/') })
+    switch ($r.Code) {
+        0 {
+            if ($inInbox) { Remove-Item -LiteralPath $File -Force }
+            return $true
+        }
+        2 {
+            Move-Item -LiteralPath $File -Destination (Join-Path $state 'inbox\rejected') -Force -ErrorAction SilentlyContinue
+            Send-SyncNotification 'dotfiles-sync' "A secrets bundle ($(Split-Path -Leaf $File)) failed authentication - check that both machines have the same key (dotfiles-sync secrets)."
+            $script:LastRunMsg = (@($script:LastRunMsg, 'secrets bundle rejected') | Where-Object { $_ }) -join '; '
+        }
+    }
+    return $false
+}
+
+<#
+.SYNOPSIS
+    Collects what Taildrop delivered and applies every secrets bundle in the
+    inbox, oldest first.
+#>
+function Import-SecretBundles {
+    Receive-Incoming
+    Get-ChildItem -LiteralPath (Join-Path (Get-StateDir) 'inbox') -File -Filter 'dotfiles-sync-*.secrets' |
+        Sort-Object Name | ForEach-Object { $null = Import-SecretBundle $_.FullName }
+}
+
+<#
+.SYNOPSIS
+    Manages the secret files channel.
+.PARAMETER Arguments
+    status (default) | init | show-key | set-key | push [--all] [--no-send]
+#>
+function Invoke-Secrets {
+    param([string[]]$Arguments)
+    $sub = if ($Arguments -and $Arguments.Count -gt 0) { $Arguments[0] } else { 'status' }
+    $opts = @($Arguments | Select-Object -Skip 1)
+    switch ($sub) {
+        'status' { (Invoke-SecretsHelper status).Lines | Write-Output }
+        'init' {
+            if ((Invoke-SecretsHelper init).Code -ne 0) { $script:ExitCode = 1; return }
+            Write-Info "now run 'dotfiles-sync secrets show-key' here and paste the key into"
+            Write-Info "'dotfiles-sync secrets set-key' on the other machine (keep it out of chats and notes)"
+        }
+        'show-key' {
+            [Console]::Error.WriteLine('dotfiles-sync: this key decrypts every secret file; paste it only into set-key on the peer')
+            $r = Invoke-SecretsHelper show-key
+            $r.Lines | Write-Output
+            if ($r.Code -ne 0) { $script:ExitCode = 1 }
+        }
+        'set-key' {
+            Assert-SyncLock
+            $secure = Read-Host -Prompt 'Paste the key from the other machine (input hidden)' -AsSecureString
+            $key = [Net.NetworkCredential]::new('', $secure).Password
+            if (-not $key) { Stop-Sync 'no key read' }
+            if ((Invoke-SecretsHelper set-key -InputText $key).Code -ne 0) { $script:ExitCode = 1 }
+        }
+        'push' {
+            $all = $false; $keep = $false
+            foreach ($o in $opts) {
+                switch ($o) {
+                    '--all' { $all = $true }
+                    '--no-send' { $keep = $true }
+                    default { Stop-Sync "secrets push: unknown option $o" }
+                }
+            }
+            if (-not (Get-SyncConfig label)) { Stop-Sync 'not set up: dotfiles-sync setup --label NAME --peer DEVICE' }
+            if (-not (Test-Path -LiteralPath (Join-Path $script:Repo '.syncsecrets'))) { Stop-Sync "no .syncsecrets in $($script:Repo)" }
+            Assert-SyncLock
+            if (-not (Export-Secrets -Keep:$keep -All:$all)) { $script:ExitCode = 1 }
+        }
+        default { Stop-Sync "secrets: unknown subcommand $sub (status, init, show-key, set-key, push)" }
     }
 }
 
@@ -1384,7 +1576,8 @@ function Invoke-Auto {
         Write-Info "committed local changes ($(Invoke-Git -GitArgs @('log', '-1', '--format=%h')))"
     }
 
-    # 2. apply what arrived
+    # 2. apply what arrived: secret files first (they never wait for held patches)
+    Import-SecretBundles
     Invoke-Import @('--auto')
 
     # 3. send what is new, and whatever an earlier run could not send
@@ -1409,6 +1602,9 @@ function Invoke-Auto {
     else {
         Remove-Item -LiteralPath $blockedFile -Force -ErrorAction SilentlyContinue
     }
+
+    # 3b. secret files that changed here since they were last sent or received
+    $null = Export-Secrets
 
     # 4. retry what earlier runs could not send (export only sends when it queued something)
     if (@(Get-QueuedFiles).Count -gt 0 -and -not (Send-Outbox)) {
@@ -1595,6 +1791,9 @@ function Show-Status {
     $rows['held'] = "$held file(s)" + $(if ($held -gt 0) { ' - run dotfiles-sync import' } else { '' })
     $last = Read-StateFile (Join-Path $state 'last-run')
     $rows['last run'] = if ($last) { $last } else { '(never)' }
+    $listed = @(Get-PatternLines (Join-Path $script:Repo '.syncsecrets')).Count
+    $keyState = if (Test-Path -LiteralPath (Join-Path $state 'secrets.key')) { 'set' } else { 'not set (dotfiles-sync secrets)' }
+    $rows['secrets'] = "$listed file(s) listed, key $keyState"
     $task = Get-ScheduledTask -TaskName $script:WatchTaskName -ErrorAction SilentlyContinue
     $rows['watcher'] = if ($task) { "$($task.State) (task $($script:WatchTaskName))" } else { 'not scheduled (dotfiles-sync schedule)' }
     foreach ($k in $rows.Keys) { Write-Output ('{0,-10} {1}' -f "${k}:", $rows[$k]) }
@@ -1617,6 +1816,7 @@ dotfiles-sync - keep two dotfiles repos in sync by content, never by history.
   dotfiles-sync auto                          one unattended sync cycle
   dotfiles-sync watch [--debounce S] [--poll S] [--max-wait S]
   dotfiles-sync schedule | unschedule         run 'watch' at logon (+ 15-min fallback)
+  dotfiles-sync secrets [status|init|show-key|set-key|push [--all] [--no-send]]
   dotfiles-sync status
 
 Options go before the command: -C DIR selects the repo (default ~\dotfiles or
@@ -1665,6 +1865,7 @@ function Invoke-Main {
             'watch' { Invoke-Watch $rest }
             'schedule' { Invoke-Schedule }
             'unschedule' { Invoke-Unschedule }
+            'secrets' { Invoke-Secrets $rest }
             'status' { Show-Status }
             'check-push' { $script:ExitCode = Invoke-CheckPush $rest }
             default { Stop-Sync "unknown command: $command (try --help)" }
