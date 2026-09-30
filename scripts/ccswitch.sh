@@ -143,6 +143,33 @@ check_dependencies() {
     done
 }
 
+##
+# Exits with an explanation when the macOS login keychain cannot be used from
+# this process (no-op on other platforms).
+#
+# A process outside the GUI login session - typically a shell in a tmux server
+# that was first started over SSH - gets "User interaction is not allowed"
+# (exit 36) from every `security` call. The credential helpers below silence
+# those errors, so without this check the switch would fail silently, or back
+# up empty credentials over a good copy.
+##
+check_keychain_access() {
+    [[ "$(detect_platform)" == "macos" ]] || return 0
+    security show-keychain-info >/dev/null 2>&1 && return 0
+
+    local manager
+    manager=$(launchctl managername 2>/dev/null || echo "unknown")
+    echo "Error: the login keychain is not accessible from this shell (session: $manager)." >&2
+    if [[ "$manager" != "Aqua" ]]; then
+        echo "This shell runs outside the GUI login session. If it is inside tmux, the tmux" >&2
+        echo "server was probably started over SSH; run 'tmux kill-server' and open a new" >&2
+        echo "terminal window from the desktop so tmux starts in the GUI session." >&2
+    else
+        echo "Unlock it with: security unlock-keychain" >&2
+    fi
+    exit 1
+}
+
 # Setup backup directories
 setup_directories() {
     mkdir -p "$BACKUP_DIR"/{configs,credentials,scripts}
@@ -770,7 +797,14 @@ main() {
     
     check_bash_version
     check_dependencies
-    
+
+    # every command that reads or writes credentials needs the keychain on macOS
+    case "${1:-}" in
+        --add-account|--remove-account|--switch|--switch-to)
+            check_keychain_access
+            ;;
+    esac
+
     case "${1:-}" in
         --add-account)
             cmd_add_account
