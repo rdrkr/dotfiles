@@ -19,6 +19,7 @@
 #   dotfiles-sync auto                          one unattended sync cycle
 #   dotfiles-sync schedule | unschedule         run 'auto' continuously (launchd / cron)
 #   dotfiles-sync with-lock CMD [ARG...]        run CMD while holding the sync lock
+#   dotfiles-sync secrets [status|init|show-key|set-key|push [--all] [--no-send]]
 #   dotfiles-sync status
 #
 # Continuous sync: 'schedule' installs a launchd agent on macOS (every 2 minutes
@@ -46,10 +47,22 @@
 # Snapshots only add and overwrite files: a file deleted on the other side stays
 # here until you delete it yourself.
 #
+# Secret files both machines need but git must never hold (e.g.
+# .claude/usage-secrets.json, which the status line's usage fetcher reads) are
+# listed in .syncsecrets and must be gitignored. 'auto' sends the ones that
+# changed as a bundle encrypted with AES-256-GCM (scripts/dotfiles-sync-secrets.js,
+# which needs node) under a key both clones keep in .git/dotfiles-sync/secrets.key:
+# create it with 'secrets init' on one machine, print it there with 'secrets
+# show-key' and paste it into 'secrets set-key' on the other. A received bundle
+# only writes paths this repo's own .syncsecrets lists, the newest copy of each
+# file wins, and bundles are deleted once sent or applied. One that fails
+# authentication (wrong key, altered) is moved to inbox/rejected/.
+#
 # The repo defaults to ~/dotfiles; set DOTFILES_SYNC_REPO or pass -C DIR.
 # DOTFILES_SYNC_TAILSCALE overrides the tailscale CLI, DOTFILES_SYNC_DOWNLOADS
 # (":"-separated) the folders searched for Taildrop files, and
-# DOTFILES_SYNC_NO_NOTIFY=1 turns desktop notifications off (tests use these).
+# DOTFILES_SYNC_NO_NOTIFY=1 turns desktop notifications off (tests use these);
+# DOTFILES_SYNC_NODE points at node when it is not found on its own.
 # Under WSL it drives the Windows Tailscale client (tailscale.exe) and picks up
 # files Taildrop saved to the Windows Downloads folder. Native Windows uses
 # scripts/dotfiles-sync.ps1, which speaks the same patch format; this script
@@ -180,7 +193,7 @@ cfg() {
 state_dir() {
   local dir
   dir="$(posix_path "$(g rev-parse --absolute-git-dir)")/dotfiles-sync"
-  mkdir -p "$dir/outbox/sent" "$dir/outbox/manual" "$dir/inbox/done" "$dir/inbox/held"
+  mkdir -p "$dir/outbox/sent" "$dir/outbox/manual" "$dir/inbox/done" "$dir/inbox/held" "$dir/inbox/rejected"
   printf '%s\n' "$dir"
 }
 
@@ -504,7 +517,11 @@ flush_outbox() {
   while IFS= read -r f; do
     info "sending $(basename "$f") to $peer over Taildrop"
     if "$ts" file cp "$(ts_path "$ts" "$f")" "${peer}:" </dev/null; then
-      mv "$f" "$state/outbox/sent/"
+      # a secrets bundle is as good as the files it holds: never keep a copy
+      case "$f" in
+        *.secrets) rm -f "$f" ;;
+        *) mv "$f" "$state/outbox/sent/" ;;
+      esac
     else
       info "Taildrop failed; $(basename "$f") stays queued and is retried on the next run"
       return 1
@@ -768,7 +785,7 @@ receive_incoming() {
       LAST_RUN_MSG="${LAST_RUN_MSG:+$LAST_RUN_MSG; }cannot read $dl"
       continue
     fi
-    for f in "$dl"/dotfiles-sync-*.patch "$dl"/dotfiles-sync-*.snapshot.tar; do
+    for f in "$dl"/dotfiles-sync-*.patch "$dl"/dotfiles-sync-*.snapshot.tar "$dl"/dotfiles-sync-*.secrets; do
       [ -f "$f" ] && mv "$f" "$inbox/"
     done
   done < <(download_dirs)
@@ -1043,6 +1060,11 @@ cmd_import() {
     base="$(basename "$f")"
     info "incoming: $base"
     case "$f" in
+      *.secrets)
+        # 'auto' applies these itself before importing, even while patches are held
+        [ "$how" = auto ] || import_secret_bundle "$f" || true
+        continue
+        ;;
       *.snapshot.tar)
         if [ "$how" = auto ]; then
           mv "$f" "$state/inbox/held/" 2>/dev/null || true
@@ -1074,6 +1096,151 @@ cmd_import() {
     esac
   done 3< <(if [ "$how" = auto ]; then collect_incoming new "$@"; else collect_incoming all "$@"; fi)
   [ "$n" -gt 0 ] || info "nothing received"
+}
+
+##
+# Prints the path of node, or nothing when it cannot be found. launchd and cron
+# jobs get a bare PATH, so version-manager and Homebrew locations are tried too.
+##
+node_bin() {
+  local c
+  for c in "${DOTFILES_SYNC_NODE:-}" "$(command -v node 2>/dev/null || true)" \
+    "$HOME/.local/share/mise/shims/node" /opt/homebrew/bin/node /usr/local/bin/node; do
+    [ -n "$c" ] && [ -x "$c" ] && { printf '%s\n' "$c"; return 0; }
+  done
+  return 0
+}
+
+##
+# Runs scripts/dotfiles-sync-secrets.js for this clone.
+# @param $1 helper command (init, show-key, set-key, status, pack, unpack)
+# @param $@ (after $1) further helper arguments
+# @return the helper's exit code: 0 done, 1 error, 2 bundle rejected,
+#   3 nothing to send, 4 not configured; 1 as well when node is missing
+##
+secrets_helper() {
+  local node cmd="$1"
+  shift
+  node="$(node_bin)"
+  if [ -z "$node" ]; then
+    info "node not found - secret files need it (set DOTFILES_SYNC_NODE)"
+    return 1
+  fi
+  "$node" "$REPO/scripts/dotfiles-sync-secrets.js" "$cmd" --repo "$REPO" --state "$(state_dir)" "$@"
+}
+
+##
+# Packs the secret files that changed since they were last sent or received
+# into an encrypted bundle and queues it like any other sync file. Does nothing
+# when no .syncsecrets exists; says why when there is no key yet.
+# @param $1 "send" or "keep" (see deliver)
+# @param $2 "--all" to send unchanged files too (optional)
+# @return 0 when sent, kept, or nothing to do; 1 when packing or the send failed
+##
+export_secrets() {
+  local mode="$1" all="${2:-}" label state out sent rc=0
+  [ -f "$REPO/.syncsecrets" ] || return 0
+  label="$(cfg label)"
+  state="$(state_dir)"
+  out="$state/dotfiles-sync-${label}-$(date +%Y%m%dT%H%M%S).secrets"
+  sent="$(secrets_helper pack --label "$label" --out "$out" ${all:+"$all"})" || rc=$?
+  case "$rc" in
+    0)
+      info "secret file(s) to send: $(printf '%s' "$sent" | tr '\n' ' ')"
+      deliver "$out" "$mode"
+      ;;
+    3)
+      [ "$AUTO_RUN" = yes ] || info "no secret file changed since it was last synced (--all resends them)"
+      return 0
+      ;;
+    4) return 0 ;;
+    *) rm -f "$out"; return 1 ;;
+  esac
+}
+
+##
+# Applies one encrypted secrets bundle. Once applied it is deleted when it sat
+# in this clone's inbox; one that fails authentication is moved to
+# inbox/rejected/ with a notification; without a key (or node) it stays where
+# it is and is retried on the next run.
+# @param $1 bundle file
+# @return 0 when applied, 1 otherwise
+##
+import_secret_bundle() {
+  local f="$1" state out line rc=0
+  state="$(state_dir)"
+  out="$(secrets_helper unpack --label "$(cfg label)" "$(posix_path "$f")")" || rc=$?
+  while IFS= read -r line; do
+    [ -n "$line" ] && info "secrets: $line"
+  done <<<"$out"
+  case "$rc" in
+    0)
+      [ -z "$(inbox_place "$f")" ] || rm -f "$f"
+      return 0
+      ;;
+    2)
+      mv "$f" "$state/inbox/rejected/" 2>/dev/null || true
+      notify "dotfiles-sync" "A secrets bundle ($(basename "$f")) failed authentication - check that both machines have the same key (dotfiles-sync secrets)."
+      LAST_RUN_MSG="${LAST_RUN_MSG:+$LAST_RUN_MSG; }secrets bundle rejected"
+      ;;
+  esac
+  return 1
+}
+
+##
+# Collects what Taildrop delivered and applies every secrets bundle in the
+# inbox, oldest first.
+##
+import_secret_bundles() {
+  local state f
+  state="$(state_dir)"
+  receive_incoming
+  for f in "$state"/inbox/dotfiles-sync-*.secrets; do
+    [ -f "$f" ] && { import_secret_bundle "$f" || true; }
+  done
+  return 0
+}
+
+##
+# Manages the secret files channel.
+# @param $@ status (default) | init | show-key | set-key | push [--all] [--no-send]
+##
+cmd_secrets() {
+  local sub="${1:-status}" key mode=send all=''
+  [ $# -gt 0 ] && shift
+  case "$sub" in
+    status) secrets_helper status ;;
+    init)
+      secrets_helper init || exit 1
+      info "now run 'dotfiles-sync secrets show-key' here and paste the key into"
+      info "'dotfiles-sync secrets set-key' on the other machine (keep it out of chats and notes)"
+      ;;
+    show-key)
+      printf 'dotfiles-sync: this key decrypts every secret file; paste it only into set-key on the peer\n' >&2
+      secrets_helper show-key
+      ;;
+    set-key)
+      require_lock
+      printf 'Paste the key from the other machine (input hidden): ' >"$TTY_OUT"
+      IFS= read -rs key <"$TTY_IN" || { printf '\n' >"$TTY_OUT"; die "no key read"; }
+      printf '\n' >"$TTY_OUT"
+      printf '%s\n' "$key" | secrets_helper set-key || exit 1
+      ;;
+    push)
+      while [ $# -gt 0 ]; do
+        case "$1" in
+          --all) all=--all; shift ;;
+          --no-send) mode=keep; shift ;;
+          *) die "secrets push: unknown option $1" ;;
+        esac
+      done
+      [ -n "$(cfg label)" ] || die "not set up: dotfiles-sync setup --label NAME --peer DEVICE"
+      [ -f "$REPO/.syncsecrets" ] || die "no .syncsecrets in $REPO"
+      require_lock
+      export_secrets "$mode" "$all" || exit 1
+      ;;
+    *) die "secrets: unknown subcommand $sub (status, init, show-key, set-key, push)" ;;
+  esac
 }
 
 ##
@@ -1118,7 +1285,8 @@ cmd_auto() {
     info "committed local changes ($(g log -1 --format=%h))"
   fi
 
-  # 2. apply what arrived
+  # 2. apply what arrived: secret files first (they never wait for held patches)
+  import_secret_bundles
   cmd_import --auto
 
   # 3. send what is new, and whatever an earlier run could not send
@@ -1142,6 +1310,9 @@ cmd_auto() {
   else
     rm -f "$state/scan-blocked"
   fi
+
+  # 3b. secret files that changed here since they were last sent or received
+  export_secrets send || true
 
   # 4. retry what earlier runs could not send (export only sends when it queued something)
   if [ "$(count_sync_files "$state/outbox")" -gt 0 ] && ! flush_outbox; then
@@ -1284,6 +1455,8 @@ cmd_status() {
   printf 'held:      %s file(s)%s\n' "$(count_sync_files "$state/inbox/held")" \
     "$([ "$(count_sync_files "$state/inbox/held")" -gt 0 ] && printf ' - run dotfiles-sync import')"
   printf 'last run:  %s\n' "$(cat "$state/last-run" 2>/dev/null || printf '(never)')"
+  printf 'secrets:   %s file(s) listed, key %s\n' "$(pattern_lines "$REPO/.syncsecrets" | wc -l | tr -d ' ')" \
+    "$([ -f "$state/secrets.key" ] && printf 'set' || printf 'not set (dotfiles-sync secrets)')"
 }
 
 main() {
@@ -1312,6 +1485,7 @@ main() {
     schedule) cmd_schedule ;;
     unschedule) cmd_unschedule ;;
     with-lock) cmd_with_lock "$@" ;;
+    secrets) cmd_secrets "$@" ;;
     status) cmd_status ;;
     check-push) cmd_check_push "$@" ;;
     -h|--help|help) sed -n '2,/^$/s/^# \{0,1\}//p' "$0" ;;
