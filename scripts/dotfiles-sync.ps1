@@ -1087,17 +1087,16 @@ function Split-SyncPatch {
 
 <#
 .SYNOPSIS
-    Returns git apply --exclude options for the paths a change touches that this
-    repo deliberately does not track: ignored by .gitignore (or info/exclude)
-    and not in the index. The peer may still track such files - e.g. from
-    before they were ignored - and applying them here would fail or start
-    tracking them.
+    Returns the paths a change touches that this repo deliberately does not
+    track: ignored by .gitignore (or info/exclude) and not in the index. The
+    peer may still track such files - e.g. from before they were ignored - and
+    applying them here would fail or start tracking them.
 .PARAMETER Diff
     The change's diff text.
 .PARAMETER Tracked
     Every path in this repo's index.
 #>
-function Get-IgnoredPathExcludes {
+function Get-IgnoredPaths {
     param([Parameter(Mandatory)][AllowEmptyString()][string]$Diff, [Parameter(Mandatory)][Collections.Generic.HashSet[string]]$Tracked)
     $paths = [Collections.Generic.HashSet[string]]::new()
     foreach ($m in [regex]::Matches($Diff, '(?m)^diff --git a/(\S+) b/(\S+)\r?$')) {
@@ -1108,8 +1107,34 @@ function Get-IgnoredPathExcludes {
     for ($i = 0; $i -lt $list.Count; $i += 100) {
         $batch = $list[$i..([Math]::Min($i + 99, $list.Count - 1))]
         $ignored = & git -C $script:Repo check-ignore -- @batch 2>$null
-        foreach ($p in @($ignored | Where-Object { $_ })) { "--exclude=$p" }
+        foreach ($p in @($ignored | Where-Object { $_ })) { $p }
     }
+}
+
+<#
+.SYNOPSIS
+    Drops the file sections of a diff that touch any of the given paths.
+    Leaving them out of the diff, rather than passing git apply one --exclude
+    per path, keeps the command line short: Windows refuses command lines over
+    32767 characters, which a change touching a few hundred ignored files
+    (e.g. one that stops tracking them) goes past.
+.PARAMETER Diff
+    The change's diff text.
+.PARAMETER Paths
+    Paths whose sections are dropped (matched against both a/ and b/ names).
+.OUTPUTS
+    The remaining diff text; it has no "diff --git" line when nothing is left.
+#>
+function Remove-DiffSections {
+    param([Parameter(Mandatory)][AllowEmptyString()][string]$Diff, [Parameter(Mandatory)][AllowEmptyCollection()][Collections.Generic.HashSet[string]]$Paths)
+    if ($Paths.Count -eq 0) { return $Diff }
+    $sb = [Text.StringBuilder]::new()
+    foreach ($section in [regex]::Split($Diff, '(?m)^(?=diff --git )')) {
+        $m = [regex]::Match($section, '\Adiff --git a/(\S+) b/(\S+)\r?$', 'Multiline')
+        if ($m.Success -and ($Paths.Contains($m.Groups[1].Value) -or $Paths.Contains($m.Groups[2].Value))) { continue }
+        $null = $sb.Append($section)
+    }
+    return $sb.ToString()
 }
 
 <#
@@ -1151,8 +1176,15 @@ function Import-SyncPatch {
         foreach ($change in Split-SyncPatch $File) {
             $key = "$from $($change.Sha)"
             if ($done.Contains($key) -or $skipped.Contains($key)) { continue }
-            [IO.File]::WriteAllText($body, $change.Body, $script:Latin1)
-            $opts = @($applyOpts) + @(Get-IgnoredPathExcludes -Diff $change.Body -Tracked $tracked)
+            $ignored = [Collections.Generic.HashSet[string]]::new([string[]]@(Get-IgnoredPaths -Diff $change.Body -Tracked $tracked))
+            $diff = Remove-DiffSections -Diff $change.Body -Paths $ignored
+            if ($diff -notmatch '(?m)^diff --git ') {
+                Write-Info "already present or ignored here: $($change.Subject)"
+                Write-StateFile $skippedFile $key -Append
+                continue
+            }
+            [IO.File]::WriteAllText($body, $diff, $script:Latin1)
+            $opts = @($applyOpts)
             $shortSha = $change.Sha.Substring(0, [Math]::Min(10, $change.Sha.Length))
             $message = "sync(${from}): $($change.Subject)"
 

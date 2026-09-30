@@ -853,17 +853,34 @@ import_snapshot() {
 }
 
 ##
-# Prints `git apply --exclude` options for the paths a change touches that this
-# repo deliberately does not track: ignored by .gitignore (or info/exclude) and
-# not in the index. The peer may still track such files - e.g. from before they
-# were ignored - and applying them here would fail or start tracking them.
+# Prints the paths a change touches that this repo deliberately does not track:
+# ignored by .gitignore (or info/exclude) and not in the index, one per line.
+# The peer may still track such files - e.g. from before they were ignored -
+# and applying them here would fail or start tracking them.
 # @param $1 the change's diff file
 # @param $2 file listing every path in this repo's index
 ##
-ignored_path_excludes() {
+ignored_paths() {
   awk '/^diff --git a\// { a = $3; b = $4; sub(/^a\//, "", a); sub(/^b\//, "", b); print a; print b }' "$1" \
-    | sort -u | grep -vxF -f "$2" | g check-ignore --stdin 2>/dev/null | sed 's/^/--exclude=/'
+    | sort -u | grep -vxF -f "$2" | g check-ignore --stdin 2>/dev/null
   return 0
+}
+
+##
+# Prints a diff without the file sections that touch any of the listed paths.
+# Leaving them out of the diff, rather than passing git apply one --exclude per
+# path, keeps the command line short: Windows (Git Bash) refuses command lines
+# over 32767 characters, which a change touching a few hundred ignored files
+# (e.g. one that stops tracking them) goes past.
+# @param $1 diff file
+# @param $2 file listing the paths to drop (matched against a/ and b/ names)
+##
+drop_diff_sections() {
+  awk -v list="$2" '
+    BEGIN { while ((getline p < list) > 0) drop[p] = 1 }
+    /^diff --git a\// { a = $3; b = $4; sub(/^a\//, "", a); sub(/^b\//, "", b); skip = (a in drop) || (b in drop) }
+    !skip
+  ' "$1"
 }
 
 ##
@@ -911,9 +928,15 @@ import_patch() {
       continue
     fi
     body="${chunk}.diff"
-    tail -n +3 "$chunk" >"$body"
+    tail -n +3 "$chunk" >"$body.full"
+    ignored_paths "$body.full" "$tracked" >"$dir/.ignored"
+    drop_diff_sections "$body.full" "$dir/.ignored" >"$body"
+    if ! grep -q '^diff --git ' "$body"; then
+      info "already present or ignored here: $subject"
+      printf '%s\n' "$key" >>"$skipped"
+      continue
+    fi
     opts=("${apply_opts[@]}")
-    while IFS= read -r o; do opts+=("$o"); done < <(ignored_path_excludes "$body" "$tracked")
 
     if [ "$how" = auto ]; then
       rc=0
