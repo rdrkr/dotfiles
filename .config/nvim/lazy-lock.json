@@ -1,7 +1,7 @@
 {
   "LazyVim": { "branch": "main", "commit": "999700997f72227187d49d8b92667183dc7fc809" },
   "LuaSnip": { "branch": "master", "commit": "642b0c595e11608b4c18219e93b88d7637af27bc" },
-  "SchemaStore.nvim": { "branch": "main", "commit": "90513f613907e00ce9a07cfd9773a3e18d73146e" },
+  "SchemaStore.nvim": { "branch": "main", "commit": "fae5c76c00dec18485f264396ce24368e9c4e9fb" },
   "android-nvim-plugin": { "branch": "main", "commit": "1b13adb5c0c85027498c068efa05466aa93ea374" },
   "apple-notes.nvim": { "branch": "main", "commit": "e78bf81358be75dd353b7e96125f3d39d42e7fee" },
   "async.nvim": { "branch": "main", "commit": "15f28ec323a75f34f317336831c00c2d1b0a7192" },
@@ -63,7 +63,7 @@
   "nvim-lspconfig": { "branch": "master", "commit": "3e8d598d3b5f8338a41699c436e5fa11d2666cf0" },
   "nvim-metals": { "branch": "main", "commit": "a4b20656bf1014404dd63bf9fd5f22fcc50fee52" },
   "nvim-nio": { "branch": "master", "commit": "edcc181a875301dd21840189aa2f2f9ad69fc172" },
-  "nvim-treesitter": { "branch": "main", "commit": "e6be2ff65d89df5039cad7a422600757bbf81d02" },
+  "nvim-treesitter": { "branch": "main", "commit": "910fdf6f49e9dee7e7257c7d11a76b040fdfb9de" },
   "nvim-treesitter-textobjects": { "branch": "main", "commit": "5c7b0263797dfd1bd6202f2b219f3b53a80b2187" },
   "nvim-ts-autotag": { "branch": "main", "commit": "88c1453db4ba7dd24131086fe51fdf74e587d275" },
   "nvim-web-devicons": { "branch": "master", "commit": "58447c1fca354bbf184425e4a8d01deecbd6f3c4" },
