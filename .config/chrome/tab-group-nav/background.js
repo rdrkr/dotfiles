@@ -6,12 +6,13 @@
  * order instead, expanding a collapsed group when stepping into it. Whenever
  * the active tab changes (keyboard or mouse), every group in that window that
  * does not contain the active tab is collapsed, so leaving a group folds it
- * back up.
+ * back up. `new-tab-in-group` opens a new tab inside the active tab's group.
  *
  * The commands are browser-level accelerators (chrome.commands), so unlike
  * content-script based shortcut extensions they work on every page, including
  * chrome:// pages, the New Tab page, PDFs and while the omnibox has focus.
- * Triggered from komorebic-hotkeys.ahk (Win+Alt+Left/Right, Win+Shift+[/]).
+ * Triggered from komorebic-hotkeys.ahk (Win+Alt+Left/Right, Win+Shift+[/],
+ * Win+T).
  */
 
 /** Delay between retries while Chrome refuses tab edits (ms). */
@@ -109,9 +110,37 @@ async function collapseAllWindows() {
   for (const win of windows) await collapseInactiveGroups(win.id);
 }
 
+/**
+ * Opens a New Tab page in the focused window. When the active tab is in a
+ * group, the new tab is placed at the end of that group and joined to it;
+ * otherwise it is appended to the end of the strip, like Chrome's Ctrl+T.
+ * Runs inside the serial queue, so the onActivated collapse pass only sees the
+ * new tab once it already belongs to the group.
+ * @returns {Promise<void>}
+ */
+async function newTabInGroup() {
+  const [active] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  if (!active) {
+    await chrome.tabs.create({});
+    return;
+  }
+
+  const { windowId, groupId } = active;
+  if (groupId === chrome.tabGroups.TAB_GROUP_ID_NONE) {
+    await chrome.tabs.create({ windowId });
+    return;
+  }
+
+  const groupTabs = await chrome.tabs.query({ windowId, groupId });
+  const lastIndex = Math.max(...groupTabs.map((t) => t.index));
+  const tab = await chrome.tabs.create({ windowId, index: lastIndex + 1 });
+  await withRetry(() => chrome.tabs.group({ groupId, tabIds: [tab.id] }));
+}
+
 chrome.commands.onCommand.addListener((command) => {
   if (command === "next-tab") enqueue(() => step(1));
   else if (command === "previous-tab") enqueue(() => step(-1));
+  else if (command === "new-tab-in-group") enqueue(newTabInGroup);
 });
 
 chrome.tabs.onActivated.addListener(({ windowId }) => {

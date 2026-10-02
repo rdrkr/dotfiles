@@ -111,12 +111,14 @@ LWin & Tab::AltTab
 ; Window tabs
 ; Chrome only: Alt+Shift+Comma/Period are the previous/next-tab commands of the
 ; Tab Group Nav extension (.config/chrome/tab-group-nav), which, unlike Ctrl+Tab,
-; steps into collapsed tab groups and re-collapses them on exit.
+; steps into collapsed tab groups and re-collapses them on exit. Alt+Shift+Y is
+; its new-tab-in-group command, overriding Cmd+T (Chrome reserves Ctrl+T itself).
 #HotIf WinActive("ahk_exe chrome.exe")
 #!Left:: Send("!+,")
 #!Right:: Send("!+.")
 +#[:: Send("!+,")
 +#]:: Send("!+.")
+#t:: Send("!+y")
 #HotIf
 ; All other applications:
 ; Preserve the existing Ctrl+Tab behavior.
