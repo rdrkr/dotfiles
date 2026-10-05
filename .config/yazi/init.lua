@@ -26,3 +26,12 @@ require("full-border"):setup({
 })
 
 -- ya.emit("plugin", { "split-tabs", "spl_activate" })
+
+require("starship"):setup({
+	hide_flags = false,
+	flags_after_prompt = true,
+	config_file = "~/.config/starship/starship.toml",
+	show_right_prompt = true,
+	hide_count = false,
+	count_separator = " ",
+})
