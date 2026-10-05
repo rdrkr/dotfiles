@@ -23,11 +23,6 @@ use = "Lil-Dank/lazygit"
 rev = "e73fd74"
 hash = "6ea5f37c7f219671ec504cb8311f889d"
 
-[[plugin.deps]]
-use = "XYenon/clipboard"
-rev = "a2655fd"
-hash = "90625fa33e3372073d60f124c3c867"
-
 [[flavor.deps]]
 use = "matt-dong-123/gruvbox-material"
 rev = "e0fd2d8"
