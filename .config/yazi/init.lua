@@ -17,6 +17,10 @@ end
 
 -- Share yanked (copied/cut) files across all running Yazi instances,
 -- so files yanked in one instance can be pasted in another.
-require("session"):setup {
+require("session"):setup({
 	sync_yanked = true,
-}
+})
+
+require("full-border"):setup({
+	type = ui.Border.ROUNDED,
+})
