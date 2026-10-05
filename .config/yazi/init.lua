@@ -24,3 +24,5 @@ require("session"):setup({
 require("full-border"):setup({
 	type = ui.Border.ROUNDED,
 })
+
+ya.emit("plugin", { "split-tabs", "spl_activate" })
