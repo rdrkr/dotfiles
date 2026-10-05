@@ -8,6 +8,11 @@ use = "terrakok/split-tabs"
 rev = "d0531f4"
 hash = "4298f0a23f6109a92334eef06fc7ffb9"
 
+[[plugin.deps]]
+use = "Rolv-Apneseth/starship"
+rev = "ea92cf4"
+hash = "9776f378459072b6c2875eae5addc49d"
+
 [[flavor.deps]]
 use = "matt-dong-123/gruvbox-material"
 rev = "e0fd2d8"
