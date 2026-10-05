@@ -1,5 +1,7 @@
-[plugin]
-deps = []
+[[plugin.deps]]
+use = "yazi-rs/plugins:full-border"
+rev = "6229767"
+hash = "f281261ff04ad7ec867c3f802a50835f"
 
 [[flavor.deps]]
 use = "matt-dong-123/gruvbox-material"
