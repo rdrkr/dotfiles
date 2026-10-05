@@ -280,6 +280,12 @@ prepend_keymap = [
 
   # confirm-quit.yazi
   { on = "q", run = "plugin confirm-quit", desc = "Exit the process" },
+
+  # lazygit.yazi
+  { on = [
+    "l",
+    "g",
+  ], run = "plugin lazygit", desc = "Open lazygit" },
 ]
 
 [tasks]
