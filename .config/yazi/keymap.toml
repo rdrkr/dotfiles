@@ -272,11 +272,8 @@ keymap = [
 prepend_keymap = [
 
   # split-tabs.yazi
-  # spl_preview is a no-op after toggling off, so this only opens the preview when entering split mode.
-  { on = "\\", run = [
-    "plugin split-tabs spl_toggle",
-    "plugin split-tabs spl_preview",
-  ], desc = "Split-tabs: toggle split tabs mode (with preview)" },
+  # split-preview.yazi (local): toggles split-tabs, then opens its preview after a short delay.
+  { on = "\\", run = "plugin split-preview", desc = "Split-tabs: toggle split tabs mode (with preview)" },
   { on = "<Tab>", run = "plugin split-tabs spl_switch_tab", desc = "Split-tabs: switch to the other pane" },
   { on = "<F5>", run = "plugin split-tabs spl_copy", desc = "Split-tabs: copy to the other pane" },
   { on = "<F6>", run = "plugin split-tabs spl_move", desc = "Split-tabs: move to the other pane" },
