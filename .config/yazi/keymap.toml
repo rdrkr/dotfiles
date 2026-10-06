@@ -149,28 +149,28 @@ keymap = [
     "m",
   ], run = [
     "sort mtime --reverse=no",
-    "linemode mtime",
+    "linemode size_and_mtime",
   ], desc = "Sort by modified time" },
   { on = [
     ",",
     "M",
   ], run = [
     "sort mtime --reverse=yes",
-    "linemode mtime",
+    "linemode size_and_mtime",
   ], desc = "Sort by modified time (reverse)" },
   { on = [
     ",",
     "b",
   ], run = [
     "sort btime --reverse=no",
-    "linemode btime",
+    "linemode size_and_btime",
   ], desc = "Sort by birth time" },
   { on = [
     ",",
     "B",
   ], run = [
     "sort btime --reverse=yes",
-    "linemode btime",
+    "linemode size_and_btime",
   ], desc = "Sort by birth time (reverse)" },
   { on = [
     ",",
@@ -201,14 +201,14 @@ keymap = [
     "s",
   ], run = [
     "sort size --reverse=no",
-    "linemode size",
+    "linemode size_and_mtime",
   ], desc = "Sort by size" },
   { on = [
     ",",
     "S",
   ], run = [
     "sort size --reverse=yes",
-    "linemode size",
+    "linemode size_and_mtime",
   ], desc = "Sort by size (reverse)" },
   { on = [
     ",",
