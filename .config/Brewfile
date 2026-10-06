@@ -1,6 +1,7 @@
 tap "alexstrnik/browserino", "https://github.com/AlexStrNik/homebrew-Browserino"
 tap "barutsrb/tap", "https://github.com/BarutSRB/homebrew-tap"
 tap "blacktop/tap"
+tap "deskflow/tap"
 tap "felixkratz/formulae", "https://github.com/FelixKratz/homebrew-formulae"
 tap "gentleman-programming/tap", "https://github.com/Gentleman-Programming/homebrew-tap"
 tap "glzr-io/tap"
@@ -267,6 +268,7 @@ cask "claude-code"
 cask "claude-usage-tracker"
 # Server and cloud storage browser
 cask "cyberduck"
+cask "deskflow"
 # Voice and text chat software
 cask "discord"
 # Client for the Dropbox cloud storage service
