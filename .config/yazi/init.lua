@@ -60,8 +60,8 @@ require("full-border"):setup({
 require("starship"):setup({
 	hide_flags = false,
 	flags_after_prompt = false,
-	-- config_file = "~/.config/starship/starship.toml",
-	show_right_prompt = true,
+	-- config_file = "../starship/starship.toml",
+	show_right_prompt = false,
 	hide_count = false,
 	count_separator = " ",
 })
