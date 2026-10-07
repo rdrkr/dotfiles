@@ -36,14 +36,14 @@ gui:
     # default text
     defaultFgColor:
       - "#d4be98"
-  # commit author colours in the commits panel
-  authorColors:
-    "*": "#d3869b"
-  # branch-name colours by prefix
-  branchColorPatterns:
-    "^feature/": "#a9b665"
-    "^bugfix/": "#ea6962"
-    "^hotfix/": "#ea6962"
-    "^release/": "#d8a657"
-    "^develop$": "#7daea3"
-    "^(main|master)$": "#e78a4e"
+    # commit author colours in the commits panel
+    authorColors:
+      "*": "#d3869b"
+    # branch-name colours by prefix
+    branchColorPatterns:
+      "^feature/": "#a9b665"
+      "^bugfix/": "#ea6962"
+      "^hotfix/": "#ea6962"
+      "^release/": "#d8a657"
+      "^develop$": "#7daea3"
+      "^(main|master)$": "#e78a4e"
