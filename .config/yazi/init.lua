@@ -35,11 +35,15 @@ end
 
 ---Override of the built-in mtime linemode so dates are day-first (DD/MM) instead of MM/DD.
 ---@return string line The formatted modification time.
-function Linemode:mtime() return format_time(self._file.cha.mtime) end
+function Linemode:mtime()
+	return format_time(self._file.cha.mtime)
+end
 
 ---Override of the built-in btime linemode so dates are day-first (DD/MM) instead of MM/DD.
 ---@return string line The formatted birth time.
-function Linemode:btime() return format_time(self._file.cha.btime) end
+function Linemode:btime()
+	return format_time(self._file.cha.btime)
+end
 
 -- Share yanked (copied/cut) files across all running Yazi instances,
 -- so files yanked in one instance can be pasted in another.
@@ -56,7 +60,7 @@ require("full-border"):setup({
 require("starship"):setup({
 	hide_flags = false,
 	flags_after_prompt = false,
-	config_file = "~/.config/starship/starship.toml",
+	-- config_file = "~/.config/starship/starship.toml",
 	show_right_prompt = true,
 	hide_count = false,
 	count_separator = " ",
