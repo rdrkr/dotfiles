@@ -39,12 +39,25 @@ return {
             show_help = "<f1>"
         }
     },
-    -- 👇 if you use `open_for_directories=true`, this is recommended
+    ---Runs at startup, before the plugin loads: disables netrw and, inside
+    ---psmux on Windows, hides WT_SESSION from the yazi this plugin spawns.
     init = function()
+        -- 👇 if you use `open_for_directories=true`, this is recommended
         -- mark netrw as loaded so it's not loaded at all.
         --
         -- More details: https://github.com/mikavilpas/yazi.nvim/issues/802
         vim.g.loaded_netrwPlugin =
             1
+
+        -- yazi reads WT_SESSION as "Windows Terminal" and sends sixel, but a
+        -- psmux pane is hosted by the inbox conhost, which strips sixel
+        -- (psmux#431), so image previews come out blank. Without it yazi falls
+        -- back to chafa block art. yazi.nvim's jobstart can only add variables,
+        -- not remove them, so it is cleared for nvim as a whole: nothing nvim
+        -- starts inside a psmux pane talks to Windows Terminal directly anyway.
+        -- The PowerShell twin of this is the `yazi` function in profile.ps1.
+        if vim.fn.has("win32") == 1 and vim.env.TMUX then
+            vim.env.WT_SESSION = nil
+        end
     end
 }
