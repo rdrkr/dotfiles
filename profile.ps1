@@ -335,14 +335,27 @@ if (Get-Command starship -ErrorAction SilentlyContinue) {
 
 # yazi
 function y {
+    <#
+    .SYNOPSIS
+        Runs yazi and changes to the directory it was in when it quit.
+    .DESCRIPTION
+        Inside psmux, WT_SESSION is hidden from yazi for the run. yazi reads it
+        as "Windows Terminal" and sends sixel, but every psmux pane is hosted
+        by the inbox conhost, which strips sixel before psmux sees it
+        (psmux#431), so image previews come out blank. Without WT_SESSION yazi
+        falls back to chafa and draws previews as Unicode block art instead.
+    #>
     $tmp = New-TemporaryFile
+    $wtSession = $env:WT_SESSION
     try {
+        if ($env:TMUX) { Remove-Item Env:WT_SESSION -ErrorAction SilentlyContinue }
         yazi @args --cwd-file="$tmp"
         $cwd = Get-Content $tmp -Raw
         if (-not [string]::IsNullOrWhiteSpace($cwd) -and $cwd.Trim() -ne (Get-Location).Path) {
             Set-Location $cwd.Trim()
         }
     } finally {
+        $env:WT_SESSION = $wtSession
         Remove-Item $tmp -Force -ErrorAction SilentlyContinue
     }
 }

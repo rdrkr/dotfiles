@@ -27,6 +27,7 @@ Google.PlatformTools
 Graphviz.Graphviz
 Gyan.FFmpeg
 HandBrake.HandBrake
+hpjansson.Chafa
 ImageMagick.ImageMagick
 Inkscape.Inkscape
 JernejSimoncic.Wget
