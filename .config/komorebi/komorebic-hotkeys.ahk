@@ -237,11 +237,11 @@ LWin & Tab::AltTab
 ; WM hotkeys below are only active while komorebi is enabled (see ToggleKomorebi)
 #HotIf gKomorebiEnabled
 
-; Focus windows
-!^#Left:: Komorebic("focus left")
+; Focus windows. Ctrl+Alt+Win+Left/Right are deliberately unbound: Deskflow
+; uses them to jump to the neighbouring machine (.config/deskflow/
+; deskflow-server.conf); Ctrl+Left/Right above cover komorebi focus.
 !^#Down:: Komorebic("focus down")
 !^#Up:: Komorebic("focus up")
-!^#Right:: Komorebic("focus right")
 
 ; Workspaces
 !1:: Komorebic("focus-workspace 0")
