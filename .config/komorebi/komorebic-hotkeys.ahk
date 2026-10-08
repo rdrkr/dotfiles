@@ -103,6 +103,16 @@ Run('powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File
 ; Language switching (Alt+Space -> Ctrl+Shift)
 !Space:: Send("{Ctrl Down}{Shift}{Ctrl Up}")
 
+; Block the Start menu on a lone Win press (like a lone Cmd press on macOS,
+; which does nothing). Windows opens Start when Win is released with no other
+; key pressed in between; sending the unassigned virtual key vkE8 while Win is
+; down makes every Win press look like a combo, so Start never opens. The `~`
+; lets Win itself through, so all Win combos (ours and native ones) still
+; work, and because LWin is also a prefix key (`LWin & Tab` below) the `~`
+; makes this fire on key-down instead of waiting for the release.
+~LWin:: Send("{Blind}{vkE8}")
+~RWin:: Send("{Blind}{vkE8}")
+
 ; App switching (Cmd+Tab -> Alt+Tab)
 LWin & Tab::AltTab
 !Tab:: return
