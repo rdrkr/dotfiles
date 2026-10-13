@@ -16,6 +16,8 @@ tap "smartthingscommunity/smartthings"
 tap "steipete/tap"
 tap "touch-tap/tap"
 tap "vjeantet/tap"
+# Next-gen compiler infrastructure
+brew "llvm"
 # Code searching, linting, rewriting
 brew "ast-grep"
 # Improved shell history for zsh, bash, fish and nushell
@@ -114,8 +116,6 @@ brew "lazysql"
 brew "lcov"
 # Scalable, high-performance WebRTC server
 brew "livekit"
-# Next-gen compiler infrastructure
-brew "llvm"
 # Powerful, lightweight programming language
 brew "lua"
 # Package manager for the Lua programming language
