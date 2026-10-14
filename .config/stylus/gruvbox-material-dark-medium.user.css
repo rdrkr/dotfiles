@@ -1,0 +1,213 @@
+/* ==UserStyle==
+@name         Gruvbox Material Dark (Medium) - Global Default
+@namespace    github.com/rdrkr/dotfiles
+@version      1.0.0
+@description  Fallback gruvbox-material dark (medium) theme for every website that has no dedicated Stylus style.
+@author       Ronen Druker
+@license      MIT
+@homepageURL  https://github.com/rdrkr/dotfiles/tree/main/.config/stylus
+@updateURL    https://raw.githubusercontent.com/rdrkr/dotfiles/main/.config/stylus/gruvbox-material-dark-medium.user.css
+@preprocessor default
+==/UserStyle== */
+
+/*
+ * Palette: https://github.com/sainnhe/gruvbox-material (dark, medium background,
+ * "material" foreground) - the same colors as the superfile and yazi themes.
+ *
+ * Site exclusions
+ * ---------------
+ * Stylus has no "fallback" concept: every matching style is applied. To keep
+ * this global theme off sites that already have their own style (or that
+ * should stay untouched), add the site's domain to the alternation inside the
+ * negative lookahead below. Domains are regular expressions, so escape dots
+ * with a double backslash (CSS string escaping), separate entries with "|",
+ * and every subdomain of a listed domain is excluded too, e.g.:
+ *
+ *   (?:github\\.com|youtube\\.com|mail\\.google\\.com)
+ *
+ * "example\\.invalid" is a placeholder that never matches a real site.
+ */
+@-moz-document regexp("^(?!https?://(?:[^/]+\\.)?(?:example\\.invalid)(?:[:/?#]|$)).*$") {
+  /*
+   * Palette tokens, prefixed with "--gbm-" so they never collide with a
+   * site's own custom properties.
+   */
+  :root {
+    /** Darkest background, used for code blocks and wells. */
+    --gbm-bg-dim: #1b1b1b;
+    /** Page background. */
+    --gbm-bg0: #282828;
+    /** Raised surfaces: headers, menus, dialogs, inputs. */
+    --gbm-bg1: #32302f;
+    /** Buttons, table headers and hover states. */
+    --gbm-bg3: #45403d;
+    /** Scrollbar thumb and pressed states. */
+    --gbm-bg5: #5a524c;
+    /** Text selection background. */
+    --gbm-bg-visual: #4f422e;
+    /** Body text. */
+    --gbm-fg0: #d4be98;
+    /** Headings and emphasized text. */
+    --gbm-fg1: #ddc7a1;
+    /** Errors and deleted content. */
+    --gbm-red: #ea6962;
+    /** Visited links and active borders. */
+    --gbm-orange: #e78a4e;
+    /** Accent color: focus rings, checkboxes, highlights. */
+    --gbm-yellow: #d8a657;
+    /** Inserted content and success states. */
+    --gbm-green: #a9b665;
+    /** Hovered links. */
+    --gbm-aqua: #89b482;
+    /** Links. */
+    --gbm-blue: #7daea3;
+    /** Inline code text. */
+    --gbm-purple: #d3869b;
+    /** Borders and separators. */
+    --gbm-grey0: #7c6f64;
+    /** Placeholders and secondary text. */
+    --gbm-grey1: #928374;
+
+    /* Native form controls, scrollbars and UA widgets render in dark mode. */
+    color-scheme: dark !important;
+    accent-color: var(--gbm-yellow) !important;
+    scrollbar-color: var(--gbm-bg5) var(--gbm-bg0) !important;
+  }
+
+  /*
+   * Rules below use :where() so they all have zero specificity: with every
+   * declaration marked !important, source order alone decides which rule
+   * wins, which keeps the overrides predictable.
+   */
+
+  /* Base: the page background and body text color. */
+  :where(html, body) {
+    background-color: var(--gbm-bg0) !important;
+    color: var(--gbm-fg0) !important;
+  }
+
+  /*
+   * Every non-media element inherits its parent's background. Starting from
+   * the page background this wipes out light site surfaces, keeps overlays
+   * (menus, modals, sticky headers) opaque, and lets the surfaces defined
+   * below (raised chrome, buttons, code) carry their color to their children.
+   * Media, embeds and native widgets keep their own rendering.
+   */
+  :where(*:not(html, body, img, picture, video, audio, canvas, svg, svg *, iframe, embed, object, progress,
+    meter, input[type="checkbox"], input[type="radio"], input[type="range"], input[type="color"])) {
+    background-color: inherit !important;
+    border-color: var(--gbm-bg3) !important;
+    color: var(--gbm-fg0) !important;
+    text-shadow: none !important;
+  }
+
+  /* Headings and strong text use the brighter foreground. */
+  :where(h1, h2, h3, h4, h5, h6, strong, b, th, dt, legend, summary) {
+    color: var(--gbm-fg1) !important;
+  }
+
+  /* Secondary text. */
+  :where(small, figcaption, caption, cite, time, del, s) {
+    color: var(--gbm-grey1) !important;
+  }
+
+  /* Raised surfaces: page chrome, popups and dialogs. */
+  :where(header, nav, footer, aside, dialog, details, menu,
+    [role="banner"], [role="navigation"], [role="dialog"], [role="alertdialog"],
+    [role="menu"], [role="listbox"], [role="tooltip"], [role="toolbar"]) {
+    background-color: var(--gbm-bg1) !important;
+  }
+
+  /* Links. */
+  :where(a, a *) {
+    color: var(--gbm-blue) !important;
+  }
+
+  :where(a:visited, a:visited *) {
+    color: var(--gbm-purple) !important;
+  }
+
+  :where(a:hover, a:hover *, a:focus-visible, a:focus-visible *) {
+    color: var(--gbm-aqua) !important;
+  }
+
+  /* Text inputs. */
+  :where(input, textarea, select, [contenteditable="true"], [role="textbox"], [role="searchbox"],
+    [role="combobox"]) {
+    background-color: var(--gbm-bg1) !important;
+    border-color: var(--gbm-grey0) !important;
+    color: var(--gbm-fg0) !important;
+  }
+
+  :where(input, textarea)::placeholder {
+    color: var(--gbm-grey1) !important;
+    opacity: 1 !important;
+  }
+
+  /* Buttons. */
+  :where(button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]),
+  ::file-selector-button {
+    background-color: var(--gbm-bg3) !important;
+    border-color: var(--gbm-grey0) !important;
+    color: var(--gbm-fg1) !important;
+  }
+
+  :where(button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]):hover {
+    background-color: var(--gbm-bg5) !important;
+  }
+
+  /* Disabled controls. */
+  :where(:disabled, [aria-disabled="true"]) {
+    color: var(--gbm-grey0) !important;
+  }
+
+  /* Focus ring. */
+  :where(:focus-visible) {
+    outline-color: var(--gbm-yellow) !important;
+  }
+
+  /* Code. */
+  :where(pre, code, kbd, samp) {
+    background-color: var(--gbm-bg-dim) !important;
+  }
+
+  :where(code, kbd, samp) {
+    color: var(--gbm-purple) !important;
+  }
+
+  :where(pre code, pre code *) {
+    color: var(--gbm-fg0) !important;
+  }
+
+  /* Tables. */
+  :where(th, thead td) {
+    background-color: var(--gbm-bg3) !important;
+  }
+
+  /* Quotes and separators. */
+  :where(blockquote) {
+    border-color: var(--gbm-grey0) !important;
+    color: var(--gbm-grey1) !important;
+  }
+
+  :where(hr) {
+    background-color: var(--gbm-bg3) !important;
+    border-color: var(--gbm-bg3) !important;
+  }
+
+  /* Diffs and highlights. */
+  :where(ins) {
+    color: var(--gbm-green) !important;
+  }
+
+  :where(mark) {
+    background-color: var(--gbm-yellow) !important;
+    color: var(--gbm-bg0) !important;
+  }
+
+  /* Text selection. */
+  ::selection {
+    background-color: var(--gbm-bg-visual) !important;
+    color: var(--gbm-fg1) !important;
+  }
+}
