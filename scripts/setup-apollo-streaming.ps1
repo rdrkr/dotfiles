@@ -6,43 +6,54 @@
 .DESCRIPTION
     Setup mode (the default, run as Administrator):
       1. Installs Apollo, Google Chrome, Microsoft Teams, Outlook and Tailscale
-         with winget. With -WithVirtualDisplayDriver, it also installs the
-         standalone Virtual Display Driver and the VC++ runtime it needs.
+         with winget.
       2. Sets the Apollo web UI credentials if none are configured yet.
-      3. Sets `dd_configuration_option = ensure_primary` in sunshine.conf. While a
-         stream runs, Apollo's per-session virtual display becomes the primary
-         display and the physical monitors stay on as secondary displays.
-      4. Adds "Teams", "Outlook" and "Chrome" to apps.json. Each app gets its own
-         virtual display that matches the client's resolution, and runs this
-         script in launch mode as a detached command.
+      3. Sets `dd_configuration_option = verify_only` in sunshine.conf, so
+         Apollo only adds its virtual display and leaves the physical monitors
+         alone. This script switches the monitors itself (see -StreamStart),
+         because it has to pause komorebi first.
+      4. Adds "Teams", "Outlook" and "Chrome" to apps.json. Each app gets
+         Apollo's built-in virtual display (SudoVDA), which exists only while a
+         stream runs and matches the client's resolution. Each app calls this
+         script with -StreamStart / -StreamEnd as prep commands and with
+         -Launch as a detached command. Each app also ends its session when
+         the client disconnects, so the PC is restored right away.
       5. Turns off sleep and hibernate on AC power so the PC stays reachable.
       6. Sets ApolloService to start automatically and restarts it.
 
-    Launch mode (-Launch <App>, which Apollo invokes at stream start):
-      Starts the app, or brings up a new window if it is already running. For
-      the next -WindowWaitSeconds seconds, it moves every top-level window of
-      the app onto the primary display, which is the stream's virtual display,
-      and maximizes it. Windows that were open on a physical monitor follow the
-      stream too. When the stream ends, Apollo removes the virtual display and
-      Windows moves the windows back to the physical monitors.
+    Stream start (-StreamStart, an Apollo prep "do" command):
+      Records whether komorebi is running and paused, and pauses it if it is
+      running and active. Saves the current display layout, then makes the
+      virtual display the only active display, which moves every window onto
+      the stream.
 
-    Apollo already ships its own virtual display driver (SudoVDA) and creates a
-    display per stream, so the standalone Virtual Display Driver is optional.
-    The standalone driver adds a permanent extra monitor that the cursor and
-    windows can wander onto when you are not streaming, so it is opt-in.
+    App launch (-Launch <App>, an Apollo detached command):
+      Starts the app, or brings up a new window if it is already running, and
+      for -WindowWaitSeconds seconds maximizes each of its windows on the
+      stream's display.
+
+    Stream end (-StreamEnd, an Apollo prep "undo" command):
+      Restores the saved layout without the virtual display, so the physical
+      monitors come back exactly as they were and Windows moves the windows
+      back. Then it unpauses komorebi only if -StreamStart paused it, so
+      komorebi ends up running, paused or stopped as it was before.
+
+    Stream modes log to %LOCALAPPDATA%\ApolloStreaming\stream.log.
 
     Safe to re-run: packages that are already installed are skipped, config
     keys are updated in place, and the three apps are replaced by name while
     other apps in apps.json are kept.
 .PARAMETER Launch
-    Launch mode: start the named app and move its windows onto the stream's
-    virtual display. Apollo uses this; you don't need to run it by hand.
+    Start the named app and maximize its windows on the stream's display.
+    Apollo runs this; you don't need to run it by hand.
 .PARAMETER WindowWaitSeconds
-    Launch mode only: how long to keep moving newly appearing windows onto the
-    virtual display. Covers splash screens and slow first starts.
-.PARAMETER WithVirtualDisplayDriver
-    Also install the standalone Virtual Display Driver (VirtualDrivers) and the
-    Visual C++ runtime it depends on.
+    Launch mode only: how long to keep maximizing newly appearing windows.
+    Covers splash screens and slow first starts.
+.PARAMETER StreamStart
+    Pause komorebi and switch to the virtual display only. Apollo runs this.
+.PARAMETER StreamEnd
+    Restore the physical displays and komorebi's previous state. Apollo runs
+    this.
 .PARAMETER WebUsername
     Apollo web UI username. If no credentials exist yet and this is omitted,
     the script prompts for it.
@@ -52,13 +63,11 @@
 .PARAMETER ResetCredentials
     Replace existing Apollo web UI credentials instead of keeping them.
 .PARAMETER DryRun
-    Report what would be done without installing or changing anything.
+    Report what setup would do without installing or changing anything.
 .EXAMPLE
     .\setup-apollo-streaming.ps1
 .EXAMPLE
-    .\setup-apollo-streaming.ps1 -WithVirtualDisplayDriver -DryRun
-.EXAMPLE
-    .\setup-apollo-streaming.ps1 -Launch Teams
+    .\setup-apollo-streaming.ps1 -DryRun
 #>
 
 [CmdletBinding(DefaultParameterSetName = 'Setup')]
@@ -71,8 +80,11 @@ param(
     [ValidateRange(5, 600)]
     [int]$WindowWaitSeconds = 45,
 
-    [Parameter(ParameterSetName = 'Setup')]
-    [switch]$WithVirtualDisplayDriver,
+    [Parameter(ParameterSetName = 'StreamStart', Mandatory)]
+    [switch]$StreamStart,
+
+    [Parameter(ParameterSetName = 'StreamEnd', Mandatory)]
+    [switch]$StreamEnd,
 
     [Parameter(ParameterSetName = 'Setup')]
     [string]$WebUsername,
@@ -101,8 +113,15 @@ $script:APOLLO_STATE       = Join-Path $script:APOLLO_CONFIG_DIR 'sunshine_state
 $script:APOLLO_SERVICE     = 'ApolloService'
 $script:APOLLO_WEB_UI      = 'https://localhost:47990'
 
-# Absolute path of this script; Apollo runs it in launch mode from apps.json.
+# Absolute path of this script; Apollo runs it from apps.json.
 $script:SCRIPT_PATH        = $PSCommandPath
+# Mode this run was started in (Setup, Launch, StreamStart or StreamEnd).
+$script:MODE               = $PSCmdlet.ParameterSetName
+
+# Per-session state (komorebi + saved display layout) and the stream log.
+$script:STREAM_DIR         = Join-Path $env:LOCALAPPDATA 'ApolloStreaming'
+$script:STREAM_STATE       = Join-Path $script:STREAM_DIR 'session.json'
+$script:STREAM_LOG         = Join-Path $script:STREAM_DIR 'stream.log'
 
 # Store app IDs (AUMIDs) for the MSIX-packaged apps.
 $script:TEAMS_AUMID        = 'MSTeams_8wekyb3d8bbwe!MSTeams'
@@ -139,6 +158,24 @@ function Write-DryRun {
     #>
     param([Parameter(Mandatory)][string]$Message)
     Write-Host "    [DRY RUN] $Message" -ForegroundColor Yellow
+}
+
+function Write-StreamLog {
+    <#
+    .SYNOPSIS
+        Appends a timestamped line to the stream log.
+    .DESCRIPTION
+        Stream modes run hidden under Apollo, so the log is the only place to
+        see what they did.
+    .PARAMETER Message
+        Text to log.
+    #>
+    param([Parameter(Mandatory)][string]$Message)
+    if (-not (Test-Path $script:STREAM_DIR)) {
+        New-Item -ItemType Directory -Path $script:STREAM_DIR -Force | Out-Null
+    }
+    $line = '{0:yyyy-MM-dd HH:mm:ss} [{1}] {2}' -f (Get-Date), $script:MODE, $Message
+    Add-Content -Path $script:STREAM_LOG -Value $line
 }
 
 function Test-IsAdministrator {
@@ -238,9 +275,10 @@ function Install-WingetPackage {
 function Install-Packages {
     <#
     .SYNOPSIS
-        Installs Apollo, the streamed apps, Tailscale and optionally the
-        standalone Virtual Display Driver.
+        Installs Apollo, the streamed apps and Tailscale.
     .DESCRIPTION
+        Apollo brings its own virtual display driver (SudoVDA), which only adds
+        a display while a stream runs, so no separate driver is installed.
         Outlook is only installed when neither classic Outlook (Microsoft 365)
         nor the new Outlook app is present; the new Outlook comes from the
         Microsoft Store because it has no winget-source package.
@@ -254,11 +292,6 @@ function Install-Packages {
     Install-WingetPackage -Id $script:NEW_OUTLOOK_STORE -Source 'msstore' `
         -IsInstalled { (Get-AppPath 'OUTLOOK.EXE') -or (Test-AppxInstalled 'Microsoft.OutlookForWindows') }
     Install-WingetPackage -Id 'tailscale.tailscale'
-
-    if ($WithVirtualDisplayDriver) {
-        Install-WingetPackage -Id 'Microsoft.VCRedist.2015+.x64'
-        Install-WingetPackage -Id 'VirtualDrivers.Virtual-Display-Driver'
-    }
 }
 
 function Write-Utf8File {
@@ -364,15 +397,31 @@ function Set-ApolloConfigValue {
     Write-Utf8File -Path $script:APOLLO_CONF -Content (($lines -join "`r`n") + "`r`n")
 }
 
+function Get-ScriptCommand {
+    <#
+    .SYNOPSIS
+        Builds the hidden PowerShell command line Apollo uses to call this script.
+    .PARAMETER Arguments
+        Arguments for this script, such as "-StreamStart".
+    #>
+    param([Parameter(Mandatory)][string]$Arguments)
+    return 'powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass ' +
+        "-File `"$script:SCRIPT_PATH`" $Arguments"
+}
+
 function New-StreamAppEntry {
     <#
     .SYNOPSIS
         Builds the apps.json entry for one streamed app.
     .DESCRIPTION
-        The app runs this script in launch mode as a detached command, so the
-        stream stays up after the launcher exits and ends only when the client
-        quits it. "virtual-display" gives each session its own display sized
-        to the client.
+        - prep-cmd: -StreamStart before the app starts and -StreamEnd when the
+          session ends. Both run elevated, like the komorebic calls in
+          komorebic-hotkeys.ahk.
+        - detached: -Launch, so the stream stays up after the launcher exits
+          and ends only when the client quits or disconnects.
+        - virtual-display: Apollo's per-session display sized to the client.
+        - terminate-on-pause: a client disconnect ends the session instead of
+          leaving it paused, so -StreamEnd restores the PC right away.
     .PARAMETER App
         Streamed app key (Teams, Outlook or Chrome).
     .PARAMETER Uuid
@@ -385,15 +434,18 @@ function New-StreamAppEntry {
 
     if (-not $Uuid) { $Uuid = [guid]::NewGuid().ToString().ToUpperInvariant() }
 
-    $launcher = 'powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass ' +
-        "-File `"$script:SCRIPT_PATH`" -Launch $App"
-
     return [pscustomobject][ordered]@{
-        'name'              = $App
-        'uuid'              = $Uuid
-        'detached'          = @($launcher)
-        'virtual-display'   = $true
-        'auto-detach'       = $true
+        'name'               = $App
+        'uuid'               = $Uuid
+        'prep-cmd'           = @([pscustomobject][ordered]@{
+            'do'       = Get-ScriptCommand '-StreamStart'
+            'undo'     = Get-ScriptCommand '-StreamEnd'
+            'elevated' = $true
+        })
+        'detached'           = @(Get-ScriptCommand "-Launch $App")
+        'virtual-display'    = $true
+        'auto-detach'        = $true
+        'terminate-on-pause' = $true
     }
 }
 
@@ -477,10 +529,11 @@ function Write-NextSteps {
     Write-Host ''
     Write-Host 'Setup complete. Remaining manual steps:' -ForegroundColor Green
     Write-Host "  1. Sign in to Tailscale on this PC and on the phone (tray icon / app)."
-    Write-Host "  2. In Moonlight on the phone, add this PC (by Tailscale IP when away from home)."
-    Write-Host "  3. Enter the PIN Moonlight shows at $script:APOLLO_WEB_UI (PIN tab)."
-    Write-Host "  4. In Moonlight settings, set touch mode to direct touch (not trackpad)."
+    Write-Host "  2. In the Moonlight (or VoidLink) app, add this PC (by Tailscale IP when away from home)."
+    Write-Host "  3. Enter the PIN the app shows at $script:APOLLO_WEB_UI (PIN tab)."
+    Write-Host "  4. In the app's settings, set touch mode to direct touch (not trackpad)."
     Write-Host "  5. Start Teams, Outlook or Chrome from the app list."
+    Write-Host "  Stream log: $script:STREAM_LOG"
 }
 
 function Invoke-Setup {
@@ -506,46 +559,319 @@ function Invoke-Setup {
     }
 
     Set-ApolloCredentials
-    # Make the stream's virtual display primary so new windows open on it,
-    # while the physical monitors stay on as secondary displays.
-    Set-ApolloConfigValue -Key 'dd_configuration_option' -Value 'ensure_primary'
+    # Apollo only adds the virtual display; -StreamStart turns the physical
+    # monitors off after pausing komorebi, and -StreamEnd turns them back on.
+    Set-ApolloConfigValue -Key 'dd_configuration_option' -Value 'verify_only'
     Update-ApolloApps
     Disable-SleepOnAC
     Restart-ApolloService
     Write-NextSteps
 }
 
-function Initialize-WindowApi {
+function Initialize-NativeApi {
     <#
     .SYNOPSIS
-        Loads the Win32 helpers used to find and move app windows.
+        Loads the Win32 helpers for display layout and app windows.
     #>
-    if ('ApolloStreamWindow' -as [type]) { return }
+    if ('ApolloStreamNative' -as [type]) { return }
 
     Add-Type -TypeDefinition @'
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Runtime.InteropServices;
 
-/// <summary>Finds top-level app windows and moves them onto the primary display.</summary>
-public static class ApolloStreamWindow
+/// <summary>
+/// Saves and switches the Windows display layout (CCD API) and finds and
+/// maximizes top-level app windows.
+/// </summary>
+public static class ApolloStreamNative
 {
-    private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+    /// <summary>Adapter name the SudoVDA virtual display driver registers.</summary>
+    public const string VirtualAdapterName = "SudoMaker Virtual Display Adapter";
+
+    // ---- Display configuration (CCD) ----
 
     [StructLayout(LayoutKind.Sequential)]
-    private struct RECT { public int Left, Top, Right, Bottom; }
+    private struct LUID { public uint LowPart; public int HighPart; }
 
     [StructLayout(LayoutKind.Sequential)]
-    private struct POINT { public int X, Y; }
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct MONITORINFO
+    private struct PathSourceInfo
     {
-        public int cbSize;
-        public RECT rcMonitor;
-        public RECT rcWork;
-        public uint dwFlags;
+        public LUID adapterId;
+        public uint id;
+        public uint modeInfoIdx;
+        public uint statusFlags;
     }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct PathTargetInfo
+    {
+        public LUID adapterId;
+        public uint id;
+        public uint modeInfoIdx;
+        public uint outputTechnology;
+        public uint rotation;
+        public uint scaling;
+        public uint refreshNumerator;
+        public uint refreshDenominator;
+        public uint scanLineOrdering;
+        public int targetAvailable;
+        public uint statusFlags;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct PathInfo
+    {
+        public PathSourceInfo sourceInfo;
+        public PathTargetInfo targetInfo;
+        public uint flags;
+    }
+
+    // DISPLAYCONFIG_MODE_INFO: 16-byte header plus a 48-byte union. Only the
+    // source-mode position is read or written; the rest is copied verbatim.
+    [StructLayout(LayoutKind.Explicit, Size = 64)]
+    private struct ModeInfo
+    {
+        [FieldOffset(0)] public uint infoType;
+        [FieldOffset(4)] public uint id;
+        [FieldOffset(8)] public LUID adapterId;
+        [FieldOffset(28)] public int sourcePositionX;
+        [FieldOffset(32)] public int sourcePositionY;
+    }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct SourceDeviceName
+    {
+        public uint type;
+        public uint size;
+        public LUID adapterId;
+        public uint id;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)] public string viewGdiDeviceName;
+    }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct DisplayDevice
+    {
+        public int cb;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)] public string DeviceName;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)] public string DeviceString;
+        public uint StateFlags;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)] public string DeviceID;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)] public string DeviceKey;
+    }
+
+    [DllImport("user32.dll")] private static extern int GetDisplayConfigBufferSizes(uint flags, out uint numPaths, out uint numModes);
+    [DllImport("user32.dll")] private static extern int QueryDisplayConfig(uint flags, ref uint numPaths, [Out] PathInfo[] paths, ref uint numModes, [Out] ModeInfo[] modes, IntPtr topologyId);
+    [DllImport("user32.dll")] private static extern int SetDisplayConfig(uint numPaths, [In] PathInfo[] paths, uint numModes, [In] ModeInfo[] modes, uint flags);
+    [DllImport("user32.dll")] private static extern int DisplayConfigGetDeviceInfo(ref SourceDeviceName request);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern bool EnumDisplayDevices(string device, uint index, ref DisplayDevice info, uint flags);
+
+    private const uint QDC_ONLY_ACTIVE_PATHS = 0x2;
+    private const uint SDC_APPLY = 0x80;
+    private const uint SDC_USE_SUPPLIED_DISPLAY_CONFIG = 0x20;
+    private const uint SDC_ALLOW_CHANGES = 0x400;
+    private const uint DISPLAYCONFIG_PATH_ACTIVE = 0x1;
+    private const uint DISPLAYCONFIG_MODE_INFO_TYPE_SOURCE = 1;
+    private const uint DISPLAYCONFIG_DEVICE_INFO_GET_SOURCE_NAME = 1;
+    private const uint MODE_IDX_INVALID = 0xFFFFFFFF;
+    private const int ERROR_INSUFFICIENT_BUFFER = 122;
+
+    /// <summary>Reads the active display paths and their modes.</summary>
+    private static void QueryActive(out PathInfo[] paths, out ModeInfo[] modes)
+    {
+        while (true)
+        {
+            uint numPaths, numModes;
+            int rc = GetDisplayConfigBufferSizes(QDC_ONLY_ACTIVE_PATHS, out numPaths, out numModes);
+            if (rc != 0) throw new Win32Exception(rc);
+            paths = new PathInfo[numPaths];
+            modes = new ModeInfo[numModes];
+            rc = QueryDisplayConfig(QDC_ONLY_ACTIVE_PATHS, ref numPaths, paths, ref numModes, modes, IntPtr.Zero);
+            if (rc == ERROR_INSUFFICIENT_BUFFER) continue; // layout changed in between; retry
+            if (rc != 0) throw new Win32Exception(rc);
+            Array.Resize(ref paths, (int)numPaths);
+            Array.Resize(ref modes, (int)numModes);
+            return;
+        }
+    }
+
+    /// <summary>Returns the GDI name (\\.\DISPLAYn) of a path's source.</summary>
+    private static string GetSourceGdiName(PathInfo path)
+    {
+        var request = new SourceDeviceName();
+        request.type = DISPLAYCONFIG_DEVICE_INFO_GET_SOURCE_NAME;
+        request.size = (uint)Marshal.SizeOf(typeof(SourceDeviceName));
+        request.adapterId = path.sourceInfo.adapterId;
+        request.id = path.sourceInfo.id;
+        return DisplayConfigGetDeviceInfo(ref request) == 0 ? request.viewGdiDeviceName : null;
+    }
+
+    /// <summary>Returns the adapter name (DeviceString) for each GDI display name.</summary>
+    private static Dictionary<string, string> GetAdapterNames()
+    {
+        var names = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var device = new DisplayDevice();
+        device.cb = Marshal.SizeOf(typeof(DisplayDevice));
+        for (uint i = 0; EnumDisplayDevices(null, i, ref device, 0); i++)
+        {
+            names[device.DeviceName] = device.DeviceString;
+            device.cb = Marshal.SizeOf(typeof(DisplayDevice));
+        }
+        return names;
+    }
+
+    /// <summary>Returns true for paths driven by the SudoVDA virtual display adapter.</summary>
+    private static bool[] FindVirtualPaths(PathInfo[] paths)
+    {
+        var adapters = GetAdapterNames();
+        var result = new bool[paths.Length];
+        for (int i = 0; i < paths.Length; i++)
+        {
+            string gdi = GetSourceGdiName(paths[i]);
+            string adapter;
+            result[i] = gdi != null && adapters.TryGetValue(gdi, out adapter) &&
+                adapter.IndexOf(VirtualAdapterName, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Applies the given paths that pass the filter, with only the modes they
+    /// reference. Optionally moves the single kept source to (0, 0) so it can
+    /// be the primary display.
+    /// </summary>
+    private static void ApplySubset(PathInfo[] paths, ModeInfo[] modes, bool[] keep, bool moveToOrigin)
+    {
+        var keptPaths = new List<PathInfo>();
+        var keptModes = new List<ModeInfo>();
+        var remap = new Dictionary<uint, uint>();
+
+        Func<uint, uint> mapMode = idx =>
+        {
+            if (idx == MODE_IDX_INVALID || idx >= modes.Length) return MODE_IDX_INVALID;
+            uint mapped;
+            if (!remap.TryGetValue(idx, out mapped))
+            {
+                mapped = (uint)keptModes.Count;
+                keptModes.Add(modes[idx]);
+                remap[idx] = mapped;
+            }
+            return mapped;
+        };
+
+        for (int i = 0; i < paths.Length; i++)
+        {
+            if (!keep[i]) continue;
+            var path = paths[i];
+            path.flags |= DISPLAYCONFIG_PATH_ACTIVE;
+            path.sourceInfo.modeInfoIdx = mapMode(path.sourceInfo.modeInfoIdx);
+            path.targetInfo.modeInfoIdx = mapMode(path.targetInfo.modeInfoIdx);
+            keptPaths.Add(path);
+        }
+
+        if (keptPaths.Count == 0) throw new InvalidOperationException("No display would be left active.");
+
+        var modeArray = keptModes.ToArray();
+        if (moveToOrigin)
+        {
+            for (int i = 0; i < modeArray.Length; i++)
+            {
+                if (modeArray[i].infoType != DISPLAYCONFIG_MODE_INFO_TYPE_SOURCE) continue;
+                modeArray[i].sourcePositionX = 0;
+                modeArray[i].sourcePositionY = 0;
+            }
+        }
+
+        int rc = SetDisplayConfig((uint)keptPaths.Count, keptPaths.ToArray(), (uint)modeArray.Length, modeArray,
+            SDC_APPLY | SDC_USE_SUPPLIED_DISPLAY_CONFIG | SDC_ALLOW_CHANGES);
+        if (rc != 0) throw new Win32Exception(rc);
+    }
+
+    /// <summary>Returns true when a SudoVDA virtual display is currently active.</summary>
+    public static bool HasActiveVirtualDisplay()
+    {
+        PathInfo[] paths; ModeInfo[] modes;
+        QueryActive(out paths, out modes);
+        return Array.IndexOf(FindVirtualPaths(paths), true) >= 0;
+    }
+
+    /// <summary>Serializes the active display layout to a Base64 string.</summary>
+    public static string SaveLayout()
+    {
+        PathInfo[] paths; ModeInfo[] modes;
+        QueryActive(out paths, out modes);
+        using (var stream = new MemoryStream())
+        using (var writer = new BinaryWriter(stream))
+        {
+            writer.Write(paths.Length);
+            writer.Write(modes.Length);
+            foreach (var p in paths) writer.Write(ToBytes(p));
+            foreach (var m in modes) writer.Write(ToBytes(m));
+            writer.Flush();
+            return Convert.ToBase64String(stream.ToArray());
+        }
+    }
+
+    /// <summary>
+    /// Makes the SudoVDA virtual display the only active display. Returns
+    /// false when no virtual display is active.
+    /// </summary>
+    public static bool UseOnlyVirtualDisplay()
+    {
+        PathInfo[] paths; ModeInfo[] modes;
+        QueryActive(out paths, out modes);
+        var isVirtual = FindVirtualPaths(paths);
+        if (Array.IndexOf(isVirtual, true) < 0) return false;
+        ApplySubset(paths, modes, isVirtual, true);
+        return true;
+    }
+
+    /// <summary>
+    /// Re-applies a layout saved by SaveLayout, leaving out any virtual
+    /// display, so only the physical monitors are active again in their
+    /// original arrangement.
+    /// </summary>
+    /// <param name="saved">Base64 string returned by SaveLayout.</param>
+    public static void RestoreLayoutWithoutVirtual(string saved)
+    {
+        PathInfo[] paths; ModeInfo[] modes;
+        using (var reader = new BinaryReader(new MemoryStream(Convert.FromBase64String(saved))))
+        {
+            int pathCount = reader.ReadInt32();
+            int modeCount = reader.ReadInt32();
+            paths = new PathInfo[pathCount];
+            modes = new ModeInfo[modeCount];
+            for (int i = 0; i < pathCount; i++) paths[i] = FromBytes<PathInfo>(reader.ReadBytes(Marshal.SizeOf(typeof(PathInfo))));
+            for (int i = 0; i < modeCount; i++) modes[i] = FromBytes<ModeInfo>(reader.ReadBytes(Marshal.SizeOf(typeof(ModeInfo))));
+        }
+
+        var isVirtual = FindVirtualPaths(paths);
+        var keep = new bool[paths.Length];
+        for (int i = 0; i < keep.Length; i++) keep[i] = !isVirtual[i];
+        ApplySubset(paths, modes, keep, false);
+    }
+
+    private static byte[] ToBytes<T>(T value) where T : struct
+    {
+        var bytes = new byte[Marshal.SizeOf(typeof(T))];
+        var handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
+        try { Marshal.StructureToPtr(value, handle.AddrOfPinnedObject(), false); }
+        finally { handle.Free(); }
+        return bytes;
+    }
+
+    private static T FromBytes<T>(byte[] bytes) where T : struct
+    {
+        var handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
+        try { return (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T)); }
+        finally { handle.Free(); }
+    }
+
+    // ---- App windows ----
+
+    private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
     [DllImport("user32.dll")] private static extern bool EnumWindows(EnumWindowsProc cb, IntPtr lParam);
     [DllImport("user32.dll")] private static extern bool IsWindowVisible(IntPtr hWnd);
@@ -553,26 +879,16 @@ public static class ApolloStreamWindow
     [DllImport("user32.dll")] private static extern int GetWindowTextLength(IntPtr hWnd);
     [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint pid);
     [DllImport("user32.dll")] private static extern int GetWindowLong(IntPtr hWnd, int index);
-    [DllImport("user32.dll")] private static extern IntPtr MonitorFromWindow(IntPtr hWnd, uint flags);
-    [DllImport("user32.dll")] private static extern IntPtr MonitorFromPoint(POINT pt, uint flags);
-    [DllImport("user32.dll")] private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO info);
     [DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr hWnd, int cmd);
     [DllImport("user32.dll")] private static extern bool IsZoomed(IntPtr hWnd);
     [DllImport("user32.dll")] private static extern bool SetForegroundWindow(IntPtr hWnd);
-    [DllImport("user32.dll")] private static extern bool SetWindowPos(IntPtr hWnd, IntPtr after, int x, int y, int cx, int cy, uint flags);
-    [DllImport("user32.dll")] private static extern IntPtr SetThreadDpiAwarenessContext(IntPtr context);
     [DllImport("dwmapi.dll")] private static extern int DwmGetWindowAttribute(IntPtr hWnd, int attr, out int value, int size);
 
     private const uint GW_OWNER = 4;
     private const int GWL_EXSTYLE = -20;
     private const int WS_EX_TOOLWINDOW = 0x80;
     private const int DWMWA_CLOAKED = 14;
-    private const uint MONITOR_DEFAULTTONEAREST = 2;
-    private const uint MONITOR_DEFAULTTOPRIMARY = 1;
-    private const int SW_RESTORE = 9;
     private const int SW_MAXIMIZE = 3;
-    private const uint SWP_NOSIZE = 0x1, SWP_NOZORDER = 0x4, SWP_NOACTIVATE = 0x10;
-    private static readonly IntPtr DPI_PER_MONITOR_AWARE_V2 = new IntPtr(-4);
 
     /// <summary>
     /// Returns visible, uncloaked, unowned, titled top-level windows that
@@ -599,45 +915,11 @@ public static class ApolloStreamWindow
         return result.ToArray();
     }
 
-    /// <summary>Returns true when most of the window is on the primary display.</summary>
+    /// <summary>Maximizes the window unless it already is.</summary>
     /// <param name="hWnd">Window handle.</param>
-    public static bool IsOnPrimary(IntPtr hWnd)
+    public static void Maximize(IntPtr hWnd)
     {
-        var primary = MonitorFromPoint(new POINT(), MONITOR_DEFAULTTOPRIMARY);
-        return MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST) == primary;
-    }
-
-    /// <summary>Returns true when the window is maximized.</summary>
-    /// <param name="hWnd">Window handle.</param>
-    public static bool IsMaximized(IntPtr hWnd)
-    {
-        return IsZoomed(hWnd);
-    }
-
-    /// <summary>
-    /// Moves the window onto the primary display's work area and maximizes it
-    /// there. The primary display is the stream's virtual display while
-    /// Apollo streams with dd_configuration_option = ensure_primary.
-    /// </summary>
-    /// <param name="hWnd">Window handle.</param>
-    public static void MoveToPrimaryMaximized(IntPtr hWnd)
-    {
-        var previous = SetThreadDpiAwarenessContext(DPI_PER_MONITOR_AWARE_V2);
-        try
-        {
-            var info = new MONITORINFO { cbSize = Marshal.SizeOf(typeof(MONITORINFO)) };
-            GetMonitorInfo(MonitorFromPoint(new POINT(), MONITOR_DEFAULTTOPRIMARY), ref info);
-
-            // Restore first: a maximized window can't be moved to another monitor.
-            ShowWindow(hWnd, SW_RESTORE);
-            SetWindowPos(hWnd, IntPtr.Zero, info.rcWork.Left + 40, info.rcWork.Top + 40, 0, 0,
-                SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
-            ShowWindow(hWnd, SW_MAXIMIZE);
-        }
-        finally
-        {
-            if (previous != IntPtr.Zero) SetThreadDpiAwarenessContext(previous);
-        }
+        if (!IsZoomed(hWnd)) ShowWindow(hWnd, SW_MAXIMIZE);
     }
 
     /// <summary>Brings the window to the foreground.</summary>
@@ -648,6 +930,106 @@ public static class ApolloStreamWindow
     }
 }
 '@
+}
+
+function Get-KomorebiState {
+    <#
+    .SYNOPSIS
+        Returns komorebi's current state as 'stopped', 'paused' or 'active'.
+    .DESCRIPTION
+        'stopped' also covers komorebic not being installed or not answering.
+    #>
+    if (-not (Get-Process -Name 'komorebi' -ErrorAction SilentlyContinue)) { return 'stopped' }
+    if (-not (Get-Command komorebic -ErrorAction SilentlyContinue)) { return 'stopped' }
+
+    try {
+        $state = komorebic state | Out-String | ConvertFrom-Json
+        if ($state.is_paused) { return 'paused' }
+        return 'active'
+    } catch {
+        Write-StreamLog "komorebic state failed: $_"
+        return 'stopped'
+    }
+}
+
+function Invoke-StreamStart {
+    <#
+    .SYNOPSIS
+        Pauses komorebi (if active), saves the display layout and makes the
+        virtual display the only active display.
+    .DESCRIPTION
+        Never fails: Apollo aborts the launch when a prep command exits non-zero,
+        so errors are logged instead.
+    #>
+    try {
+        Initialize-NativeApi
+
+        $komorebi = Get-KomorebiState
+        $pausedByUs = $false
+        if ($komorebi -eq 'active') {
+            komorebic toggle-pause | Out-Null
+            $pausedByUs = $true
+        }
+        Write-StreamLog "komorebi was $komorebi; paused by stream: $pausedByUs"
+
+        # Save before changing anything so a failure below can still be undone.
+        $session = [pscustomobject]@{
+            komorebiPausedByStream = $pausedByUs
+            displayLayout          = [ApolloStreamNative]::SaveLayout()
+        }
+        Write-Utf8File -Path $script:STREAM_STATE -Content ($session | ConvertTo-Json)
+
+        if ([ApolloStreamNative]::UseOnlyVirtualDisplay()) {
+            Write-StreamLog 'Switched to the virtual display only'
+        } else {
+            Write-StreamLog 'No active virtual display found; physical displays left on'
+        }
+    } catch {
+        Write-StreamLog "Stream start failed: $_"
+    }
+}
+
+function Invoke-StreamEnd {
+    <#
+    .SYNOPSIS
+        Turns the physical displays back on in their saved layout and returns
+        komorebi to the state it had before the stream.
+    .DESCRIPTION
+        The saved layout is applied without the virtual display, so the monitors
+        are back before Apollo removes the virtual display. komorebi is only
+        unpaused if -StreamStart paused it and it is still paused, after a short
+        wait for windows to settle.
+    #>
+    if (-not (Test-Path $script:STREAM_STATE)) {
+        Write-StreamLog 'No saved session; nothing to restore'
+        return
+    }
+
+    $session = Get-Content -Path $script:STREAM_STATE -Raw | ConvertFrom-Json
+
+    try {
+        Initialize-NativeApi
+        [ApolloStreamNative]::RestoreLayoutWithoutVirtual($session.displayLayout)
+        Write-StreamLog 'Restored the physical display layout'
+    } catch {
+        Write-StreamLog "Display restore failed: $_"
+    }
+
+    try {
+        if ($session.komorebiPausedByStream) {
+            Start-Sleep -Seconds 2
+            if ((Get-KomorebiState) -eq 'paused') {
+                komorebic toggle-pause | Out-Null
+                Write-StreamLog 'Unpaused komorebi'
+            } else {
+                Write-StreamLog 'komorebi is no longer paused or running; left as is'
+            }
+        }
+    } catch {
+        Write-StreamLog "komorebi restore failed: $_"
+    }
+
+    Remove-Item -Path $script:STREAM_STATE -Force -ErrorAction SilentlyContinue
 }
 
 function Start-StreamApp {
@@ -685,16 +1067,15 @@ function Start-StreamApp {
 function Invoke-Launch {
     <#
     .SYNOPSIS
-        Launch mode: starts the app and keeps its windows on the stream's
-        virtual display for -WindowWaitSeconds seconds.
+        Starts the app and maximizes its windows on the stream's display.
     .DESCRIPTION
-        Each window is moved and maximized once. A window is moved again only
-        if it leaves the primary display (e.g. an app restoring its saved
-        position after its splash screen), so un-maximizing a window on
-        the phone is left alone.
+        The virtual display is the only active display by now, so every window
+        is already on it. Each window is maximized once when first seen, so
+        un-maximizing one from the phone is left alone.
     #>
-    Initialize-WindowApi
+    Initialize-NativeApi
     Start-StreamApp -App $Launch
+    Write-StreamLog "Started $Launch"
 
     $names = $script:APP_PROCESSES[$Launch]
     $handled = @{}
@@ -704,19 +1085,13 @@ function Invoke-Launch {
     do {
         $pids = @(Get-Process -Name $names -ErrorAction SilentlyContinue | ForEach-Object { [uint32]$_.Id })
         if ($pids.Count -gt 0) {
-            foreach ($hWnd in [ApolloStreamWindow]::GetAppWindows([uint32[]]$pids)) {
+            foreach ($hWnd in [ApolloStreamNative]::GetAppWindows([uint32[]]$pids)) {
                 $key = $hWnd.ToInt64()
-                $onPrimary = [ApolloStreamWindow]::IsOnPrimary($hWnd)
-                $isNew = -not $handled.ContainsKey($key)
-
-                # New windows get moved and maximized; known ones only if they left the stream.
-                if (-not $onPrimary -or ($isNew -and -not [ApolloStreamWindow]::IsMaximized($hWnd))) {
-                    [ApolloStreamWindow]::MoveToPrimaryMaximized($hWnd)
-                }
+                if ($handled.ContainsKey($key)) { continue }
+                [ApolloStreamNative]::Maximize($hWnd)
                 $handled[$key] = $true
-
                 if (-not $focused) {
-                    [ApolloStreamWindow]::Focus($hWnd)
+                    [ApolloStreamNative]::Focus($hWnd)
                     $focused = $true
                 }
             }
@@ -725,8 +1100,9 @@ function Invoke-Launch {
     } while ((Get-Date) -lt $deadline)
 }
 
-if ($PSCmdlet.ParameterSetName -eq 'Launch') {
-    Invoke-Launch
-} else {
-    Invoke-Setup
+switch ($script:MODE) {
+    'Launch'      { Invoke-Launch }
+    'StreamStart' { Invoke-StreamStart }
+    'StreamEnd'   { Invoke-StreamEnd }
+    default       { Invoke-Setup }
 }
