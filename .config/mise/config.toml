@@ -10,6 +10,8 @@
 # Official releases only. This flag drives Remux.app as well: update-remux-app.sh reads it and
 # installs the tagged DMG rather than the rolling `nightly` one. Adding `prerelease = true` back
 # puts both on the nightly channel again, and nothing else has to change.
-"github:lostb1t/remux" = { version = "latest", os = ["macos", "linux"] }
+# postinstall updates Remux.app whenever mise installs a new CLI, so a plain `mise upgrade` keeps
+# the two on the same release; without it only `ua` touched the app. The script skips off macOS.
+"github:lostb1t/remux" = { version = "latest", os = ["macos", "linux"], postinstall = "bash ~/dotfiles/scripts/update-remux-app.sh" }
 go = "1.27.1"
 gofumpt = "latest"

@@ -3,8 +3,12 @@
 #
 # Updates the Remux desktop app (https://github.com/lostb1t/remux) from GitHub releases. macOS
 # builds only ship as a DMG, which neither Homebrew nor mise can manage (mise handles the headless
-# `remux` CLI), so `ua` runs this script instead. If the app was running it is stopped with
-# SIGTERM and relaunched, the same way switchbot's relogin watcher restarts it.
+# `remux` CLI), so this script does it. Two things run it: mise's `postinstall` hook on the remux
+# tool, so a plain `mise upgrade` that brings in a new CLI brings the app along, and `ua`, which
+# also catches an app left behind while the CLI was already current. `ua` runs mise in the same
+# stage as this script, so both can fire at once; a lock makes the second wait for the first and
+# then find the app up to date. If the app was running it is stopped with SIGTERM and relaunched,
+# the same way switchbot's relogin watcher restarts it.
 #
 # Release channel: official releases. Pre-releases (Remux's rolling `nightly` build) are taken only
 # when mise opts remux into them, so one flag drives both the CLI and the app:
@@ -26,7 +30,13 @@ readonly TOOL="github:$REPO"
 readonly APP="${REMUX_APP:-/Applications/Remux.app}"
 readonly URL="${REMUX_URL:-http://127.0.0.1:3000/}"
 readonly QUIT_TIMEOUT=10
-readonly LAUNCH_TIMEOUT=60
+# Remux fetches every addon's manifest before it opens its port, and an addon whose host is down
+# holds that up until the fetch fails - 84s against a Cloudflare 522 from AIOStreams. Waiting 60s
+# reported an installed, starting Remux as a failed update.
+readonly LAUNCH_TIMEOUT=150
+# Serialises concurrent runs (see the header); lockf waits this long for the other run to finish
+readonly LOCK_FILE="${TMPDIR:-/tmp}/remux-app-update.lock"
+readonly LOCK_TIMEOUT=1800
 
 # Scratch directory holding the DMG, its mount point and the previous app bundle
 WORK_DIR=""
@@ -201,6 +211,10 @@ main() {
   if [[ ! -d "$APP" ]]; then
     echo "$APP is not installed, skipping"
     return 0
+  fi
+  # re-run under the lock; the variable marks the inner run so it does not lock again
+  if [[ -z "${REMUX_UPDATE_LOCKED:-}" ]]; then
+    REMUX_UPDATE_LOCKED=1 exec /usr/bin/lockf -k -t "$LOCK_TIMEOUT" "$LOCK_FILE" bash "$0" "$@"
   fi
   command -v jq >/dev/null 2>&1 || fail "jq is required to read Remux releases"
 
