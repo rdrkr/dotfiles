@@ -397,9 +397,68 @@ function ld { lazydocker @args }
 function open { start @args }
 function c { Clear-Host }
 
+function Test-UaElevated {
+    <#
+    .SYNOPSIS
+        Returns whether this shell runs with an elevated (administrator) token.
+    .OUTPUTS
+        System.Boolean.
+    #>
+    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+    ([Security.Principal.WindowsPrincipal]$identity).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
+function Test-UaRemoteSession {
+    <#
+    .SYNOPSIS
+        Returns whether this shell is being driven over SSH.
+    .DESCRIPTION
+        A psmux pane keeps the SSH_* variables it was opened with, so a pane opened at the
+        desktop and later attached over SSH has none. Inside psmux the session's current
+        SSH_CONNECTION (updated on attach) is asked for first; when psmux cannot answer, the
+        shell's own SSH_CONNECTION / SSH_CLIENT decide.
+    .OUTPUTS
+        System.Boolean.
+    #>
+    if ($env:TMUX -and $env:PSMUX_SESSION) {
+        $line = & psmux show-environment SSH_CONNECTION 2>$null
+        if ($LASTEXITCODE -eq 0 -and $line) { return [bool]("$line" -like 'SSH_CONNECTION=*') }
+    }
+    [bool]($env:SSH_CONNECTION -or $env:SSH_CLIENT)
+}
+
+function ua-setup {
+    <#
+    .SYNOPSIS
+        Registers the scheduled task that lets a remote ua run elevated without UAC.
+    .DESCRIPTION
+        Run once at the desktop: it asks for UAC a single time. See
+        scripts/run-tasks/ua-elevated.ps1; remove the task with `ua-setup -Unregister`.
+    .PARAMETER Unregister
+        Remove the scheduled task instead.
+    #>
+    param([switch]$Unregister)
+
+    $script = Join-Path $env:USERPROFILE 'dotfiles\scripts\run-tasks\ua-elevated.ps1'
+    if ($Unregister) { & $script -Unregister } else { & $script -Register }
+}
+
 # update all: run the per-OS task list with the task runner's own tsx (installing its
 # dependencies on first use); options such as --verbose or --help are passed through.
+# winget installers elevate through UAC, whose dialog only appears on the desktop: in a remote
+# session (SSH, psmux attached over SSH) that is not already elevated, the run goes through the
+# elevated scheduled task registered by ua-setup instead, so it never waits on a dialog nobody
+# can answer. --elevated forces that path locally too.
 function ua {
+    <#
+    .SYNOPSIS
+        Updates all system tools and packages (see scripts/run-tasks/update-<os>.yaml).
+    .DESCRIPTION
+        Runs the task runner on this OS's task list. On Windows, a remote shell without an
+        elevated token runs it through the elevated scheduled task (see ua-setup).
+    .EXAMPLE
+        ua --verbose
+    #>
     $runner = "$env:USERPROFILE\dotfiles\scripts\run-tasks"
     $tsx = "$runner\node_modules\tsx\dist\cli.mjs"
     # esbuild's binary is platform-specific; node_modules synced from another OS lacks it
@@ -409,7 +468,18 @@ function ua {
         npm ci --prefix $runner --silent
         if ($LASTEXITCODE -ne 0) { return }
     }
-    node $tsx "$runner\run-tasks.ts" "$runner\update-$($global:_OS).yaml" @args
+
+    $isHelp = ($args -contains '--help') -or ($args -contains '-h')
+    $forceElevated = $args -contains '--elevated'
+    $runnerArgs = @($args | Where-Object { $_ -ne '--elevated' })
+    if ($global:_OS -eq 'windows' -and -not $isHelp -and -not (Test-UaElevated) -and
+        ($forceElevated -or (Test-UaRemoteSession))) {
+        # passed by name as an array, so flags such as --verbose are not parsed as parameters
+        & "$runner\ua-elevated.ps1" -Run -RunnerArgs $runnerArgs
+        return
+    }
+
+    node $tsx "$runner\run-tasks.ts" "$runner\update-$($global:_OS).yaml" @runnerArgs
 }
 
 # claude code aliases
