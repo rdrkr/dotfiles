@@ -528,9 +528,11 @@ alias ld='lazydocker'
 alias c='clear'
 # update all: run the per-OS task list with the task runner's own tsx (installing its
 # dependencies on first use); options such as --verbose or --help are passed through.
-# On Linux, prompt for sudo up front (the parallel task runner ignores child stdin, so an
-# interactive sudo prompt inside a task would hang forever), then keep the sudo timestamp
-# fresh in the background until the run finishes.
+# On Linux and macOS, authenticate sudo up front, in this terminal, then keep the sudo
+# timestamp fresh in the background until the run finishes: tasks get no stdin and their
+# output is drawn by the runner, so a sudo prompt inside a task (Homebrew casks, mas) could
+# never be answered. On macOS this is a Touch ID prompt locally; over SSH, where Touch ID is
+# unavailable, it is a password prompt here instead of a dialog on the Mac's own screen.
 ua() {
   setopt localoptions localtraps nomonitor
   local runner_dir=~/dotfiles/scripts/run-tasks
@@ -545,7 +547,7 @@ ua() {
     npm ci --prefix "$runner_dir" --silent || return 1
   fi
 
-  if [[ "$_OS" == "linux" && ${@[(I)(-h|--help)]} -eq 0 ]]; then
+  if [[ "$_OS" == (linux|macos) && ${@[(I)(-h|--help)]} -eq 0 ]]; then
     sudo -v || return 1
     ( while true; do sudo -n true; sleep 60; kill -0 "$$" 2>/dev/null || exit; done ) &>/dev/null &
     sudo_keepalive=$!

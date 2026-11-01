@@ -27,9 +27,12 @@ groups:
   - title: Updating App Store apps
     stage: 0
     tasks:
+      # mas needs root to upgrade apps; ua authenticates sudo up front, and -n makes the task
+      # fail instead of waiting for a password prompt nobody can answer
       - title: Upgrading App Store apps
-        command: mas
-        args: [upgrade]
+        command: sudo
+        requires: [mas]
+        args: [-n, mas, upgrade]
 
   - title: Updating global npm packages
     stage: 1
