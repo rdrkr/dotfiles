@@ -533,9 +533,21 @@ alias c='clear'
 # output is drawn by the runner, so a sudo prompt inside a task (Homebrew casks, mas) could
 # never be answered. On macOS this is a Touch ID prompt locally; over SSH, where Touch ID is
 # unavailable, it is a password prompt here instead of a dialog on the Mac's own screen.
+# That relies on scripts/pam/install-pam-tid-local.sh, whose PAM module skips Touch ID when
+# SSH_* variables are set. In tmux a pane's variables date from when it was opened, so they
+# are taken from the session's SSH_CONNECTION instead (tmux updates it on every attach).
 ua() {
   setopt localoptions localtraps nomonitor
   local runner_dir=~/dotfiles/scripts/run-tasks
+  if [[ -n "$TMUX" ]]; then
+    local tmux_ssh="$(tmux show-environment SSH_CONNECTION 2>/dev/null)"
+    if [[ "$tmux_ssh" == SSH_CONNECTION=* ]]; then
+      local -x SSH_CONNECTION="${tmux_ssh#*=}"
+    elif [[ "$tmux_ssh" == -SSH_CONNECTION ]]; then
+      local SSH_CONNECTION SSH_CLIENT SSH_TTY
+      unset SSH_CONNECTION SSH_CLIENT SSH_TTY
+    fi
+  fi
   # tsx's CLI runs through node and needs esbuild's binary for this platform: node_modules
   # synced from another OS lacks both the executable bit and that binary, so reinstall then
   local tsx="${runner_dir}/node_modules/tsx/dist/cli.mjs"
@@ -548,6 +560,10 @@ ua() {
   fi
 
   if [[ "$_OS" == (linux|macos) && ${@[(I)(-h|--help)]} -eq 0 ]]; then
+    if [[ "$_OS" == macos && -n "$SSH_CONNECTION" && ! -f /usr/local/lib/pam/pam_tid_local.so ]]; then
+      print -u2 "ua: pam_tid_local is not installed, so sudo may wait on a Touch ID dialog on the Mac;"
+      print -u2 "    install it once from outside tmux: ~/dotfiles/scripts/pam/install-pam-tid-local.sh"
+    fi
     sudo -v || return 1
     ( while true; do sudo -n true; sleep 60; kill -0 "$$" 2>/dev/null || exit; done ) &>/dev/null &
     sudo_keepalive=$!
