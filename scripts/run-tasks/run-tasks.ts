@@ -7,11 +7,7 @@ import { accessSync, constants, readFileSync, statSync } from "node:fs"
 import { homedir } from "node:os"
 import { delimiter, join, resolve } from "node:path"
 import { parse } from "yaml"
-import task from "tasuku"
-// import task from 'tasuku/inline'          // inline renderer
-// import task from 'tasuku/theme/claude'    // Claude Code theme
-// import task from 'tasuku/theme/blink'     // reduced-motion theme
-// import task from 'tasuku/theme/codex'     // OpenAI Codex theme
+import { GroupView, Renderer, TaskView } from "./renderer.ts"
 
 /**
  * Task definition
@@ -56,11 +52,6 @@ interface TaskFile {
   /** Groups run in parallel within their stage */
   groups: TaskGroup[]
 }
-
-/**
- * Callback API tasuku hands to a running task
- */
-type TaskApi = Parameters<Parameters<typeof task>[1]>[0]
 
 // CLI arguments
 const argv = process.argv.slice(2)
@@ -174,83 +165,85 @@ function hasExecutable(name: string): boolean {
 
 /**
  * Run a single task: skip it with a warning when a required executable is missing, otherwise
- * spawn its command and stream stdout/stderr into the task preview
+ * spawn its command and stream stdout/stderr into its view. Never rejects: a failure is
+ * recorded on the view so the rest of the group still runs.
  */
-async function runTask(t: Task, isVerbose: boolean, { setTitle, setError, setWarning, streamPreview }: TaskApi) {
-  setTitle(t.title)
+async function runTask(t: Task, view: TaskView): Promise<void> {
+  view.start()
 
   const missing = [t.requires ?? t.command].flat().filter((name) => !hasExecutable(name))
   if (missing.length > 0) {
-    setWarning(`skipped, not found: ${missing.join(", ")}`)
+    view.skip(`skipped, not found: ${missing.join(", ")}`)
     return
   }
 
-  await new Promise<void>((resolve, reject) => {
+  await new Promise<void>((resolve) => {
     const child = spawn(t.command, t.args, {
       cwd: t.cwd,
       env: { ...process.env, TERM: "dumb" },
       stdio: ["ignore", "pipe", "pipe"],
     })
 
-    child.stdout.pipe(streamPreview, { end: false })
-    child.stderr.pipe(streamPreview, { end: false })
+    child.stdout.setEncoding("utf-8").on("data", (chunk: string) => view.append("stdout", chunk))
+    child.stderr.setEncoding("utf-8").on("data", (chunk: string) => view.append("stderr", chunk))
 
-    child.on("close", (code) => {
-      if (code === 0) {
-        setTitle(t.title)
-        resolve()
-
-        if (!isVerbose) {
-          streamPreview.clear()
+    // a spawn failure can emit both "error" and "close": settle on whichever comes first
+    child.on("close", (code, signal) => {
+      if (view.status === "running") {
+        if (code === 0) {
+          view.succeed()
+        } else {
+          view.fail(code === null ? `killed by ${signal}` : `exited with code ${code}`)
         }
-      } else {
-        const msg = `exited with code ${code}`
-        setError(msg)
-        reject(new Error(msg))
       }
+      resolve()
     })
 
     child.on("error", (err) => {
-      setError(err.message)
-      reject(err)
+      if (view.status === "running") {
+        view.fail(err.message)
+      }
+      resolve()
     })
   })
 }
 
 /**
  * Run every group of one stage in parallel, where each group runs its tasks sequentially
- * with live output streaming
+ * with live output streaming; resolves to whether every task succeeded or was skipped
  */
-async function runStage(groups: Required<TaskGroup>[]) {
-  await task.group(
-    (rootCreator) =>
-      groups.map(({ title, tasks }) =>
-        rootCreator(
-          title,
-          async () =>
-            await task.group(
-              (childCreator) =>
-                tasks.map((t) => {
-                  const isVerbose = verbose || Boolean(t.verbose)
-                  return childCreator("Waiting...", (api) => runTask(t, isVerbose, api), {
-                    previewLines: isVerbose ? 100 : 10,
-                  })
-                }),
-              {
-                concurrency: 1,
-                // Keep going after a failing task so the rest of the group's
-                // updates still run; each failure is surfaced inline via setError().
-                stopOnError: false,
-              },
-            ),
-          { showTime: true },
-        ),
+async function runStage(renderer: Renderer, groups: Required<TaskGroup>[]): Promise<boolean> {
+  const views = groups.map(
+    (g) =>
+      new GroupView(
+        g.title,
+        g.tasks.map((t) => {
+          const isVerbose = verbose || Boolean(t.verbose)
+          return new TaskView(t.title, isVerbose ? 100 : 10, isVerbose)
+        }),
       ),
-    {
-      concurrency: groups.length,
-      stopOnError: false,
-    },
   )
+
+  renderer.beginStage(views)
+  try {
+    await Promise.all(
+      groups.map(async (group, i) => {
+        const view = views[i]!
+        view.start()
+        // keep going after a failing task so the rest of the group's updates still run
+        for (const [j, t] of group.tasks.entries()) {
+          const taskView = view.tasks[j]!
+          await runTask(t, taskView)
+          renderer.taskFinished(view, taskView)
+        }
+        view.end()
+      }),
+    )
+  } finally {
+    renderer.endStage()
+  }
+
+  return views.every((g) => g.status !== "error")
 }
 
 const taskGroups = taskFile.groups.map((g) => ({
@@ -265,18 +258,19 @@ const stages = [...new Set(taskGroups.map((g) => g.stage))]
   .sort((a, b) => a - b)
   .map((stage) => taskGroups.filter((g) => g.stage === stage))
 
+const renderer = new Renderer()
+
+// Ctrl-C also reaches the tasks (they share the terminal's process group): leave the last
+// frame on screen, restore the cursor and exit like a shell would
+process.on("SIGINT", () => {
+  renderer.abort()
+  process.exit(130)
+})
+
 for (const groups of stages) {
-  try {
-    await runStage(groups)
-  } catch (err) {
-    // tasuku rejects with an AggregateError when any task fails, even with
-    // stopOnError: false. Every failure has already been shown inline by the
-    // owning task (✖ + streamed stderr), so swallow the noisy minified stack
-    // trace here, signal failure through the exit code and move on to the next stage.
-    if (err instanceof AggregateError) {
-      process.exitCode = 1
-    } else {
-      throw err
-    }
+  // every failure is already shown inline by its task; signal it through the exit code
+  // and move on to the next stage
+  if (!(await runStage(renderer, groups))) {
+    process.exitCode = 1
   }
 }
