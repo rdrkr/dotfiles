@@ -280,7 +280,10 @@ prepend_keymap = [
   { on = "P", run = "plugin split-tabs spl_preview", desc = "Split-tabs: toggle preview pane" },
 
   # confirm-quit.yazi
-  { on = "q", run = "plugin confirm-quit", desc = "Exit the process" },
+  #{ on = "q", run = "plugin confirm-quit", desc = "Exit the process" },
+
+  # always-confirm.yazi
+  { on = "q", run = "plugin always-confirm", desc = "Quit Yazi with an enforced confirmation prompt" },
 
   # lazygit.yazi
   { on = [

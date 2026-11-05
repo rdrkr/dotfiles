@@ -144,7 +144,8 @@ if ($Do) {
   $fwd = ($Rest | ForEach-Object { if ($_ -match '^-[A-Za-z]+$') { $_ } else { '"' + (($_ -replace '"', '\"') -replace '(\\+)$', '$1$1') + '"' } }) -join " "
   $cmd = "powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File C:\work\tools\drive.ps1 $fwd -Result $resGuest"
   $code = Invoke-InSandbox $id $cmd
-  if (Test-Path $resHost) { Get-Content $resHost; Remove-Item $resHost -Force } else { "no result (exit $code)" }
+  # read and delete before printing: a caller's Select-Object -First stops this script at its first output line
+  if (Test-Path $resHost) { $out = Get-Content $resHost; Remove-Item $resHost -Force; $out } else { "no result (exit $code)" }
   return
 }
 
