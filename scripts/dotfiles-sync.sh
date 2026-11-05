@@ -42,7 +42,10 @@
 # pattern per line; each repo has its own). Extra patterns that must never leave
 # this machine - corporate hostnames, internal URLs - go in
 # .git/dotfiles-sync/blocklist (extended regexes, one per line); keep that file
-# out of the repo, since the patterns themselves are what must not leak.
+# out of the repo, since the patterns themselves are what must not leak. Files
+# allowed to carry blocklisted patterns anyway (shell globs, repo-relative, e.g.
+# .config/stylus/*) go in .git/dotfiles-sync/blocklist-exempt; the built-in
+# secret patterns and gitleaks still check them.
 #
 # Snapshots only add and overwrite files: a file deleted on the other side stays
 # here until you delete it yourself.
@@ -441,6 +444,54 @@ download_dirs() {
 }
 
 ##
+# Succeeds when any of the given repo paths matches a pattern of the local
+# blocklist-exempt file.
+# @param $1 file with the exempt patterns (shell globs)
+# @param $@ (after $1) repo-relative paths; a rename has two
+# @return 0 when exempt, 1 otherwise
+##
+blocklist_exempt() {
+  local list="$1" p pat
+  shift
+  for p in "$@"; do
+    while IFS= read -r pat; do
+      # shellcheck disable=SC2053 # the pattern is a glob on purpose
+      [[ "$p" == ${pat#/} ]] && return 0
+    done < <(pattern_lines "$list")
+  done
+  return 1
+}
+
+##
+# Copies what is about to leave, minus the blocklist-exempt files: a patch loses
+# their "diff --git" sections, a snapshot directory loses the files.
+# @param $1 file to scan (patch, or a directory of snapshot files)
+# @param $2 blocklist-exempt file
+# @param $3 destination (a file for a patch, a directory for a snapshot)
+##
+copy_without_exempt() {
+  local target="$1" list="$2" dest="$3" line skip=0 f rel
+  if [ -d "$target" ]; then
+    mkdir -p "$dest"
+    while IFS= read -r -d '' f; do
+      rel="${f#"$target"/}"
+      blocklist_exempt "$list" "$rel" && continue
+      mkdir -p "$dest/$(dirname "$rel")"
+      cp "$f" "$dest/$rel"
+    done < <(find "$target" -type f -print0)
+    return 0
+  fi
+  : >"$dest"
+  while IFS= read -r line || [ -n "$line" ]; do
+    if [[ "$line" =~ ^diff\ --git\ a/(.+)\ b/(.+)$ ]]; then
+      skip=0
+      blocklist_exempt "$list" "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]%$'\r'}" && skip=1
+    fi
+    [ "$skip" = 1 ] || printf '%s\n' "$line" >>"$dest"
+  done <"$target"
+}
+
+##
 # Checks a file about to leave this machine for secrets and patterns from the
 # local blocklist, and runs gitleaks too when it is installed. Hits are printed
 # with the secrets themselves masked.
@@ -460,24 +511,37 @@ scan_outgoing() {
     # any browser cookie-jar line (Netscape format), whatever the cookie holds
     $'(TRUE|FALSE)\t/[^\t]*\t(TRUE|FALSE)\t[0-9]+\t[^\t]+\t[^\t]+'
   )
-  local -a args=() redact=()
-  local p
+  local -a args=() redact=() blargs=()
+  local p exempt blocktarget tmpd="" blhits=""
   for p in "${builtin[@]}"; do
     args+=(-e "$p")
     redact+=(-e "s#${p}#[redacted]#g")
   done
   blocklist="$(state_dir)/blocklist"
   while IFS= read -r p; do
-    args+=(-e "$p")
+    blargs+=(-e "$p")
   done < <(pattern_lines "$blocklist")
+
+  # the blocklist skips exempt files; the secret patterns check everything
+  exempt="$(state_dir)/blocklist-exempt"
+  blocktarget="$target"
+  if [ "${#blargs[@]}" -gt 0 ] && [ -n "$(pattern_lines "$exempt")" ]; then
+    tmpd="$(mktemp -d)"
+    if [ -d "$target" ]; then blocktarget="$tmpd/snap"; else blocktarget="$tmpd/patch"; fi
+    copy_without_exempt "$target" "$exempt" "$blocktarget"
+  fi
 
   # report file:line with the secrets themselves masked, so a failed scan never
   # puts them on screen (blocklist hits are shown, they are this machine's own)
   if [ -d "$target" ]; then
     hits="$(cd "$target" && grep -rnI -E "${args[@]}" . 2>/dev/null || true)"
+    [ "${#blargs[@]}" -gt 0 ] && blhits="$(cd "$blocktarget" && grep -rnI -E "${blargs[@]}" . 2>/dev/null || true)"
   else
     hits="$(grep -nI -E "${args[@]}" "$target" 2>/dev/null || true)"
+    [ "${#blargs[@]}" -gt 0 ] && blhits="$(grep -nI -E "${blargs[@]}" "$blocktarget" 2>/dev/null || true)"
   fi
+  [ -n "$tmpd" ] && rm -rf "$tmpd"
+  [ -n "$blhits" ] && hits="${hits}${hits:+$'\n'}${blhits}"
   if [ -n "$hits" ]; then
     printf '%s\n' "$hits" | sed -E "${redact[@]}" | cut -c1-160 >&2
     info "outgoing changes match a secret or blocklist pattern (above) - nothing was sent. Untrack or fix those files, or list them in .syncignore, then retry."

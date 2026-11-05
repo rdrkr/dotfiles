@@ -47,7 +47,10 @@
       dotfiles-sync.email   regex every pushed author/committer email must match
 
     Files that must never cross are listed in .syncignore; patterns that must
-    never leave this machine go in .git\dotfiles-sync\blocklist.
+    never leave this machine go in .git\dotfiles-sync\blocklist. Files allowed
+    to carry blocklisted patterns anyway (wildcards, repo-relative, e.g.
+    .config/stylus/*) go in .git\dotfiles-sync\blocklist-exempt; the built-in
+    secret patterns and gitleaks still check them.
 
     Secret files both machines need but git must never hold (e.g.
     .claude\usage-secrets.json, which the status line's usage fetcher reads)
@@ -541,6 +544,24 @@ function Get-TarPath {
 
 <#
 .SYNOPSIS
+    Tells whether any of the given repo paths matches a blocklist-exempt pattern.
+.PARAMETER Paths
+    Repo-relative paths with forward slashes (a rename has two).
+.PARAMETER Patterns
+    The lines of .git\dotfiles-sync\blocklist-exempt (wildcards as in -like).
+.OUTPUTS
+    $true when a path is exempt from the blocklist.
+#>
+function Test-BlocklistExempt {
+    param([string[]]$Paths, [string[]]$Patterns)
+    foreach ($p in $Paths) {
+        foreach ($pat in $Patterns) { if ($p -like $pat.TrimStart('/')) { return $true } }
+    }
+    return $false
+}
+
+<#
+.SYNOPSIS
     Checks what is about to leave this machine for secrets and local blocklist
     patterns, and runs gitleaks too when it is installed. Hits are printed with
     the secrets masked.
@@ -552,8 +573,10 @@ function Get-TarPath {
 function Test-OutgoingClean {
     param([Parameter(Mandatory)][string]$Target)
     $blocklist = @(Get-PatternLines (Join-Path (Get-StateDir) 'blocklist'))
+    $exempt = @(Get-PatternLines (Join-Path (Get-StateDir) 'blocklist-exempt'))
     $all = @($script:BuiltinSecretPatterns) + $blocklist
     $scan = [regex]::new((($all | ForEach-Object { "(?:$_)" }) -join '|'), 'Compiled')
+    # also the scan for exempt files: they skip the blocklist, never the secret patterns
     $redact = [regex]::new((($script:BuiltinSecretPatterns | ForEach-Object { "(?:$_)" }) -join '|'), 'Compiled')
 
     $isDir = Test-Path -LiteralPath $Target -PathType Container
@@ -566,8 +589,14 @@ function Test-OutgoingClean {
         if ($probe -gt 0 -and [Array]::IndexOf($bytes, [byte]0, 0, $probe) -ge 0) { continue }
         $name = if ($isDir) { '.' + $file.FullName.Substring((Resolve-Path -LiteralPath $Target).Path.TrimEnd('\').Length).Replace('\', '/') } else { $file.FullName }
         $lines = $script:Latin1.GetString($bytes).Split("`n")
+        # a snapshot file is one repo path; a patch switches path at every "diff --git a/<old> b/<new>"
+        $isExempt = $isDir -and (Test-BlocklistExempt @($name.Substring(2)) $exempt)
         for ($i = 0; $i -lt $lines.Length; $i++) {
-            if ($scan.IsMatch($lines[$i])) {
+            if (-not $isDir -and $exempt.Count -and $lines[$i].StartsWith('diff --git ')) {
+                $m = [regex]::Match($lines[$i].TrimEnd("`r"), '^diff --git a/(.+) b/(.+)$')
+                $isExempt = $m.Success -and (Test-BlocklistExempt @($m.Groups[1].Value, $m.Groups[2].Value) $exempt)
+            }
+            if (($isExempt -and $redact.IsMatch($lines[$i])) -or (-not $isExempt -and $scan.IsMatch($lines[$i]))) {
                 $shown = if ($isDir) { "${name}:$($i + 1):" } else { "$($i + 1):" }
                 $shown += $redact.Replace($lines[$i].TrimEnd("`r"), '[redacted]')
                 if ($shown.Length -gt 160) { $shown = $shown.Substring(0, 160) }

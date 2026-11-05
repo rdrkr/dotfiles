@@ -378,6 +378,33 @@ try {
     Assert-That ((Get-StateText $script:RepoB 'last-run') -match ' ok') 'listing the file in .syncignore unblocks sync' ($r.Out + (Get-StateText $script:RepoB 'last-run'))
     Get-Dropped 'a' | Remove-Item
 
+    Write-Host "`n[blocklist-exempt files skip the blocklist, not the secret patterns]"
+    foreach ($side in @(
+            @{ Name = 'PowerShell'; Repo = $script:RepoB; Auto = { Invoke-AutoB }; Peer = { Invoke-AutoA }; Drop = 'a' },
+            @{ Name = 'bash'; Repo = $script:RepoA; Auto = { Invoke-AutoA }; Peer = { Invoke-AutoB }; Drop = 'b' })) {
+        $state = Join-Path $side.Repo '.git\dotfiles-sync'
+        [IO.File]::WriteAllText((Join-Path $state 'blocklist'), "corp\.example`n")
+        Set-RepoFile $side.Repo 'styles/site.json' "match=*://git.corp.example/* ($($side.Name))`n"
+        $r = & $side.Auto
+        Assert-That (@(Get-Dropped $side.Drop).Count -eq 0) "$($side.Name): a blocklisted pattern blocks sending" $r.Out
+        [IO.File]::WriteAllText((Join-Path $state 'blocklist-exempt'), "styles/*`n")
+        $r = & $side.Auto
+        Assert-That (@(Get-Dropped $side.Drop).Count -eq 1) "$($side.Name): a blocklist-exempt file is sent" ($r.Out + (Get-StateText $side.Repo 'last-run'))
+        $r = & $side.Peer
+        Assert-That ((Compare-Repos) -eq '') "$($side.Name): the peer applies it" ((Compare-Repos) + "`n" + $r.Out)
+        $token = 'ghp_' + ('Cd2' * 12)
+        Set-RepoFile $side.Repo 'styles/leak.json' "token=$token`n"
+        $r = & $side.Auto
+        Assert-That (@(Get-Dropped $side.Drop).Count -eq 0) "$($side.Name): a secret in an exempt file still blocks" $r.Out
+        Assert-That (-not $r.Out.Contains($token)) "$($side.Name): the secret is not printed" $r.Out
+        # take the leak back out: the outgoing diff nets it away, so the next cycle is clean again
+        Remove-Item (Join-Path $side.Repo 'styles\leak.json')
+        $r = & $side.Auto
+        Assert-That ((Get-StateText $side.Repo 'last-run') -match ' ok') "$($side.Name): sync recovers once the secret is gone" ($r.Out + (Get-StateText $side.Repo 'last-run'))
+        Remove-Item (Join-Path $state 'blocklist'), (Join-Path $state 'blocklist-exempt')
+        Get-Dropped $side.Drop | Remove-Item
+    }
+
     Write-Host "`n[failed send stays queued and is retried]"
     Set-RepoFile $script:RepoB 'queued.txt' "queued`n"
     $env:FAKE_TS_FAIL = '1'
