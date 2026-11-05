@@ -335,8 +335,10 @@ try {
     $r = Invoke-AutoA
     Assert-That ($r.Code -eq 0) 'auto on A succeeds' $r.Out
     Assert-That ((Compare-Repos) -eq '') 'A matches B after the sync' ((Compare-Repos) + "`n" + $r.Out)
-    $trailer = Invoke-TestGit $script:RepoA log -1 '--format=%(trailers:key=Dotfiles-Sync-Source,valueonly)'
-    Assert-That ([string]$trailer -match '^work [0-9a-f]{40}') 'imported commit carries the source trailer' ([string]$trailer)
+    $subject = [string](Invoke-TestGit $script:RepoA log -1 '--format=%s')
+    Assert-That ($subject -match '^sync\(work\): .+ \[[0-9a-f]{10}\]$') 'imported commit names its source in the subject' $subject
+    $rest = (@(Invoke-TestGit $script:RepoA log -1 '--format=%b') | Where-Object { $_ }) -join "`n"
+    Assert-That ($rest -eq '') 'imported commit has no body and no trailer' $rest
     Assert-That ((Get-Content (Join-Path $script:RepoA 'work-only/a.txt') -Raw) -eq "personal side`n") "A's ignored file is untouched"
     Assert-That ((Get-Content (Join-Path $script:RepoA 'anchored-only.txt') -Raw) -eq "local to a`n") "A's anchored ignored file is untouched"
 
@@ -346,18 +348,36 @@ try {
     $r = Invoke-AutoB
     Assert-That (@(Get-Dropped 'a').Count -eq 0) 'B has nothing new to send' $r.Out
 
+    Write-Host "`n[older imports carrying the Dotfiles-Sync-Source trailer are still recognised]"
+    foreach ($side in @(@{ Repo = $script:RepoA; From = 'work' }, @{ Repo = $script:RepoB; From = 'personal' })) {
+        # plumbing, not 'git commit': the commit-msg hook rejects trailers, and
+        # this stands in for an import made before imports were subject-only
+        Set-RepoFile $side.Repo 'legacy.txt' "imported long ago`n"
+        $null = Invoke-TestGit $side.Repo add -A
+        $tree = [string](Invoke-TestGit $side.Repo write-tree)
+        $msg = Join-Path $script:Root 'legacy-msg.txt'
+        [IO.File]::WriteAllText($msg, "sync($($side.From)): legacy import`n`nDotfiles-Sync-Source: $($side.From) $('0' * 40)`n")
+        $commit = [string](Invoke-TestGit $side.Repo commit-tree $tree -p HEAD -F $msg)
+        $null = Invoke-TestGit $side.Repo update-ref HEAD $commit
+    }
+    $r = Invoke-AutoA
+    Assert-That (@(Get-Dropped 'b').Count -eq 0) 'bash: a legacy import is not sent back' $r.Out
+    $r = Invoke-AutoB
+    Assert-That (@(Get-Dropped 'a').Count -eq 0) 'PowerShell: a legacy import is not sent back' $r.Out
+
     Write-Host "`n[bash -> PowerShell, UTF-8 subject, CRLF blob]"
     [IO.File]::WriteAllText((Join-Path $script:RepoA 'mac-crlf.txt'), "x`r`ny`r`n")
     Set-RepoFile $script:RepoA 'shared.txt' "line 1`nline 2 (work)`nline 3`nline 4 (personal)`n"
     $null = Invoke-TestGit $script:RepoA add -A
     $null = Invoke-TestGit $script:RepoA commit -q -m 'ünïcode subject ✓'
+    $unicodeSha = ([string](Invoke-TestGit $script:RepoA rev-parse HEAD)).Substring(0, 10)
     $r = Invoke-AutoA
     Assert-That (@(Get-Dropped 'b').Count -eq 1) 'A sent one patch to B' $r.Out
     $r = Invoke-AutoB
     Assert-That ($r.Code -eq 0) 'auto on B imports it' $r.Out
     Assert-That ((Compare-Repos) -eq '') 'B matches A after the sync' ((Compare-Repos) + "`n" + $r.Out)
     $subject = [string](Invoke-TestGit $script:RepoB log -1 '--format=%s')
-    Assert-That ($subject -eq 'sync(personal): ünïcode subject ✓') 'UTF-8 subject survives the trip' $subject
+    Assert-That ($subject -eq "sync(personal): ünïcode subject ✓ [$unicodeSha]") 'UTF-8 subject survives the trip' $subject
 
     Write-Host "`n[duplicate patch is a no-op]"
     $done = Get-ChildItem (Join-Path $script:RepoB '.git\dotfiles-sync\inbox\done') -File | Sort-Object Name | Select-Object -Last 1
@@ -481,8 +501,8 @@ try {
         Assert-That ((Get-StateText $side.To 'sync.log') -match 'hook says no') "$($side.Name): the commit's error reaches sync.log"
         Remove-Item -LiteralPath $hook
         $r = & $side.Recv
-        $trailer = [string](Invoke-TestGit $side.To log -1 '--format=%(trailers:key=Dotfiles-Sync-Source,valueonly)')
-        Assert-That ((Test-Path (Join-Path $side.To "commit-fail-$($side.Name).txt")) -and $trailer -match "^$($side.Label) ") "$($side.Name): next run applies it with the trailer" $r.Out
+        $subject = [string](Invoke-TestGit $side.To log -1 '--format=%s')
+        Assert-That ((Test-Path (Join-Path $side.To "commit-fail-$($side.Name).txt")) -and $subject -match "^sync\($($side.Label)\): .* \[[0-9a-f]{10}\]$") "$($side.Name): next run applies it, naming its source" ($subject + "`n" + $r.Out)
     }
     $r = Invoke-AutoA; $r = Invoke-AutoB
     Assert-That ((Compare-Repos) -eq '') 'repos converge after the retries' (Compare-Repos)

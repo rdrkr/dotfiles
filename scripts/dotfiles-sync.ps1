@@ -10,8 +10,9 @@
 
     Changes travel between the two repos as patch files and each one lands in
     the receiving repo as a new commit made with that repo's own git identity,
-    carrying a "Dotfiles-Sync-Source: <label> <sha>" trailer. No commit, author
-    or history ever crosses over.
+    with a subject-only message "sync(<label>): <subject> [<sha10>]" that names
+    the peer commit it came from (no body, no trailer). No commit, author or
+    history ever crosses over.
 
     Usage:
       dotfiles-sync setup --label NAME --peer DEVICE [--email REGEX]
@@ -91,8 +92,10 @@ $OutputEncoding = [Text.UTF8Encoding]::new($false)
 
 <# First line of every patch file. #>
 $script:PatchHeader = '# dotfiles-sync patch v1'
-<# Commit trailer that names the peer commit an imported change came from. #>
+<# Legacy commit trailer that named the peer commit an imported change came from; only read now, never written. #>
 $script:Trailer = 'Dotfiles-Sync-Source'
+<# Subject of an imported commit, "sync(<label>): <subject> [<sha10>]": group 1 is the peer label, group 2 its abbreviated commit. #>
+$script:SourceSubject = '^sync\(([^()\s]+)\): .* \[([0-9a-f]{10,40})\]$'
 <# Message of the commit 'auto' makes for local changes. #>
 $script:AutoCommitMsg = 'chore(sync): auto-commit local changes'
 <# Task Scheduler task running 'watch' at logon. #>
@@ -298,15 +301,56 @@ function Get-SyncConfig {
 
 <#
 .SYNOPSIS
-    Returns the trailer value (the "<label> <sha>" source) of a commit, or ''.
+    Builds the subject-only message of an imported commit. The peer label and
+    abbreviated commit at its end are what marks it as imported, so it is never
+    sent back and never applied twice.
+.PARAMETER From
+    Label of the peer the change came from.
+.PARAMETER Subject
+    Subject of the peer commit.
+.PARAMETER Sha
+    Full hash of the peer commit.
+.OUTPUTS
+    "sync(<from>): <subject> [<sha10>]".
+#>
+function Format-SyncMessage {
+    param([Parameter(Mandatory)][string]$From, [Parameter(Mandatory)][AllowEmptyString()][string]$Subject, [Parameter(Mandatory)][string]$Sha)
+    return "sync(${From}): $Subject [$($Sha.Substring(0, [Math]::Min(10, $Sha.Length)))]"
+}
+
+<#
+.SYNOPSIS
+    Returns the "<label> <sha>" source of a commit imported from the peer, read
+    from its subject (or, for older imports, its Dotfiles-Sync-Source trailer),
+    or '' for a local commit.
 .PARAMETER Commit
     Commit to inspect.
 #>
-function Get-SyncTrailer {
+function Get-SyncSource {
     param([Parameter(Mandatory)][string]$Commit)
+    $fmt = "--format=%s%n%(trailers:key=$($script:Trailer),valueonly)"
+    $lines = @(Invoke-Git -GitArgs @('log', '-1', $fmt, $Commit))
+    if ($lines.Count -gt 0 -and [string]$lines[0] -match $script:SourceSubject) { return "$($Matches[1]) $($Matches[2])" }
+    return (($lines | Select-Object -Skip 1 | Where-Object { $_ }) -join "`n").Trim()
+}
+
+<#
+.SYNOPSIS
+    Returns the "<label> <sha>" sources of every change already imported into
+    HEAD: abbreviated ones from subjects, full ones from legacy trailers.
+.OUTPUTS
+    HashSet of source keys.
+#>
+function Get-ImportedSources {
+    $done = [Collections.Generic.HashSet[string]]::new()
+    foreach ($s in @(Invoke-Git -GitArgs @('log', '--format=%s', 'HEAD') -AllowFail -Quiet)) {
+        if ([string]$s -match $script:SourceSubject) { $null = $done.Add("$($Matches[1]) $($Matches[2])") }
+    }
     $fmt = "--format=%(trailers:key=$($script:Trailer),valueonly)"
-    $v = Invoke-Git -GitArgs @('log', '-1', $fmt, $Commit)
-    return (($v | Where-Object { $_ }) -join "`n").Trim()
+    foreach ($t in @(Invoke-Git -GitArgs @('log', $fmt, 'HEAD') -AllowFail -Quiet)) {
+        if ($t) { $null = $done.Add(([string]$t).Trim()) }
+    }
+    return , $done
 }
 
 <#
@@ -906,7 +950,7 @@ function Invoke-Export {
         $commits = @(Invoke-Git -GitArgs @('rev-list', '--reverse', '--first-parent', "$base..HEAD") | Where-Object { $_ })
         foreach ($c in $commits) {
             # commits that were themselves imported from the peer go no further
-            if (Get-SyncTrailer $c) { continue }
+            if (Get-SyncSource $c) { continue }
             $null = Invoke-Git -GitArgs (@('diff', '--binary', '--full-index', "--output=$chunk", "$c^1", $c, '--', '.') + $pathspecs)
             if ((Get-Item -LiteralPath $chunk).Length -eq 0) { continue }
             $subject = [string](Invoke-Git -GitArgs @('log', '-1', '--format=%s', $c))
@@ -1186,7 +1230,8 @@ function Remove-DiffSections {
 .SYNOPSIS
     Walks the changes in one patch file. Interactively it asks to apply or skip
     each one; with -Auto it applies them all and stops at the first that does
-    not apply cleanly. Applied changes are committed with the trailer.
+    not apply cleanly. Applied changes are committed with a subject-only
+    message that names their source (see Format-SyncMessage).
 .PARAMETER File
     Patch file.
 .PARAMETER Auto
@@ -1210,8 +1255,7 @@ function Import-SyncPatch {
 
     $applyOpts = @(Get-ExcludeApplyOptions)
     $tracked = [Collections.Generic.HashSet[string]]::new([string[]]@(Invoke-Git -GitArgs @('ls-files') | Where-Object { $_ }))
-    $fmt = "--format=%(trailers:key=$($script:Trailer),valueonly)"
-    $done = [Collections.Generic.HashSet[string]]::new([string[]]@(Invoke-Git -GitArgs @('log', $fmt, 'HEAD') | Where-Object { $_ }))
+    $done = Get-ImportedSources
     $skippedFile = Join-Path $state 'skipped'
     if (-not (Test-Path -LiteralPath $skippedFile)) { [IO.File]::WriteAllText($skippedFile, '') }
     $skipped = [Collections.Generic.HashSet[string]]::new([string[]]@(Get-PatternLines $skippedFile))
@@ -1220,7 +1264,8 @@ function Import-SyncPatch {
     try {
         foreach ($change in Split-SyncPatch $File) {
             $key = "$from $($change.Sha)"
-            if ($done.Contains($key) -or $skipped.Contains($key)) { continue }
+            $shortSha = $change.Sha.Substring(0, [Math]::Min(10, $change.Sha.Length))
+            if ($done.Contains($key) -or $done.Contains("$from $shortSha") -or $skipped.Contains($key)) { continue }
             $ignored = [Collections.Generic.HashSet[string]]::new([string[]]@(Get-IgnoredPaths -Diff $change.Body -Tracked $tracked))
             $diff = Remove-DiffSections -Diff $change.Body -Paths $ignored
             if ($diff -notmatch '(?m)^diff --git ') {
@@ -1230,8 +1275,7 @@ function Import-SyncPatch {
             }
             [IO.File]::WriteAllText($body, $diff, $script:Latin1)
             $opts = @($applyOpts)
-            $shortSha = $change.Sha.Substring(0, [Math]::Min(10, $change.Sha.Length))
-            $message = "sync(${from}): $($change.Subject)"
+            $message = Format-SyncMessage -From $from -Subject $change.Subject -Sha $change.Sha
 
             if ($Auto) {
                 & git -C $script:Repo apply --3way --index --whitespace=nowarn @opts $body 2>&1 |
@@ -1246,12 +1290,12 @@ function Import-SyncPatch {
                     Write-Info "already present or ignored here: $($change.Subject)"
                     Write-StateFile $skippedFile $key -Append
                 }
-                elseif (Invoke-SyncCommit @($message, "$($script:Trailer): $key")) {
+                elseif (Invoke-SyncCommit @($message)) {
                     Write-Info "applied from ${from}: $($change.Subject) ($(Invoke-Git -GitArgs @('log', '-1', '--format=%h')))"
                 }
                 else {
                     # never leave it staged: the next cycle would commit it as a
-                    # local change, without the trailer, and send it back
+                    # local change, without its source, and send it back
                     $null = Invoke-Git -GitArgs @('reset', '-q', '--hard', 'HEAD')
                     Stop-Sync "could not commit the change from $from ($($change.Subject)); the patch stays in the inbox and is retried on the next run (see sync.log)"
                 }
@@ -1274,10 +1318,10 @@ function Import-SyncPatch {
                             Write-Info 'this change does not apply here (the files differ too much); answer n to skip it'
                             continue
                         }
-                        # tells 'auto' not to commit the half-resolved tree without the trailer
+                        # tells 'auto' not to commit the half-resolved tree as a local change
                         Write-StateFile (Join-Path $state 'resolving') $key
                         Write-Info "applied with conflicts. Resolve them, 'git add' the files, then run:"
-                        Write-Info "  git -C $($script:Repo) commit -m `"$($message -replace '"', '\"')`" -m `"$($script:Trailer): $key`""
+                        Write-Info "  git -C $($script:Repo) commit -m `"$($message -replace '"', '\"')`""
                         Write-Info "and rerun 'dotfiles-sync import' for the rest."
                         Stop-Sync 'import stopped at a conflict'
                     }
@@ -1285,13 +1329,13 @@ function Import-SyncPatch {
                         Write-Info 'nothing left to change (already present or ignored here)'
                         Write-StateFile $skippedFile $key -Append
                     }
-                    elseif (Invoke-SyncCommit @($message, "$($script:Trailer): $key")) {
+                    elseif (Invoke-SyncCommit @($message)) {
                         Write-Info "committed $(Invoke-Git -GitArgs @('log', '-1', '--format=%h'))"
                     }
                     else {
                         Write-StateFile (Join-Path $state 'resolving') $key
                         Write-Info 'the commit failed (reason above). Fix it, then commit the staged change yourself:'
-                        Write-Info "  git -C $($script:Repo) commit -m `"$($message -replace '"', '\"')`" -m `"$($script:Trailer): $key`""
+                        Write-Info "  git -C $($script:Repo) commit -m `"$($message -replace '"', '\"')`""
                         Stop-Sync 'import stopped: commit failed'
                     }
                     $handled = $true
@@ -1805,7 +1849,7 @@ function Show-Status {
         $pending = 0
         $commits = @(Invoke-Git -GitArgs @('rev-list', '--first-parent', "$base..HEAD") -AllowFail -Quiet | Where-Object { $_ })
         foreach ($c in $commits) {
-            if (Get-SyncTrailer $c) { continue }
+            if (Get-SyncSource $c) { continue }
             if (-not (Test-Git (@('diff', '--quiet', "$c^1", $c, '--', '.') + $pathspecs))) { $pending++ }
         }
         $desc = Invoke-Git -GitArgs @('log', '-1', '--format=%h %s', $base) -AllowFail -Quiet

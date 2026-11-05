@@ -74,7 +74,10 @@
 set -euo pipefail
 
 PATCH_HEADER='# dotfiles-sync patch v1'
+# legacy trailer that named the peer commit an imported change came from; only read now, never written
 TRAILER='Dotfiles-Sync-Source'
+# sed -E script turning an imported commit's subject, "sync(<label>): <subject> [<sha10>]", into "<label> <sha10>"
+SOURCE_SED='s/^sync\(([^()[:space:]]+)\): .* \[([0-9a-f]{10,40})\]$/\1 \2/p'
 AUTO_COMMIT_MSG='chore(sync): auto-commit local changes'
 LAUNCHD_LABEL='com.dotfiles.sync'
 
@@ -165,7 +168,7 @@ g() {
 # while another program (an editor's git integration, a backup) holds the index
 # lock or touches the working tree during the pre-commit hook. git's error
 # output is logged.
-# @param $@ git commit arguments (e.g. -m MESSAGE -m TRAILER)
+# @param $@ git commit arguments (e.g. -m MESSAGE)
 # @return 0 when committed, 1 when every attempt failed
 ##
 commit_with_retry() {
@@ -188,6 +191,41 @@ commit_with_retry() {
 ##
 cfg() {
   g config --get "dotfiles-sync.$1" || true
+}
+
+##
+# Prints the subject-only message of an imported commit. The peer label and
+# abbreviated commit at its end are what marks it as imported, so it is never
+# sent back and never applied twice.
+# @param $1 label of the peer the change came from
+# @param $2 subject of the peer commit
+# @param $3 full hash of the peer commit
+##
+sync_message() {
+  printf 'sync(%s): %s [%s]\n' "$1" "$2" "${3:0:10}"
+}
+
+##
+# Prints the "<label> <sha>" source of a commit imported from the peer, read
+# from its subject (or, for older imports, its Dotfiles-Sync-Source trailer);
+# prints nothing for a local commit.
+# @param $1 commit to inspect
+##
+sync_source() {
+  local src
+  src="$(g log -1 --format=%s "$1" | sed -nE "$SOURCE_SED")"
+  [ -n "$src" ] || src="$(g log -1 --format="%(trailers:key=${TRAILER},valueonly)" "$1" | sed '/^$/d')"
+  printf '%s' "$src"
+}
+
+##
+# Prints the "<label> <sha>" sources of every change already imported into
+# HEAD, one per line: abbreviated ones from subjects, full ones from legacy
+# trailers.
+##
+imported_sources() {
+  g log --format=%s HEAD 2>/dev/null | sed -nE "$SOURCE_SED" || true
+  g log --format="%(trailers:key=${TRAILER},valueonly)" HEAD 2>/dev/null | sed '/^$/d' || true
 }
 
 ##
@@ -741,7 +779,7 @@ cmd_export() {
 
   for c in $(g rev-list --reverse --first-parent "$base..HEAD"); do
     # commits that were themselves imported from the peer go no further
-    if [ -n "$(g log -1 --format="%(trailers:key=${TRAILER},valueonly)" "$c")" ]; then
+    if [ -n "$(sync_source "$c")" ]; then
       continue
     fi
     g diff --binary --full-index "${c}^1" "$c" -- . "${pathspecs[@]}" >"$chunk"
@@ -967,15 +1005,16 @@ drop_diff_sections() {
 ##
 # Walks the changes in one patch file. Interactively it asks to apply or skip
 # each one; with --auto it applies them all and stops at the first that does
-# not apply cleanly. Applied changes are committed with a trailer naming their
-# source, which is how both re-imports and echoes back to the peer are recognised.
+# not apply cleanly. Applied changes are committed with a subject-only message
+# naming their source (see sync_message), which is how both re-imports and
+# echoes back to the peer are recognised.
 # @param $1 patch file
 # @param $2 "auto" or "ask"
 # @return 0 when every change was handled, 1 when stopped early (quit, or not a
 #   patch), 2 when --auto hit a change that needs a human
 ##
 import_patch() {
-  local file="$1" how="$2" from dir state done_list skipped key sha subject body answer rc tracked
+  local file="$1" how="$2" from dir state done_list skipped key sha subject message body answer rc tracked
   state="$(state_dir)"
   [ "$(head -n 1 "$file")" = "$PATCH_HEADER" ] || { info "not a dotfiles-sync patch: $file"; return 1; }
   from="$(sed -n 's/^# from: //p' "$file" | head -n 1)"
@@ -992,7 +1031,7 @@ import_patch() {
   local o
   while IFS= read -r o; do apply_opts+=("$o"); done < <(exclude_apply_opts)
 
-  done_list="$(g log --format="%(trailers:key=${TRAILER},valueonly)" HEAD)"
+  done_list="$(imported_sources)"
   # a dot-file, so the "$dir"/* loop below never takes it for a change
   tracked="$dir/.tracked"
   g ls-files >"$tracked"
@@ -1005,7 +1044,7 @@ import_patch() {
     sha="$(sed -n 1p "$chunk")"
     subject="$(sed -n '2s/^Subject: //p' "$chunk")"
     key="$from $sha"
-    if printf '%s\n' "$done_list" | grep -qxF "$key" || grep -qxF "$key" "$skipped"; then
+    if printf '%s\n' "$done_list" | grep -qxF -e "$key" -e "$from ${sha:0:10}" || grep -qxF "$key" "$skipped"; then
       continue
     fi
     body="${chunk}.diff"
@@ -1018,6 +1057,7 @@ import_patch() {
       continue
     fi
     opts=("${apply_opts[@]}")
+    message="$(sync_message "$from" "$subject" "$sha")"
 
     if [ "$how" = auto ]; then
       rc=0
@@ -1032,11 +1072,11 @@ import_patch() {
       if g diff --cached --quiet; then
         info "already present or ignored here: $subject"
         printf '%s\n' "$key" >>"$skipped"
-      elif commit_with_retry -m "sync(${from}): ${subject}" -m "${TRAILER}: ${key}"; then
+      elif commit_with_retry -m "$message"; then
         info "applied from $from: $subject ($(g log -1 --format=%h))"
       else
         # never leave it staged: the next cycle would commit it as a local
-        # change, without the trailer, and send it back
+        # change, without its source, and send it back
         g reset -q --hard HEAD
         rm -rf "$dir"
         die "could not commit the change from $from ($subject); the patch stays in the inbox and is retried on the next run"
@@ -1060,10 +1100,10 @@ import_patch() {
               info "this change does not apply here (the files differ too much); answer n to skip it"
               continue
             fi
-            # tells 'auto' not to commit the half-resolved tree without the trailer
+            # tells 'auto' not to commit the half-resolved tree as a local change
             printf '%s\n' "$key" >"$state/resolving"
             info "applied with conflicts. Resolve them, 'git add' the files, then run:"
-            info "  git -C $REPO commit -m $(printf '%q' "sync(${from}): ${subject}") -m '${TRAILER}: ${key}'"
+            info "  git -C $REPO commit -m $(printf '%q' "$message")"
             info "and rerun 'dotfiles-sync import' for the rest."
             rm -rf "$dir"
             exit 1
@@ -1071,12 +1111,12 @@ import_patch() {
           if g diff --cached --quiet; then
             info "nothing left to change (already present or ignored here)"
             printf '%s\n' "$key" >>"$skipped"
-          elif commit_with_retry -m "sync(${from}): ${subject}" -m "${TRAILER}: ${key}"; then
+          elif commit_with_retry -m "$message"; then
             info "committed $(g log -1 --format=%h)"
           else
             printf '%s\n' "$key" >"$state/resolving"
             info "the commit failed (reason above). Fix it, then commit the staged change yourself:"
-            info "  git -C $REPO commit -m $(printf '%q' "sync(${from}): ${subject}") -m '${TRAILER}: ${key}'"
+            info "  git -C $REPO commit -m $(printf '%q' "$message")"
             rm -rf "$dir"
             exit 1
           fi
@@ -1506,7 +1546,7 @@ cmd_status() {
     while IFS= read -r c; do pathspecs+=("$c"); done < <(exclude_pathspecs)
     base="$(export_base 2>/dev/null || printf '%s\n' "$base")"
     for c in $(g rev-list --first-parent "$base..HEAD"); do
-      [ -z "$(g log -1 --format="%(trailers:key=${TRAILER},valueonly)" "$c")" ] || continue
+      [ -z "$(sync_source "$c")" ] || continue
       g diff --quiet "${c}^1" "$c" -- . "${pathspecs[@]}" || pending=$((pending + 1))
     done
     printf 'baseline:  %s\n' "$(g log -1 --format='%h %s' "$base" 2>/dev/null || printf '%s (missing)' "$base")"
