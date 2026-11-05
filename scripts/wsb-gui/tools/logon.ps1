@@ -11,10 +11,13 @@
   Names of the mapped builds (folders under C:\host); "a,b" as one string is accepted.
 .PARAMETER Exclude
   File patterns not copied, comma-separated.
+.PARAMETER OpenGL
+  none | llvmpipe | d3d12: deploy Mesa from C:\host\mesa next to every exe of each build and select the
+  Gallium driver machine-wide (the sandbox only has legacy OpenGL <= 2.0).
 .PARAMETER Setup
   Optional script run per build as  <Setup> -Name <b> -AppDir C:\app\<b> -DataDir C:\host\data.
 #>
-param([string[]]$Builds = @(), [string]$Exclude = "", [string]$Setup = "")
+param([string[]]$Builds = @(), [string]$Exclude = "", [string]$OpenGL = "none", [string]$Setup = "")
 $log = "C:\work\out\logon.log"
 
 <#
@@ -41,12 +44,26 @@ try {
     $p = Start-Process "C:\host\redist\vc_redist.x64.exe" -ArgumentList "/install", "/quiet", "/norestart" -Wait -PassThru
     Log "vc_redist exit $($p.ExitCode)"
   }
+  $glDlls = @()
+  if ($OpenGL -ne "none") {
+    $names = @("opengl32.dll", "libgallium_wgl.dll") + $(if ($OpenGL -eq "d3d12") { @("dxil.dll") } else { @() })
+    $glDlls = @($names | ForEach-Object { Get-Item "C:\host\mesa\$_" })
+    [Environment]::SetEnvironmentVariable("GALLIUM_DRIVER", $OpenGL, "Machine")
+    $env:GALLIUM_DRIVER = $OpenGL
+    Log "OpenGL: Mesa $((Get-Item C:\host\mesa\opengl32.dll).VersionInfo.ProductVersion), GALLIUM_DRIVER=$OpenGL"
+  }
   foreach ($b in $Builds) {
     $dst = "C:\app\$b"
     $rcArgs = @("C:\host\$b", $dst, "/E", "/NFL", "/NDL", "/NJH", "/NP", "/MT:16")
     if ($xf.Count) { $rcArgs += @("/XF") + $xf }
     robocopy @rcArgs | Out-Null
     Log "copied $b (robocopy $LASTEXITCODE)"
+    if ($glDlls.Count) {
+      # opengl32.dll is not a KnownDLL: a copy next to the exe wins over System32 for that process
+      $exeDirs = @(Get-ChildItem $dst -Filter *.exe -Recurse | Select-Object -ExpandProperty DirectoryName -Unique)
+      foreach ($dir in $exeDirs) { foreach ($dll in $glDlls) { Copy-Item $dll.FullName $dir -Force } }
+      Log "Mesa deployed to $($exeDirs.Count) folder(s) of $b"
+    }
     if ($Setup) { & $Setup -Name $b -AppDir $dst -DataDir "C:\host\data"; Log "setup $b done" }
   }
   Set-Content "C:\work\ready.flag" ("builds " + ($Builds -join ","))

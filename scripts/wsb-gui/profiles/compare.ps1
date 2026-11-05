@@ -23,12 +23,19 @@
 .PARAMETER Redist
   A Visual Studio VC\Redist\MSVC\<version> folder; default: the newest one on this machine. Its x64\*.CRT /
   *.MFC / *.OpenMP DLLs are deployed app-locally (seconds); its vc_redist.x64.exe is the fallback (~4 min).
+.PARAMETER OpenGL
+  none (default) | llvmpipe | d3d12. The sandbox only offers legacy desktop OpenGL (<= 2.0); with llvmpipe
+  (CPU, GL 4.5) or d3d12 (GL on the sandbox's vGPU) a current Mesa is deployed next to each build's exe.
+  Needs a cached Mesa: run wsb-gui.ps1 -GetMesa once.
+.PARAMETER Mesa
+  Folder with Mesa's x64 DLLs; default the newest under %LOCALAPPDATA%\wsb-gui\cache\mesa.
 .PARAMETER MemoryInMB
   Sandbox memory; default 16384.
 #>
 param(
   [string]$Work, [Parameter(Mandatory)] [hashtable]$Builds, [string]$Setup = "", [string]$Data = "",
-  [string[]]$Exclude = @("*.pdb", "*.lib", "*.exp", "*.ilk"), [string]$Redist = "", [int]$MemoryInMB = 16384
+  [string[]]$Exclude = @("*.pdb", "*.lib", "*.exp", "*.ilk"), [string]$Redist = "", [ValidateSet("none", "llvmpipe", "d3d12")] [string]$OpenGL = "none", [string]$Mesa = "",
+  [int]$MemoryInMB = 16384
 )
 $mapped = @()
 foreach ($name in $Builds.Keys) {
@@ -42,6 +49,17 @@ if (-not $Redist) {
   if ($vs) { $Redist = $vs.Parent.FullName }
 }
 if ($Redist) { $mapped += @{ Host = $Redist; Sandbox = "C:\host\redist"; ReadOnly = $true } }
+$glArg = ""
+if ($OpenGL -ne "none") {
+  if (-not $Mesa) {
+    $m = Get-ChildItem (Join-Path $env:LOCALAPPDATA "wsb-gui\cache\mesa\*\x64\opengl32.dll") -ErrorAction SilentlyContinue |
+      Sort-Object { [version]($_.Directory.Parent.Name) } -Descending | Select-Object -First 1
+    if (-not $m) { throw "no Mesa cached: run wsb-gui.ps1 -GetMesa first" }
+    $Mesa = $m.DirectoryName
+  }
+  $mapped += @{ Host = (Resolve-Path $Mesa).Path; Sandbox = "C:\host\mesa"; ReadOnly = $true }
+  $glArg = " -OpenGL $OpenGL"
+}
 if ($Data) { $mapped += @{ Host = (Resolve-Path $Data).Path; Sandbox = "C:\host\data"; ReadOnly = $true } }
 $setupArg = ""
 if ($Setup) {
@@ -52,5 +70,5 @@ if ($Setup) {
 @{
   Mapped       = $mapped
   MemoryInMB   = $MemoryInMB
-  LogonCommand = "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\work\tools\logon.ps1 -Builds $(@($Builds.Keys) -join ',') -Exclude `"$($Exclude -join ',')`"$setupArg"
+  LogonCommand = "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\work\tools\logon.ps1 -Builds $(@($Builds.Keys) -join ',') -Exclude `"$($Exclude -join ',')`"$glArg$setupArg"
 }
