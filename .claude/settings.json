@@ -19,6 +19,11 @@
     "defaultMode": "plan"
   },
   "model": "opus",
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
   "hooks": {
     "Notification": [
       {
@@ -78,6 +83,17 @@
           {
             "type": "command",
             "command": "atuin hook claude-code"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/git-rules.js",
+            "timeout": 30,
+            "onFailure": "block"
           }
         ]
       }

@@ -1,0 +1,11 @@
+#!/bin/sh
+# Global git hook forwarder, installed with:
+#   git config --global core.hooksPath ~/.claude/hooks/git
+#
+# A global core.hooksPath stops git from running a repository's own
+# .git/hooks (git-lfs, pre-commit, ...). This forwards to the repository's
+# hook of the same name, with the same arguments and stdin, when one exists.
+
+repo_hook="$(git rev-parse --git-common-dir)/hooks/$(basename "$0")"
+[ -x "$repo_hook" ] && exec "$repo_hook" "$@"
+exit 0
