@@ -25,6 +25,22 @@ ToggleKomorebi() {
 	SetTimer(() => ToolTip(), -1500)
 }
 
+; Put the active window into Windows' own move mode - what the system menu's
+; "Move" entry does (Alt+Space, M, which Alt+Space's language switching below
+; makes unreachable). Handy for windows with no title bar to drag, such as
+; Windows Terminal. One arrow-key tap arms the mode so the window follows the
+; mouse at once; then a click or Enter drops it, Esc puts it back, and the
+; arrow keys nudge it. komorebi re-tiles a window it manages once the move
+; ends, so float it first (Alt+/) to keep it where it was dropped.
+MoveActiveWindow() {
+	hwnd := WinExist("A")
+	if !hwnd
+		return
+	PostMessage(0x0112, 0xF010, 0, , hwnd)   ; WM_SYSCOMMAND, SC_MOVE
+	Sleep(50)                                ; let the move loop start
+	Send("{Right}{Left}")
+}
+
 ; State maintained by komorebi-nav-subscriber.ps1 and cached for fast access.
 global gNavStateFile := EnvGet("LOCALAPPDATA") "\komorebi-nav-state.txt"
 global gNavBits := ""        ; last-known population bitmap ("1"=populated)
@@ -318,6 +334,9 @@ GroupAdd("Terminals", "ahk_exe conhost.exe")
 	Click("Up")
 	Send("{Shift up}{Ctrl up}")
 }
+
+; Move the active window with the mouse or arrow keys (see MoveActiveWindow)
+!+m:: MoveActiveWindow()
 
 ; Enable/disable komorebi (like AeroSpace's `enable toggle`)
 !+p:: ToggleKomorebi()
