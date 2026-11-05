@@ -1,16 +1,16 @@
--- ~/.config/yazi/plugins/always-confirm.yazi/init.lua
+-- ~/.config/yazi/plugins/always-confirm.yazi/main.lua
 
 local function entry()
-	-- Prompt a native confirmation dialog box in the center of the screen
+	-- 1. Trigger the visual prompt window
 	local confirm = ya.confirm({
-		pos = { "center", w = 40, h = 10 },
+		pos = { "center", w = 45, h = 10 },
 		title = "Quit Yazi?",
 		body = "Are you absolutely sure you want to exit?",
 	})
 
-	-- If the user hits 'y' / Confirms, tell Yazi to exit cleanly
+	-- 2. If 'Yes' is pressed, trigger quit globally using the correct syntax
 	if confirm then
-		ya.manager_emit("quit", {})
+		ya.emit("quit", {})
 	end
 end
 
