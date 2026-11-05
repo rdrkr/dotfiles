@@ -397,8 +397,8 @@ try {
         $r = & $side.Auto
         Assert-That (@(Get-Dropped $side.Drop).Count -eq 0) "$($side.Name): a secret in an exempt file still blocks" $r.Out
         Assert-That (-not $r.Out.Contains($token)) "$($side.Name): the secret is not printed" $r.Out
-        # take the leak back out: the outgoing diff nets it away, so the next cycle is clean again
-        Remove-Item (Join-Path $side.Repo 'styles\leak.json')
+        # the blocked commit stays in the outgoing range: .syncignore is the way out, as for any leak
+        Add-Content -LiteralPath (Join-Path $side.Repo '.syncignore') -Value 'styles/leak.json'
         $r = & $side.Auto
         Assert-That ((Get-StateText $side.Repo 'last-run') -match ' ok') "$($side.Name): sync recovers once the secret is gone" ($r.Out + (Get-StateText $side.Repo 'last-run'))
         Remove-Item (Join-Path $state 'blocklist'), (Join-Path $state 'blocklist-exempt')
