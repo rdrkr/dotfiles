@@ -28,15 +28,15 @@
   With -Start: do not open the session window (only System-context commands will work).
 .PARAMETER ReadyTimeoutSec
   With -Start: how long to wait for the profile's logon script (default 900).
-.PARAMETER Rest
-  Arguments forwarded to drive.ps1 by -Do.
+.NOTES
+  Deliberately not an advanced script: every argument -Do does not know arrives in $args and is forwarded
+  to drive.ps1 (an advanced script would claim -Out* as its common -OutVariable/-OutBuffer).
 #>
-[CmdletBinding(PositionalBinding = $false)]
 param(
   [string]$Start = "", [hashtable]$ProfileArgs = @{}, [switch]$Do, [string]$Exec = "", [switch]$Stop, [switch]$Status,
-  [switch]$NoConnect, [int]$ReadyTimeoutSec = 900,
-  [Parameter(ValueFromRemainingArguments = $true)] [string[]]$Rest
+  [switch]$NoConnect, [int]$ReadyTimeoutSec = 900
 )
+$Rest = $args
 $ErrorActionPreference = "Stop"
 $Root = $PSScriptRoot
 $Work = Join-Path $env:LOCALAPPDATA "wsb-gui\work"

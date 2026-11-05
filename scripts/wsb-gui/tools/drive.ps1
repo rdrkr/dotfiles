@@ -27,6 +27,8 @@
   Y relative to the window's top edge.
 .PARAMETER Text
   SendKeys string (keys), wheel delta (wheel), 'bm' (pclick) or the executable to start (launch).
+.PARAMETER ArgList
+  With launch: the argument string for the started process.
 .PARAMETER Out
   PNG path written after the action (optional).
 .PARAMETER Screen
@@ -35,7 +37,7 @@
   File that receives everything the script reports; the host prints it.
 #>
 param([string]$Action = "list", [string]$ExeLike = "", [string]$Proc = "mf", [string]$Title = "", [int]$X = 0, [int]$Y = 0,
-      [string]$Text = "", [string]$Out = "", [switch]$Screen, [string]$Result = "")
+      [string]$Text = "", [string]$ArgList = "", [string]$Out = "", [switch]$Screen, [string]$Result = "")
 
 $script:lines = New-Object System.Collections.ArrayList
 
@@ -103,7 +105,8 @@ function SaveShot([int]$l, [int]$t, [int]$w, [int]$h, [string]$path) {
 }
 
 if ($Action -eq "launch") {
-  $p = Start-Process -FilePath $Text -WorkingDirectory (Split-Path $Text) -PassThru
+  $sp = @{ FilePath = $Text; WorkingDirectory = (Split-Path $Text); PassThru = $true }; if ($ArgList) { $sp.ArgumentList = $ArgList }
+  $p = Start-Process @sp
   Say "launched $Text pid $($p.Id)"; Finish 0
 }
 if ($Action -eq "cursor") { $pt = New-Object W+POINT; [W]::GetCursorPos([ref]$pt) | Out-Null; Say "cursor $($pt.X),$($pt.Y)"; Finish 0 }
