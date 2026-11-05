@@ -17,11 +17,20 @@
 # already running updates the running instance live.
 #
 # Started from AeroSpace's after-startup-command. Single-instance: a new run
-# stops the previous one first, so running it again by hand is safe.
+# stops the previous one first, so running it again by hand is safe. It
+# detaches itself (nohup, background) and returns at once, so closing the
+# terminal it was started from does not stop it.
 #
 # Environment:
 #   DESKFLOW_LOG  Deskflow client log file
 #                 (default: ~/Library/Logs/Deskflow/deskflow.log)
+
+# Re-launch detached from the terminal: a hang-up from closing it would
+# otherwise stop the watcher and leave the border on for good.
+if [[ -z "$DESKFLOW_FOCUS_BORDERS_DETACHED" ]]; then
+  DESKFLOW_FOCUS_BORDERS_DETACHED=1 nohup "$0" "$@" >/dev/null 2>&1 &
+  exit 0
+fi
 
 # Homebrew's bin may be missing when launched outside a login shell.
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
@@ -74,7 +83,8 @@ cleanup() {
 stop_previous
 echo $$ >"$PIDFILE"
 trap cleanup EXIT
-trap 'exit 0' TERM INT HUP
+# No HUP: nohup ignores it, so the watcher outlives its terminal.
+trap 'exit 0' TERM INT
 
 # Input is local until Deskflow says otherwise (e.g. Mac used on its own).
 set_border on
