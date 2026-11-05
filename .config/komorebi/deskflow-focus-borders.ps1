@@ -3,20 +3,27 @@
 # The Dell (Deskflow server) and the MacBook (Deskflow client) each draw a
 # border around their own focused window, so with both screens lit there is no
 # single "this is where my keyboard goes" indicator. This script makes the Dell
-# side follow Deskflow: komorebi's borders are shown only while Deskflow input
-# is on this machine, and hidden while it is on the Mac (whose JankyBorders is
-# toggled the same way by .config/borders/deskflow-focus-borders.sh).
+# side follow Deskflow: komorebi's focused-window border keeps its theme colour
+# only while Deskflow input is on this machine; while input is on the Mac
+# (whose JankyBorders is toggled the same way by
+# .config/borders/deskflow-focus-borders.sh) it is painted in the unfocused
+# colour, so no window on the Dell looks focused.
 #
 # Deskflow has no hooks, but deskflow-core logs every switch, e.g.
 #   switch from "eu-poc-6z3ygk4" to "rdrkr-mbp-m1" at 2559,720
 # This script tails that log (Deskflow must have file logging on; see
-# .config/deskflow/deskflow-server.conf) and runs `komorebic border
-# enable|disable` when input lands on / leaves this machine.
+# .config/deskflow/deskflow-server.conf) and recolours the borders with
+# `komorebic border-colour` when input lands on / leaves this machine.
+#
+# Recolouring rather than `komorebic border disable`: with
+# "border_implementation": "Windows" komorebi paints the native DWM window
+# frame, and disabling borders just stops updating it, leaving the last
+# focused window's frame in the focus colour.
 #
 # The script is single-instance (global mutex) and self-terminates once
 # komorebi is no longer running, so it is safe for the AHK script to (re)launch
-# it on every start/reload. Borders are re-enabled whenever it starts or exits
-# normally so they are never left hidden by accident.
+# it on every start/reload. The focus colours are restored whenever it starts
+# or exits normally so they are never left dimmed by accident.
 
 $ErrorActionPreference = 'Stop'
 
@@ -66,21 +73,69 @@ $logPath = Get-DeskflowSetting 'log' 'file'
 if (-not $logPath) { $logPath = $defaultLog }
 $logPath = [System.IO.Path]::GetFullPath($logPath)
 
-# Last border state applied: $true shown, $false hidden, $null not yet known.
+# Border kinds that mark the focused window (komorebic `-w` values, which are
+# also the keys of global-state's border_colours).
+$focusKinds = @('single', 'stack', 'monocle', 'floating')
+
+# Last border state applied: $true focus colours, $false dimmed, $null unknown.
 $script:bordersOn = $null
+
+# The theme's focus colours (kind -> @(r, g, b)) to restore when input comes
+# back. Refreshed from komorebi before each dimming so theme edits carry over;
+# these fallbacks match the GruvboxDarkMedium theme in komorebi.json.
+$script:focusColours = @{
+    single   = @(235, 219, 178)
+    stack    = @(184, 187, 38)
+    monocle  = @(235, 219, 178)
+    floating = @(235, 219, 178)
+}
+# Colour used for the focus kinds while input is elsewhere (refreshed likewise).
+$script:dimColour = @(40, 40, 40)
 
 <#
 .SYNOPSIS
-Shows or hides komorebi's window borders, skipping the call when unchanged.
+Converts one global-state colour object to an @(r, g, b) array.
+#>
+function ConvertTo-Rgb($c) { return @([int]$c.r, [int]$c.g, [int]$c.b) }
+
+<#
+.SYNOPSIS
+Captures komorebi's current focus and unfocused border colours.
+.DESCRIPTION
+Skipped when every focus kind already equals the unfocused colour, i.e. the
+borders are still dimmed (e.g. a previous instance died while input was on the
+Mac), so a dimmed state is never mistaken for the theme's colours.
+#>
+function Update-ThemeColours {
+    try {
+        $colours = (komorebic.exe global-state | ConvertFrom-Json).border_colours
+        $dim = ConvertTo-Rgb $colours.unfocused
+        $current = @{}
+        foreach ($kind in $focusKinds) { $current[$kind] = ConvertTo-Rgb $colours.$kind }
+        $allDim = @($focusKinds | Where-Object { ($current[$_] -join ',') -ne ($dim -join ',') }).Count -eq 0
+        if (-not $allDim) {
+            $script:focusColours = $current
+            $script:dimColour = $dim
+        }
+    } catch {}
+}
+
+<#
+.SYNOPSIS
+Paints komorebi's focused-window borders in the theme's focus colours or in
+the unfocused colour, skipping the calls when the state is unchanged.
 .PARAMETER On
-$true to enable borders, $false to disable them.
+$true for the focus colours (input is here), $false to dim them.
 .PARAMETER Force
 Apply even if the cached state says it is already in effect.
 #>
 function Set-Borders([bool]$On, [switch]$Force) {
     if (-not $Force -and $script:bordersOn -eq $On) { return }
-    $state = if ($On) { 'enable' } else { 'disable' }
-    try { & komorebic.exe border $state | Out-Null } catch {}
+    if (-not $On) { Update-ThemeColours }
+    foreach ($kind in $focusKinds) {
+        $rgb = if ($On) { $script:focusColours[$kind] } else { $script:dimColour }
+        try { & komorebic.exe border-colour -w $kind $rgb[0] $rgb[1] $rgb[2] | Out-Null } catch {}
+    }
     $script:bordersOn = $On
 }
 
@@ -138,7 +193,9 @@ function Read-LogRange([long]$From, [long]$To) {
     }
 }
 
-# Input is on the server when this starts (login / AHK reload), so start shown.
+# Input is on the server when this starts (login / AHK reload), so start with
+# the focus colours (restoring them if an earlier instance left them dimmed).
+Update-ThemeColours
 Set-Borders $true -Force
 
 try {
