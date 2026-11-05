@@ -628,9 +628,11 @@ if (Get-Module PSReadLine) {
     Set-PSReadLineKeyHandler -Key Ctrl+RightArrow -Function ForwardWord
 
     # Delete back one word, stopping on the delimiters set below - so
-    # `foo bar_baz` loses only `baz`. Alt+Backspace arrives as ESC DEL, which
-    # this handler catches; AHK remaps the chord to Ctrl+Backspace everywhere
-    # except terminal windows, so it reaches the shell untouched.
+    # `foo bar_baz` loses only `baz`. Outside psmux, Alt+Backspace arrives as
+    # ESC DEL, which this handler catches; inside psmux it arrives as Ctrl+W
+    # (see .psmux.conf), which PSReadLine binds to the same function. AHK
+    # remaps the chord to Ctrl+Backspace everywhere except terminal windows,
+    # so it reaches the shell untouched.
     Set-PSReadLineKeyHandler -Key Alt+Backspace -Function BackwardKillWord
     Set-PSReadLineKeyHandler -Key Home -Function BeginningOfLine
     Set-PSReadLineKeyHandler -Key End -Function EndOfLine

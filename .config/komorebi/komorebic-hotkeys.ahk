@@ -171,8 +171,9 @@ LWin & Tab::AltTab
 ; Option + Backspace -> Ctrl + Backspace (delete the previous word). Native
 ; Windows apps only know Ctrl+Backspace; Alt+Backspace is Undo in classic edit
 ; controls and does nothing in most others. Terminals are excluded: there the
-; chord must reach the shell untouched as ESC DEL, which psmux (.psmux.conf),
-; PSReadLine (profile.ps1) and zsh already bind to backward-kill-word.
+; chord must reach psmux untouched, which forwards it as Ctrl+W (.psmux.conf),
+; and outside psmux PSReadLine (profile.ps1) and zsh bind its ESC DEL form to
+; backward-kill-word.
 GroupAdd("Terminals", "ahk_exe WindowsTerminal.exe")
 GroupAdd("Terminals", "ahk_exe OpenConsole.exe")
 GroupAdd("Terminals", "ahk_exe conhost.exe")
