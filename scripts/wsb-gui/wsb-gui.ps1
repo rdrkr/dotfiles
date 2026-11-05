@@ -10,6 +10,8 @@
   -Exec   runs any command line inside the sandbox's user session (no output; write to C:\work\out yourself).
   -Stop   destroys the sandbox (nothing it did survives).
   -Status prints the running sandbox id and the work folder.
+  -GetMesa downloads a current Mesa for Windows (pal1000/mesa-dist-win) into %LOCALAPPDATA%\wsb-gui\cache\mesa
+          for apps that need desktop OpenGL beyond the sandbox's legacy 2.0 (see the compare profile's -OpenGL).
   wsb exec returns no output, so all results travel through the read-write work folder, mapped into the
   sandbox as C:\work: tools\ (copied from this repo on -Start), out\ (results), shots\ (PNGs).
 .PARAMETER Start
@@ -24,6 +26,10 @@
   Stop the running sandbox.
 .PARAMETER Status
   Show the running sandbox.
+.PARAMETER GetMesa
+  Download and unpack Mesa (idempotent); prints the folder holding its x64 DLLs.
+.PARAMETER MesaVersion
+  With -GetMesa: release tag (e.g. 26.2.4); default the latest release.
 .PARAMETER NoConnect
   With -Start: do not open the session window (only System-context commands will work).
 .PARAMETER ReadyTimeoutSec
@@ -34,7 +40,7 @@
 #>
 param(
   [string]$Start = "", [hashtable]$ProfileArgs = @{}, [switch]$Do, [string]$Exec = "", [switch]$Stop, [switch]$Status,
-  [switch]$NoConnect, [int]$ReadyTimeoutSec = 900
+  [switch]$NoConnect, [int]$ReadyTimeoutSec = 900, [switch]$GetMesa, [string]$MesaVersion = ""
 )
 $Rest = $args
 $ErrorActionPreference = "Stop"
@@ -83,6 +89,28 @@ function New-SandboxConfig([hashtable]$p) {
 }
 
 New-Item -ItemType Directory -Force $Work, (Join-Path $Work "out"), (Join-Path $Work "shots") | Out-Null
+
+if ($GetMesa) {
+  $cache = Join-Path $env:LOCALAPPDATA "wsb-gui\cache\mesa"
+  $api = "https://api.github.com/repos/pal1000/mesa-dist-win/releases/" + $(if ($MesaVersion) { "tags/$MesaVersion" } else { "latest" })
+  $rel = Invoke-RestMethod $api -Headers @{ "User-Agent" = "wsb-gui" }
+  $dest = Join-Path $cache $rel.tag_name
+  if (Test-Path (Join-Path $dest "x64\opengl32.dll")) { Join-Path $dest "x64"; return }
+  $asset = $rel.assets | Where-Object { $_.name -like "mesa3d-*-release-msvc.7z" } | Select-Object -First 1
+  if (-not $asset) { throw "release $($rel.tag_name) has no release-msvc package" }
+  # download and unpack in a fresh, empty folder; only the x64 binaries are kept
+  $tmp = Join-Path $cache ("dl-" + [Guid]::NewGuid().ToString("N").Substring(0, 8))
+  New-Item -ItemType Directory -Force $tmp | Out-Null
+  $archive = Join-Path $tmp $asset.name
+  Invoke-WebRequest $asset.browser_download_url -OutFile $archive -Headers @{ "User-Agent" = "wsb-gui" }
+  tar -xf $archive -C $tmp x64   # Windows' own tar (libarchive) reads 7z
+  if (-not (Test-Path (Join-Path $tmp "x64\opengl32.dll"))) { throw "unpacking $($asset.name) failed" }
+  New-Item -ItemType Directory -Force $dest | Out-Null
+  Move-Item (Join-Path $tmp "x64") $dest
+  Remove-Item -LiteralPath $tmp -Recurse -Force
+  Join-Path $dest "x64"
+  return
+}
 
 if ($Status) {
   if (Test-Path $IdFile) { "sandbox $(Get-SandboxId)" } else { "no sandbox recorded" }
