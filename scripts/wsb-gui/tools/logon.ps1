@@ -3,7 +3,9 @@
   Guest-side logon script of the compare profile: prepares the sandbox and reports ready.
 .DESCRIPTION
   Copies each build C:\host\<b> to C:\app\<b> and, when the sandbox has no VC++ runtime, deploys the runtime
-  DLLs from C:\host\redist\x64 next to it (app-local, seconds; the vc_redist installer is the fallback). Then runs the optional setup hook per build, then writes C:\work\ready.flag. Progress goes to
+  DLLs from C:\host\redist\x64 into the (disposable) sandbox's System32 - seconds instead of the ~4 min
+  vc_redist installer, which stays the fallback; app-local copies are not enough for apps whose components
+  load from the system path. Then runs the optional setup hook per build, then writes C:\work\ready.flag. Progress goes to
   C:\work\out\logon.log.
 .PARAMETER Builds
   Names of the mapped builds (folders under C:\host); "a,b" as one string is accepted.
@@ -31,7 +33,10 @@ try {
   $rt = Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64" -ErrorAction SilentlyContinue
   $localDlls = @(Get-ChildItem "C:\host\redist\x64\*.CRT", "C:\host\redist\x64\*.MFC", "C:\host\redist\x64\*.MFCLOC", "C:\host\redist\x64\*.OpenMP" -Filter *.dll -Recurse -ErrorAction SilentlyContinue)
   if ($rt -and $rt.Installed -eq 1) { Log "VC++ runtime present ($($rt.Version))"; $localDlls = @() }
-  elseif ($localDlls.Count) { Log "VC++ runtime: $($localDlls.Count) DLLs deployed app-locally" }
+  elseif ($localDlls.Count) {
+    foreach ($dll in $localDlls) { Copy-Item $dll.FullName "C:\Windows\System32" -Force }
+    Log "VC++ runtime: $($localDlls.Count) DLLs copied to System32"
+  }
   elseif (Test-Path "C:\host\redist\vc_redist.x64.exe") {
     $p = Start-Process "C:\host\redist\vc_redist.x64.exe" -ArgumentList "/install", "/quiet", "/norestart" -Wait -PassThru
     Log "vc_redist exit $($p.ExitCode)"
@@ -42,8 +47,6 @@ try {
     if ($xf.Count) { $rcArgs += @("/XF") + $xf }
     robocopy @rcArgs | Out-Null
     Log "copied $b (robocopy $LASTEXITCODE)"
-    # never overwrite a DLL the build ships itself
-    foreach ($dll in $localDlls) { if (-not (Test-Path "$dst\$($dll.Name)")) { Copy-Item $dll.FullName $dst } }
     if ($Setup) { & $Setup -Name $b -AppDir $dst -DataDir "C:\host\data"; Log "setup $b done" }
   }
   Set-Content "C:\work\ready.flag" ("builds " + ($Builds -join ","))
