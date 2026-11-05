@@ -21,7 +21,8 @@
 .PARAMETER Exclude
   File patterns not copied into the sandbox; default debug artifacts.
 .PARAMETER Redist
-  Folder with vc_redist.x64.exe; default: Visual Studio's newest v14x redist, when present.
+  A Visual Studio VC\Redist\MSVC\<version> folder; default: the newest one on this machine. Its x64\*.CRT /
+  *.MFC / *.OpenMP DLLs are deployed app-locally (seconds); its vc_redist.x64.exe is the fallback (~4 min).
 .PARAMETER MemoryInMB
   Sandbox memory; default 16384.
 #>
@@ -35,9 +36,10 @@ foreach ($name in $Builds.Keys) {
   $mapped += @{ Host = (Resolve-Path $Builds[$name]).Path; Sandbox = "C:\host\$name"; ReadOnly = $true }
 }
 if (-not $Redist) {
-  $vs = Get-ChildItem "C:\Program Files\Microsoft Visual Studio\*\*\VC\Redist\MSVC\v14*\vc_redist.x64.exe" -ErrorAction SilentlyContinue |
-    Sort-Object FullName -Descending | Select-Object -First 1
-  if ($vs) { $Redist = Split-Path $vs.FullName }
+  # numbered folders (14.44.35112) hold the app-local DLLs; the v143 alias only holds the installer
+  $vs = Get-ChildItem "C:\Program Files\Microsoft Visual Studio\*\*\VC\Redist\MSVC\*\x64" -Directory -ErrorAction SilentlyContinue |
+    Where-Object { Get-ChildItem $_.FullName -Directory -Filter "*.CRT" } | Sort-Object { [version]($_.Parent.Name) } -Descending | Select-Object -First 1
+  if ($vs) { $Redist = $vs.Parent.FullName }
 }
 if ($Redist) { $mapped += @{ Host = $Redist; Sandbox = "C:\host\redist"; ReadOnly = $true } }
 if ($Data) { $mapped += @{ Host = (Resolve-Path $Data).Path; Sandbox = "C:\host\data"; ReadOnly = $true } }
