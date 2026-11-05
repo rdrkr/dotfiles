@@ -335,6 +335,19 @@ GroupAdd("Terminals", "ahk_exe conhost.exe")
 	Send("{Shift up}{Ctrl up}")
 }
 
+; Option + Cmd + left click -> middle click (for mice with no middle button):
+; open a link in a new tab, close a tab, paste in terminals, etc. Win and Alt
+; are released first so the target app sees a plain middle click (AHK masks
+; their key-ups, so neither Start nor a menu bar opens), and the middle button
+; is held for as long as the physical left button is held so middle-drag
+; (autoscroll, panning) works too.
+!#LButton:: {
+	Send("{LWin up}{RWin up}{LAlt up}{RAlt up}")
+	Click("Middle Down")
+	KeyWait("LButton")
+	Click("Middle Up")
+}
+
 ; Move the active window with the mouse or arrow keys (see MoveActiveWindow)
 !+m:: MoveActiveWindow()
 
