@@ -7,10 +7,12 @@
   host wrapper (wsb-gui.ps1 -Do) prints that file. Coordinates are relative to the chosen window's top-left,
   the same pixels as its screenshot.
 .PARAMETER Action
-  list | shot | click | dclick | pclick | keys | wheel | move | corner | launch | cursor
+  list | shot | click | dclick | pclick | keys | wheel | move | place | corner | launch | cursor
   list   - visible windows of the process, largest first ("index 'title' x,y wxh").
   shot   - PNG of the window (-Out), or of the whole screen with -Screen.
   click  - real mouse click (SetCursorPos + mouse_event), raising the window first.
+  place  - moves AND resizes every window of the process to -X,-Y with size -Width x -Height (apps that size themselves
+           to the screen get the same layout as on the host, so recorded coordinates stay valid).
   pclick - click posted to the deepest child under the point (no z-order needed); -Text bm adds BM_CLICK.
   corner - prints EXIT when the window's top-right button is a yellow X (MAGNET Field home screen), else OTHER.
   launch - starts -Text as a process (working directory = its folder) and prints its PID.
@@ -25,6 +27,10 @@
   X relative to the window's left edge.
 .PARAMETER Y
   Y relative to the window's top edge.
+.PARAMETER Width
+  With place: window width.
+.PARAMETER Height
+  With place: window height.
 .PARAMETER Text
   SendKeys string (keys), wheel delta (wheel), 'bm' (pclick) or the executable to start (launch).
 .PARAMETER ArgList
@@ -36,7 +42,7 @@
 .PARAMETER Result
   File that receives everything the script reports; the host prints it.
 #>
-param([string]$Action = "list", [string]$ExeLike = "", [string]$Proc = "mf", [string]$Title = "", [int]$X = 0, [int]$Y = 0,
+param([string]$Action = "list", [string]$ExeLike = "", [string]$Proc = "mf", [string]$Title = "", [int]$X = 0, [int]$Y = 0, [int]$Width = 0, [int]$Height = 0,
       [string]$Text = "", [string]$ArgList = "", [string]$Out = "", [switch]$Screen, [string]$Result = "")
 
 $script:lines = New-Object System.Collections.ArrayList
@@ -133,6 +139,7 @@ $cb = [W+EnumProc]{ param($h, $p)
 $sorted = @($script:wins | Where-Object { $_.Area -gt 0 })
 
 if ($Action -eq "list") { $i = 0; foreach ($w in $sorted) { Say "$i '$($w.Title)' $($w.R.L),$($w.R.T) $($w.R.R - $w.R.L)x$($w.R.B - $w.R.T)"; $i++ }; Finish 0 }
+if ($Action -eq "place") { foreach ($w in $sorted) { [W]::SetWindowPos($w.H, [IntPtr]::Zero, $X, $Y, $Width, $Height, 0x14) | Out-Null }; Say "placed $($sorted.Count) window(s) at $X,$Y ${Width}x$Height"; Finish 0 }
 if ($Action -eq "move") { foreach ($w in $sorted) { [W]::SetWindowPos($w.H, [IntPtr]::Zero, $X, $Y, 0, 0, 0x15) | Out-Null }; Say "moved $($sorted.Count) window(s) to $X,$Y"; Finish 0 }
 if ($sorted.Count -eq 0) { Say "NO WINDOW"; Finish 3 }
 

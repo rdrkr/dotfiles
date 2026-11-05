@@ -140,7 +140,8 @@ if ($Do) {
   $n = [Guid]::NewGuid().ToString("N").Substring(0, 8)
   $resGuest = "C:\work\out\do-$n.txt"; $resHost = Join-Path $Work "out\do-$n.txt"
   # quote every forwarded argument for the guest command line; -Name switches pass through bare
-  $fwd = ($Rest | ForEach-Object { if ($_ -match '^-[A-Za-z]+$') { $_ } else { '"' + ($_ -replace '"', '\"') + '"' } }) -join " "
+  # (a trailing backslash would escape the closing quote, so it is doubled: "C:\mf\dev\\")
+  $fwd = ($Rest | ForEach-Object { if ($_ -match '^-[A-Za-z]+$') { $_ } else { '"' + (($_ -replace '"', '\"') -replace '(\\+)$', '$1$1') + '"' } }) -join " "
   $cmd = "powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File C:\work\tools\drive.ps1 $fwd -Result $resGuest"
   $code = Invoke-InSandbox $id $cmd
   if (Test-Path $resHost) { Get-Content $resHost; Remove-Item $resHost -Force } else { "no result (exit $code)" }

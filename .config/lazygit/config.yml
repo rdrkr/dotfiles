@@ -1,4 +1,7 @@
 # lazygit configuration
+
+confirmOnQuit: true
+
 # Theme: Gruvbox Material, dark, medium background, "material" foreground palette,
 # using the same colour roles as the Stylus browser themes (blue accent, green/red for diffs).
 gui:
