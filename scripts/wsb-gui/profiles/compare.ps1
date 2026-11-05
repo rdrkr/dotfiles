@@ -31,11 +31,13 @@
   Folder with Mesa's x64 DLLs; default the newest under %LOCALAPPDATA%\wsb-gui\cache\mesa.
 .PARAMETER MemoryInMB
   Sandbox memory; default 16384.
+.PARAMETER Networking
+  Disable (default: no network adapter at all) | Enable (the sandbox gets the host's network through NAT).
 #>
 param(
   [string]$Work, [Parameter(Mandatory)] [hashtable]$Builds, [string]$Setup = "", [string]$Data = "",
   [string[]]$Exclude = @("*.pdb", "*.lib", "*.exp", "*.ilk"), [string]$Redist = "", [ValidateSet("none", "llvmpipe", "d3d12")] [string]$OpenGL = "none", [string]$Mesa = "",
-  [int]$MemoryInMB = 16384
+  [int]$MemoryInMB = 16384, [ValidateSet("Disable", "Enable")] [string]$Networking = "Disable"
 )
 $mapped = @()
 foreach ($name in $Builds.Keys) {
@@ -70,5 +72,6 @@ if ($Setup) {
 @{
   Mapped       = $mapped
   MemoryInMB   = $MemoryInMB
+  Networking   = $Networking
   LogonCommand = "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\work\tools\logon.ps1 -Builds $(@($Builds.Keys) -join ',') -Exclude `"$($Exclude -join ',')`"$glArg$setupArg"
 }

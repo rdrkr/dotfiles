@@ -40,6 +40,7 @@ range, to recognise a screen by an icon), `launch` (`-ArgList`), `cursor`.
   - `-Setup <host .ps1>`: an app-specific hook, run once per build in the sandbox with
     `-Name -AppDir -DataDir`. Keep hooks with the app or in `%LOCALAPPDATA%\wsb-gui\setups`, not here.
   - `-Data <folder>`: test data, mapped read-only as `C:\host\data`.
+  - `-Networking Enable`: give the sandbox the host's network (default `Disable`: no network adapter at all).
 
 ## Desktop OpenGL apps
 
