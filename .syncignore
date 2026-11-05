@@ -12,3 +12,4 @@
 # A repo that does track them (e.g. the work one) lists them here.
 .config/gh/hosts.yml
 .config/*-packages-windows.txt
+.config/nvim/lazy-lock.json
