@@ -6,7 +6,7 @@
   -Start  creates a sandbox from a profile (profiles\<name>.ps1), opens its session window (a user session is
           needed for GUI work) and waits until the profile's logon script reports ready.
   -Do     runs tools\drive.ps1 inside the sandbox's user session and prints its result. Arguments after -Do are
-          passed through, e.g.  wsb-gui.ps1 -Do -Action list -ExeLike 'C:\mf\dev\'
+          passed through, e.g.  wsb-gui.ps1 -Do -Action list -ExeLike 'C:\app\dev\'
   -Exec   runs any command line inside the sandbox's user session (no output; write to C:\work\out yourself).
   -Stop   destroys the sandbox (nothing it did survives).
   -Status prints the running sandbox id and the work folder.
@@ -140,7 +140,7 @@ if ($Do) {
   $n = [Guid]::NewGuid().ToString("N").Substring(0, 8)
   $resGuest = "C:\work\out\do-$n.txt"; $resHost = Join-Path $Work "out\do-$n.txt"
   # quote every forwarded argument for the guest command line; -Name switches pass through bare
-  # (a trailing backslash would escape the closing quote, so it is doubled: "C:\mf\dev\\")
+  # (a trailing backslash would escape the closing quote, so it is doubled: "C:\app\dev\\")
   $fwd = ($Rest | ForEach-Object { if ($_ -match '^-[A-Za-z]+$') { $_ } else { '"' + (($_ -replace '"', '\"') -replace '(\\+)$', '$1$1') + '"' } }) -join " "
   $cmd = "powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File C:\work\tools\drive.ps1 $fwd -Result $resGuest"
   $code = Invoke-InSandbox $id $cmd

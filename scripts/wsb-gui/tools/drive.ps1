@@ -7,20 +7,22 @@
   host wrapper (wsb-gui.ps1 -Do) prints that file. Coordinates are relative to the chosen window's top-left,
   the same pixels as its screenshot.
 .PARAMETER Action
-  list | shot | click | dclick | pclick | keys | wheel | move | place | corner | launch | cursor
+  list | shot | click | dclick | pclick | keys | wheel | move | place | count | launch | cursor
   list   - visible windows of the process, largest first ("index 'title' x,y wxh").
   shot   - PNG of the window (-Out), or of the whole screen with -Screen.
   click  - real mouse click (SetCursorPos + mouse_event), raising the window first.
   place  - moves AND resizes every window of the process to -X,-Y with size -Width x -Height (apps that size themselves
            to the screen get the same layout as on the host, so recorded coordinates stay valid).
   pclick - click posted to the deepest child under the point (no z-order needed); -Text bm adds BM_CLICK.
-  corner - prints EXIT when the window's top-right button is a yellow X (MAGNET Field home screen), else OTHER.
+  count  - counts the pixels of the window region -X,-Y,-Width,-Height whose colour lies in the range -Text
+           "rmin,gmin,bmin-rmax,gmax,bmax"; a negative -X counts from the right edge. Lets a flow recognise a
+           screen by an icon colour without shipping the screenshot back.
   launch - starts -Text as a process (working directory = its folder) and prints its PID.
   cursor - prints the cursor position (proves input never left the sandbox when compared with the host's).
 .PARAMETER ExeLike
-  Substring of the target process's executable path (e.g. C:\mf\dev\); empty = no process filter.
+  Substring of the target process's executable path (e.g. C:\app\dev\); empty = no path filter.
 .PARAMETER Proc
-  Process name filter (without .exe); default mf.
+  Process name filter (without .exe); empty = any process. At least one of -Proc / -ExeLike is required.
 .PARAMETER Title
   Exact title of the window to act on; empty = the foreground window of the process, else the last titled one.
 .PARAMETER X
@@ -42,7 +44,7 @@
 .PARAMETER Result
   File that receives everything the script reports; the host prints it.
 #>
-param([string]$Action = "list", [string]$ExeLike = "", [string]$Proc = "mf", [string]$Title = "", [int]$X = 0, [int]$Y = 0, [int]$Width = 0, [int]$Height = 0,
+param([string]$Action = "list", [string]$ExeLike = "", [string]$Proc = "", [string]$Title = "", [int]$X = 0, [int]$Y = 0, [int]$Width = 0, [int]$Height = 0,
       [string]$Text = "", [string]$ArgList = "", [string]$Out = "", [switch]$Screen, [string]$Result = "")
 
 $script:lines = New-Object System.Collections.ArrayList
@@ -121,7 +123,9 @@ if ($Action -eq "shot" -and $Screen) {
   SaveShot $vs.Left $vs.Top $vs.Width $vs.Height $Out; Say "screen $($vs.Width)x$($vs.Height) -> $Out"; Finish 0
 }
 
-$procs = @(Get-CimInstance Win32_Process -Filter "Name='$Proc.exe'" | Where-Object { -not $ExeLike -or ($_.ExecutablePath -and $_.ExecutablePath.Contains($ExeLike)) })
+if (-not $Proc -and -not $ExeLike) { Say "pass -Proc or -ExeLike"; Finish 4 }
+$filter = if ($Proc) { "Name='$Proc.exe'" } else { "ExecutablePath IS NOT NULL" }
+$procs = @(Get-CimInstance Win32_Process -Filter $filter | Where-Object { -not $ExeLike -or ($_.ExecutablePath -and $_.ExecutablePath.Contains($ExeLike)) })
 if ($procs.Count -eq 0) { Say "NO PROCESS ($Proc $ExeLike)"; Finish 2 }
 $pids = @($procs | ForEach-Object { [uint32]$_.ProcessId })
 
@@ -185,13 +189,17 @@ switch ($Action) {
     [W]::PostMessage($target, 0x202, [IntPtr]0, $lp) | Out-Null
     if ($Text -eq "bm") { [W]::PostMessage($target, 0xF5, [IntPtr]0, [IntPtr]0) | Out-Null }
   }
-  "corner" {
-    $path = Join-Path $env:TEMP "wsbgui-corner.png"; $w2 = $win.R.R - $win.R.L
-    SaveShot $win.R.L $win.R.T $w2 90 $path
-    $bmp = [System.Drawing.Bitmap]::FromFile($path); $yellow = 0
-    for ($x = [Math]::Max(0, $w2 - 120); $x -lt $w2 - 10; $x += 2) { for ($y = 5; $y -lt 85; $y += 2) {
-      $c = $bmp.GetPixel($x, $y); if ($c.R -gt 200 -and $c.G -gt 140 -and $c.G -lt 200 -and $c.B -lt 90) { $yellow++ } } }
-    $bmp.Dispose(); Say $(if ($yellow -gt 100) { "EXIT $yellow" } else { "OTHER $yellow" })
+  "count" {
+    $wx = $win.R.R - $win.R.L; $rx = if ($X -lt 0) { $wx + $X } else { $X }
+    $rw = if ($Width -gt 0) { $Width } else { 100 }; $rh = if ($Height -gt 0) { $Height } else { 100 }
+    $lo, $hi = $Text -split "-"; $a = [int[]]($lo -split ","); $z = [int[]]($hi -split ",")
+    $path = Join-Path $env:TEMP "wsbgui-count.png"
+    SaveShot ($win.R.L + $rx) ($win.R.T + $Y) $rw $rh $path
+    $bmp = [System.Drawing.Bitmap]::FromFile($path); $hits = 0
+    for ($px = 0; $px -lt $rw; $px += 2) { for ($py = 0; $py -lt $rh; $py += 2) {
+      $c = $bmp.GetPixel($px, $py)
+      if ($c.R -ge $a[0] -and $c.R -le $z[0] -and $c.G -ge $a[1] -and $c.G -le $z[1] -and $c.B -ge $a[2] -and $c.B -le $z[2]) { $hits++ } } }
+    $bmp.Dispose(); Say "count $hits"
   }
 }
 if ($Out) { Start-Sleep -Milliseconds 900; SaveShot $win.R.L $win.R.T ($win.R.R - $win.R.L) ($win.R.B - $win.R.T) $Out }
