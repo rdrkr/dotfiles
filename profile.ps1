@@ -629,8 +629,8 @@ if (Get-Module PSReadLine) {
 
     # Delete back one word, stopping on the delimiters set below - so
     # `foo bar_baz` loses only `baz`. Alt+Backspace arrives as ESC DEL, which
-    # this handler catches; AHK leaves the chord alone (it only remaps
-    # Win+Backspace to Delete).
+    # this handler catches; AHK remaps the chord to Ctrl+Backspace everywhere
+    # except terminal windows, so it reaches the shell untouched.
     Set-PSReadLineKeyHandler -Key Alt+Backspace -Function BackwardKillWord
     Set-PSReadLineKeyHandler -Key Home -Function BeginningOfLine
     Set-PSReadLineKeyHandler -Key End -Function EndOfLine
