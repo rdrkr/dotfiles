@@ -25,8 +25,14 @@ function Log([string]$s) { Add-Content $log ("{0:HH:mm:ss} {1}" -f (Get-Date), $
 
 try {
   Log "logon start as $(whoami)"
-  $p = Start-Process "C:\host\redist\vc_redist.x64.exe" -ArgumentList "/install", "/quiet", "/norestart" -Wait -PassThru
-  Log "vc_redist exit $($p.ExitCode)"
+  # powershell -File hands "dev,fix" over as one string
+  $Builds = @($Builds | ForEach-Object { $_ -split "," } | Where-Object { $_ })
+  $rt = Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64" -ErrorAction SilentlyContinue
+  if ($rt -and $rt.Installed -eq 1) { Log "vc_redist already installed ($($rt.Version))" }
+  else {
+    $p = Start-Process "C:\host\redist\vc_redist.x64.exe" -ArgumentList "/install", "/quiet", "/norestart" -Wait -PassThru
+    Log "vc_redist exit $($p.ExitCode)"
+  }
   foreach ($b in $Builds) {
     $dst = "C:\mf\$b"
     robocopy "C:\host\$b" $dst /E /XF *.pdb *.lib *.exp *.ilk tps_dir.ini /XD test /NFL /NDL /NJH /NP /MT:16 | Out-Null
