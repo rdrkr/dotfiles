@@ -41,6 +41,22 @@ range, to recognise a screen by an icon), `launch` (`-ArgList`), `cursor`.
     `-Name -AppDir -DataDir`. Keep hooks with the app or in `%LOCALAPPDATA%\wsb-gui\setups`, not here.
   - `-Data <folder>`: test data, mapped read-only as `C:\host\data`.
 
+## Desktop OpenGL apps
+
+The sandbox's vGPU exposes Direct3D only, so desktop OpenGL falls back to Windows' legacy implementation
+(at most 2.0). Apps that need more fail at startup with errors like "OpenGL 4 is required". Fix:
+
+```powershell
+& $g -GetMesa      # once: caches pal1000/mesa-dist-win under %LOCALAPPDATA%\wsb-gui\cache\mesa
+& $g -Start compare -ProfileArgs @{ Builds = @{ dev = '...' }; OpenGL = 'llvmpipe' }
+```
+
+`compare` then copies Mesa's `opengl32.dll` and `libgallium_wgl.dll` next to every exe of each build. That
+copy wins over System32 for that process only. `llvmpipe` renders on the CPU at GL 4.5 and is the
+dependable choice. `d3d12` (GL on the vGPU, adds `dxil.dll`) is available but did not start a Qt Quick
+desktop-GL app here. A Qt build's own `opengl32sw.dll` is usually an old Mesa (GL 3.3), and apps that force
+`AA_UseDesktopOpenGL` ignore it anyway.
+
 ## Gotchas
 
 - `wsb exec -r ExistingLogin` fails with `0x80070520` until `wsb connect` has run.
