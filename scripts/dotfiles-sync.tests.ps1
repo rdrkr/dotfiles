@@ -136,7 +136,7 @@ function Get-SyncedTree {
     foreach ($line in Invoke-TestGit $Repo ls-tree -r HEAD) {
         if ($line -match '^\S+ \S+ (\S+)\t(.*)$') {
             $path = $Matches[2]
-            if ($path -eq '.syncignore' -or $path -like 'work-only/*' -or $path -eq 'anchored-only.txt' -or $path -eq 'leak.txt' -or
+            if ($path -eq '.syncignore' -or $path -like 'work-only/*' -or $path -eq 'anchored-only.txt' -or $path -eq 'leak.txt' -or $path -eq 'styles/leak.json' -or
                 $path -like 'peer-tracked/*' -or $path -like 'win-tracked/*' -or $path -like 'many-ignored-*/*') { continue }
             $map[$path] = $Matches[1]
         }
