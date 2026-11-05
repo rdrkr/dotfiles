@@ -45,9 +45,11 @@ range, to recognise a screen by an icon), `launch` (`-ArgList`), `cursor`.
 
 - `wsb exec -r ExistingLogin` fails with `0x80070520` until `wsb connect` has run.
 - The sandbox has no Store apps (no Notepad, no Paint).
-- The sandbox image already ships a VC++ 14.x runtime. The redist is only installed when it is missing (the
-  quiet install takes about 4 min).
-- Apps that size themselves to the screen get the sandbox's resolution, not the host's. Coordinates recorded
+- The sandbox has no VC++ runtime. `compare` copies the CRT/MFC DLLs from Visual Studio's newest
+  `VC\Redist\MSVC\<version>` folder into the sandbox's System32, which takes seconds. App-local copies were not
+  enough for an app whose components load from the system path. `vc_redist.x64.exe` (about 4 min) is the fallback.
+- Apps that size themselves to the screen may get the sandbox's resolution, not the host's, and not
+  consistently across starts. Read the window size from `list` before using recorded coordinates. Coordinates recorded
   on the host then need scaling, and right-anchored toolbars shift instead of scaling. `place` can resize
   windows, but some apps repaint badly afterwards.
 - A trailing backslash before a closing quote escapes it on the Windows command line. `wsb-gui.ps1` doubles
