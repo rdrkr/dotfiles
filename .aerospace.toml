@@ -10,6 +10,9 @@ on-focus-changed = [
 # Available commands : https://nikitabobko.github.io/AeroSpace/commands
 after-startup-command = [
   'exec-and-forget borders active_color=0xffebdbb2 inactive_color=0x00000000 width=5.0 style=round hidpi=on blacklist="iPhone Mirroring"',
+  # Hide the border while Deskflow input is on the Dell (one focus indicator
+  # across both machines); see .config/borders/deskflow-focus-borders.sh
+  'exec-and-forget ~/.config/borders/deskflow-focus-borders.sh',
   #'exec-and-forget sketchybar',
 ]
 

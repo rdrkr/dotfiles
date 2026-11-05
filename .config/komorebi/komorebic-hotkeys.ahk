@@ -116,6 +116,11 @@ Komorebic("start")
 ; state fresh for fast empty-skipping navigation (see CycleWorkspaceSkipEmpty).
 Run('powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "' A_ScriptDir '\komorebi-nav-subscriber.ps1"', , "Hide")
 
+; Start the resident Deskflow watcher that hides komorebi's borders while
+; Deskflow input is on the Mac, so only one machine shows a focused window
+; (see deskflow-focus-borders.ps1).
+Run('powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "' A_ScriptDir '\deskflow-focus-borders.ps1"', , "Hide")
+
 ; Language switching (Alt+Space -> Ctrl+Shift)
 !Space:: Send("{Ctrl Down}{Shift}{Ctrl Up}")
 
