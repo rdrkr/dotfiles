@@ -248,8 +248,6 @@ cask "aerospace"
 cask "aerospacebar"
 # Enable Windows-like alt-tab
 cask "alt-tab"
-# iOS App Store alternative
-cask "altserver"
 # Tools for building Android applications
 cask "android-studio"
 # Agent orchestration platform
