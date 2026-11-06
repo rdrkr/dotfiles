@@ -179,7 +179,9 @@ LWin & Tab::AltTab
 +#Up:: Send("+^{Home}")
 +#Down:: Send("+^{End}")
 
-; Option + Arrows -> Ctrl + Arrows (Jump word)
+; Option + Arrows -> Ctrl + Arrows (Jump word). IntelliJ is excluded: its macOS
+; keymap binds the Option chords directly (see intellij-mac-keymap.py).
+#HotIf !WinActive("ahk_exe idea64.exe")
 !Left:: Send("^{Left}")
 !Right:: Send("^{Right}")
 !Up:: Send("^{Up}")
@@ -188,17 +190,19 @@ LWin & Tab::AltTab
 +!Right:: Send("+^{Right}")
 +!Up:: Send("+^{Up}")
 +!Down:: Send("+^{Down}")
+#HotIf
 
 ; Option + Backspace -> Ctrl + Backspace (delete the previous word). Native
 ; Windows apps only know Ctrl+Backspace; Alt+Backspace is Undo in classic edit
 ; controls and does nothing in most others. Terminals are excluded: there the
 ; chord must reach psmux untouched, which forwards it as Ctrl+W (.psmux.conf),
 ; and outside psmux PSReadLine (profile.ps1) and zsh bind its ESC DEL form to
-; backward-kill-word.
+; backward-kill-word. IntelliJ is excluded too: its macOS keymap binds the chord
+; directly (see intellij-mac-keymap.py).
 GroupAdd("Terminals", "ahk_exe WindowsTerminal.exe")
 GroupAdd("Terminals", "ahk_exe OpenConsole.exe")
 GroupAdd("Terminals", "ahk_exe conhost.exe")
-#HotIf !WinActive("ahk_group Terminals")
+#HotIf !WinActive("ahk_group Terminals") && !WinActive("ahk_exe idea64.exe")
 !Backspace:: Send("^{Backspace}")
 #HotIf
 
@@ -214,7 +218,7 @@ GroupAdd("Terminals", "ahk_exe conhost.exe")
 #HotIf
 
 ; Essential Mac shortcuts (Cmd+C, Cmd+V, etc.) mapped from Win (#)
-#HotIf WinActive("ahk_exe ms-teams.exe")
+#HotIf WinActive("ahk_exe ms-teams.exe") || WinActive("ahk_exe idea64.exe")
 +Enter:: Send("+{Enter}")
 #HotIf
 +Enter:: Send("^j")
@@ -317,6 +321,11 @@ GroupAdd("Terminals", "ahk_exe conhost.exe")
 !+q:: Komorebic("close")
 #HotIf
 
+; IntelliJ's macOS Cmd chords. Keep this below the WM hotkeys above: when several
+; variants of a hotkey match, AutoHotkey fires the one defined first, so the WM
+; chords win here just as AeroSpace's do on the Mac.
+#Include %A_ScriptDir%\intellij-mac-hotkeys.ahk
+
 ; Disable mouse zoom
 ^WheelUp:: return
 ^WheelDown:: return
@@ -339,6 +348,16 @@ GroupAdd("Terminals", "ahk_exe conhost.exe")
 	Click("Up")
 	Send("{Shift up}{Ctrl up}")
 }
+; Cmd + Option + left click (IntelliJ's go to implementation)
+#HotIf WinActive("ahk_exe idea64.exe")
+!#LButton:: {
+	Send("{LWin up}{RWin up}{Ctrl down}{Alt down}")
+	Click("Down")
+	KeyWait("LButton")
+	Click("Up")
+	Send("{Alt up}{Ctrl up}")
+}
+#HotIf
 
 ; Ctrl + Shift + left click -> middle click (for mice with no middle button):
 ; open a link in a new tab, close a tab, paste in terminals, etc. Ctrl and
