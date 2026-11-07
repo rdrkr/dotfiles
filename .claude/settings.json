@@ -1,5 +1,10 @@
 {
   "env": {},
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
   "permissions": {
     "allow": [
       "Bash(command -v:*)",
@@ -19,11 +24,6 @@
     "defaultMode": "plan"
   },
   "model": "opus",
-  "attribution": {
-    "commit": "",
-    "pr": "",
-    "sessionUrl": false
-  },
   "hooks": {
     "Notification": [
       {
@@ -156,7 +156,7 @@
   "effortLevel": "high",
   "modelSettings": {
     "claude-opus-5-5": {
-      "effortLevel": "high"
+      "effortLevel": "medium"
     }
   },
   "autoUpdatesChannel": "latest",
