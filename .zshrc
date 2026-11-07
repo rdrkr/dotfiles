@@ -224,13 +224,13 @@ function _tmux_pick_session() {
 # Brings back, once per boot, the tmux sessions that were open when the machine
 # went down, before a new terminal picks a session to attach to.
 #
-# Sessions are saved by tmux-persist (see tmux.conf). This only acts on the
+# Sessions are saved by tmux-resurrect (see tmux.conf). This only acts on the
 # first call after a reboot, and only when tmux has no sessions yet: it starts
-# the server with a throwaway session so the plugins load, runs tmux-persist's
-# restore of every saved session synchronously, then drops the throwaway one.
-# Sessions closed on purpose were already forgotten when they closed, and a
-# server that dies within a boot (kill-server, crash) is not restored
-# automatically - use prefix + C-r per session, or its `restore.sh all`.
+# the server with a throwaway session so the plugins load, runs tmux-resurrect's
+# restore synchronously, then drops the throwaway one. tmux-restore's rewriting
+# of the save is what reopens each pane's agent conversation. Sessions closed on
+# purpose already left the save when they closed, and a server that dies within
+# a boot (kill-server, crash) is not restored automatically - use prefix + C-r.
 ##
 function _tmux_restore_after_boot() {
   local marker="${XDG_STATE_HOME:-${HOME}/.local/state}/tmux/restored-boot"
@@ -252,15 +252,15 @@ function _tmux_restore_after_boot() {
   # sessions already running: nothing was lost
   [[ -n "$(tmux list-sessions -F x 2>/dev/null)" ]] && return 0
 
-  tmux new-session -d -s __persist_restore 2>/dev/null || return 0
-  script="$(tmux show-options -gqv @persist-restore-script-path)"
+  tmux new-session -d -s __tmux_restore 2>/dev/null || return 0
+  script="$(tmux show-options -gqv @resurrect-restore-script-path)"
   if [[ -x "$script" ]]; then
     print -u2 "tmux: restoring saved sessions..."
     # through run-shell, which waits for it: the script finds its server
     # through $TMUX, and that is only set for commands tmux itself runs
-    tmux run-shell "${(q)script} quiet all" >/dev/null 2>&1
+    tmux run-shell "${(q)script}" >/dev/null 2>&1
   fi
-  tmux kill-session -t '=__persist_restore' 2>/dev/null
+  tmux kill-session -t '=__tmux_restore' 2>/dev/null
 }
 
 ##
