@@ -4,9 +4,9 @@
 # goes down, once per machine.
 #
 # tmux-restore's own install.sh does this too, but it also rewrites tmux.conf,
-# which here is managed by hand and shared between machines. Those machines get
-# their config through dotfiles-sync rather than install.sh, so tmux.conf runs
-# this at every server start and it returns straight away once set up.
+# which here is managed by hand and shared between machines. Run this by hand on
+# each machine that should have it: it adds a login item, so tmux.conf does not
+# start it. Safe to re-run; it returns straight away once set up.
 #
 #   macOS  a LaunchAgent running tmux-restore's watcher, built from source
 #   Linux  a systemd user service, where a user session exists

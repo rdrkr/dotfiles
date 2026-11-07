@@ -263,6 +263,11 @@ function Restore-PsmuxAfterBoot {
     if (-not (Test-Path -LiteralPath $restore) -or -not (Test-Path -LiteralPath $last)) { return }
 
     Write-Host 'psmux: restoring saved sessions...'
+    # panes running Claude Code reopen their conversation; see the script
+    $resume = Join-Path $env:USERPROFILE 'dotfiles\scripts\psmux-agent-resume.ps1'
+    if (Test-Path -LiteralPath $resume) {
+        & (Get-Process -Id $PID).Path -NoProfile -NonInteractive -File $resume -Apply *> $null
+    }
     & (Get-Process -Id $PID).Path -NoProfile -NonInteractive -File $restore *> $null
 }
 

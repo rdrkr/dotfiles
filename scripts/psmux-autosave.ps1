@@ -105,6 +105,20 @@ function Invoke-ResurrectSave {
     & (Get-PwshPath) -NoProfile -NonInteractive -File $save *> $null
 }
 
+function Invoke-AgentRecord {
+    <#
+    .SYNOPSIS
+        Records which Claude Code conversation each pane has open.
+    .DESCRIPTION
+        Runs after the save, also when the save was skipped as a duplicate: a
+        conversation can change while the panes look the same. See
+        psmux-agent-resume.ps1.
+    #>
+    $script = Join-Path $PSScriptRoot 'psmux-agent-resume.ps1'
+    if (-not (Test-Path -LiteralPath $script)) { return }
+    & (Get-PwshPath) -NoProfile -NonInteractive -File $script -Record *> $null
+}
+
 function Invoke-SaveLoop {
     <#
     .SYNOPSIS
@@ -127,6 +141,7 @@ function Invoke-SaveLoop {
                 if (-not (Test-PsmuxAlive -PsmuxBin $psmuxBin)) { return }
             }
             Invoke-ResurrectSave
+            Invoke-AgentRecord
         }
     }
     finally {
