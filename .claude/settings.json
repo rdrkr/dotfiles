@@ -21,7 +21,7 @@
     ],
     "deny": [],
     "ask": [],
-    "defaultMode": "plan"
+    "defaultMode": "auto"
   },
   "model": "opus",
   "hooks": {
