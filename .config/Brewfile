@@ -244,8 +244,8 @@ brew "yamlfmt"
 brew "yazi"
 # Shell extension to navigate your filesystem faster
 brew "zoxide"
-cask "aerospace"
-cask "aerospacebar"
+cask "nikitabobko/tap/aerospace"
+cask "rdrkr/tap/aerospacebar"
 # Enable Windows-like alt-tab
 cask "alt-tab"
 # Tools for building Android applications
@@ -260,13 +260,13 @@ cask "beeper"
 cask "betterdisplay"
 # Compare files and folders
 cask "beyond-compare@4"
-cask "browserino"
+cask "alexstrnik/browserino/browserino"
 # Terminal-based AI coding assistant
 cask "claude-code"
-cask "claude-usage-tracker"
+cask "hamed-elfayome/claude-usage/claude-usage-tracker"
 # Server and cloud storage browser
 cask "cyberduck"
-cask "deskflow"
+cask "deskflow/tap/deskflow"
 # Voice and text chat software
 cask "discord"
 # Client for the Dropbox cloud storage service
