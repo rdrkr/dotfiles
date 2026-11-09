@@ -143,6 +143,11 @@
       "id": "(?i)helper",
       "kind": "Exe",
       "matching_strategy": "Regex"
+    },
+    {
+      "id": "(?i)windowssandbox",
+      "kind": "Exe",
+      "matching_strategy": "Regex"
     }
   ]
 }
