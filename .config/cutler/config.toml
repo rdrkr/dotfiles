@@ -82,3 +82,14 @@ ensure_first = true # ensure_first = true; Runs before all other commands.
 sudo = true # sudo = true; When you want your command to run with sudo privileges.
 # Please note that this is just a minor convenience feature;
 # regular sudo inside your actual command still works.
+
+# Safari is sandboxed: its prefs live in ~/Library/Containers/com.apple.Safari, which
+# `defaults` resolves but cutler's [set.*] tables do not, so this goes through a command.
+# App shortcuts are keyed by menu item title; "@" = Cmd, "~" = Option,
+# \UF702 / \UF703 = Left / Right arrow. Takes effect after restarting Safari.
+[command.safari-tab-shortcuts]
+run = """
+defaults write com.apple.Safari NSUserKeyEquivalents -dict-add \\
+  "Show Previous Tab" '@~\\UF702' \\
+  "Show Next Tab" '@~\\UF703'
+"""
