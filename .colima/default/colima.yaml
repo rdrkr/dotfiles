@@ -167,7 +167,7 @@ vmType: vz
 # none disables port forwarding.
 #
 # Default: ssh
-portForwarder: ssh
+portForwarder: grpc
 
 # Utilise rosetta for amd64 emulation (requires m1 mac and vmType `vz`)
 # Default: false
