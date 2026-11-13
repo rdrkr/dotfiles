@@ -121,6 +121,13 @@ Run('powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File
 ; (see deskflow-focus-borders.ps1).
 Run('powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "' A_ScriptDir '\deskflow-focus-borders.ps1"', , "Hide")
 
+; Start the resident watcher that switches the screens with the desk keyboard:
+; external monitor only while the Keychron is connected to this machine, laptop
+; panel only once it leaves (see scripts\keyboard-display-watch.ps1). It lives in
+; the dotfiles scripts folder, which A_ScriptDir cannot reach: it reports this
+; file's symlinked location under %USERPROFILE%\.config, not the clone's.
+Run('powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "' EnvGet("USERPROFILE") '\dotfiles\scripts\keyboard-display-watch.ps1"', , "Hide")
+
 ; Language switching (Alt+Space -> Ctrl+Shift)
 !Space:: Send("{Ctrl Down}{Shift}{Ctrl Up}")
 
