@@ -112,9 +112,12 @@ function Set-DeskLayout([bool]$Connected) {
     $mode = if ($Connected) { 'external' } else { 'internal' }
     try {
         $result = & $topologyScript $mode 2>&1 | Out-String
-        Write-Log ("keyboard {0}: {1} -> [{2}] {3}" -f ($(if ($Connected) { 'connected' } else { 'disconnected' })), $mode, $LASTEXITCODE, $result.Trim())
+        $code = $LASTEXITCODE
+        Write-Log ("keyboard {0}: {1} -> [{2}] {3}" -f ($(if ($Connected) { 'connected' } else { 'disconnected' })), $mode, $code, $result.Trim())
+        return ($code -eq 0)
     } catch {
         Write-Log "keyboard edge: switching to $mode failed: $_"
+        return $false
     }
 }
 
@@ -130,14 +133,37 @@ Write-Log "watcher started (pid $PID, keyboard '$KeyboardMatch' connected: $appl
 
 $sourceId = 'keyboard-display-watch'
 Register-CimIndicationEvent -ClassName Win32_DeviceChangeEvent -SourceIdentifier $sourceId | Out-Null
+
+# A switch to "external" usually fails at first: the monitor is shared with the
+# Mac, and when the keyboard moves over it is still on the Mac's input (or still
+# hunting for this one) for several seconds after the Mac lets go, so Windows has
+# no external display to switch to yet (Win32 error 31). A failed switch is
+# therefore retried every $retrySeconds - and at once on any device event, such
+# as the monitor arriving - until it takes, the keyboard leaves again, or
+# $retryLimitSeconds pass.
+$retrySeconds = 3
+$retryLimitSeconds = 90
+$retryUntil = $null
+
 try {
     while ($true) {
-        $arrived = Wait-Event -SourceIdentifier $sourceId -Timeout $recheckSeconds
+        $timeout = if ($retryUntil) { $retrySeconds } else { $recheckSeconds }
+        $arrived = Wait-Event -SourceIdentifier $sourceId -Timeout $timeout
         # One plug produces a burst of events; take them all and check once.
         if ($arrived) { Get-Event -SourceIdentifier $sourceId -ErrorAction SilentlyContinue | Remove-Event }
 
         $connected = Test-KeyboardConnected
-        if ($connected -eq $applied) { continue }
+        if ($connected -eq $applied) {
+            if ($retryUntil) {
+                if ((Get-Date) -gt $retryUntil) {
+                    Write-Log "gave up switching after $retryLimitSeconds s"
+                    $retryUntil = $null
+                } elseif (Set-DeskLayout $applied) {
+                    $retryUntil = $null
+                }
+            }
+            continue
+        }
 
         if (-not $connected) {
             # Hold off a disconnect for the grace period; a blip comes back in time.
@@ -146,8 +172,12 @@ try {
             if (Test-KeyboardConnected) { continue }
         }
 
+        # A new edge supersedes any retry still pending for the previous one.
         $applied = $connected
-        Set-DeskLayout $connected
+        $retryUntil = $null
+        if (-not (Set-DeskLayout $connected)) {
+            $retryUntil = (Get-Date).AddSeconds($retryLimitSeconds)
+        }
     }
 } finally {
     Unregister-Event -SourceIdentifier $sourceId -ErrorAction SilentlyContinue
