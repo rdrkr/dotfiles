@@ -66,8 +66,6 @@ brew "eslint"
 brew "exiftool"
 # Simple, fast and user-friendly alternative to find
 brew "fd"
-# Cryptography and SSL/TLS Toolkit
-brew "openssl@3"
 # Play, record, convert, and stream many audio and video codecs
 brew "ffmpeg-full"
 # Command-line fuzzy finder written in Go
@@ -100,6 +98,8 @@ brew "infat"
 brew "ios-deploy"
 # Update of iperf: measures TCP, UDP, and SCTP bandwidth
 brew "iperf3"
+# Cryptography and SSL/TLS Toolkit
+brew "openssl@3"
 # Sort Python imports automatically
 brew "isort"
 # Lightweight and flexible command-line JSON processor
@@ -252,8 +252,6 @@ cask "alt-tab"
 cask "android-studio"
 # Agent orchestration platform
 cask "antigravity"
-# Terminal interface for Antigravity agents
-cask "antigravity-cli"
 # Universal chat app powered by Matrix
 cask "beeper"
 # Display management tool
