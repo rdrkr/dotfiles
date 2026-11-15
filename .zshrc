@@ -321,7 +321,10 @@ function _tmux_attach_local() {
 ## that starts tmux only waits for it, so loading all of that first made every
 ## new window pay the full startup cost twice (once here, once in the pane).
 ## If this shell keeps going after tmux exits, the rest of the file loads then.
-if [[ -z "$TMUX" && -o interactive ]] &&
+##
+## Skipped for the Rootshell iOS app, which attaches tmux itself (tmux -CC) and
+## identifies itself over SSH with LC_TERMINAL=rootshell (sshd accepts LC_*).
+if [[ -z "$TMUX" && -o interactive && "${LC_TERMINAL}" != "rootshell" ]] &&
    [[ "${TERM_PROGRAM}" == "ghostty" || -n "${SSH_CONNECTION}" ||
       ( "$_OS" == "linux" && -n "$WT_PROFILE_ID" ) ]]; then
   # avoid nested/double tmux if the shell command line already invokes tmux
