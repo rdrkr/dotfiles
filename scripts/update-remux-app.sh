@@ -18,6 +18,13 @@
 # flag: leaving the nightly channel installs the newest stable on the next run, without waiting for
 # it to overtake the nightly - see is_release_newer below for why that needs saying.
 #
+# Usage:
+#   update-remux-app.sh           install the newest build on the channel if it is newer
+#   update-remux-app.sh --check   change nothing; print "installed<TAB>latest<TAB>behind" (behind is
+#                                 1 or 0) for the same decision, and exit. switchbot's `update` and
+#                                 `upgrade` commands use this, so the channel and newer-than rules
+#                                 below are the only ones there are.
+#
 # Environment:
 #   REMUX_APP         app bundle to update (default: /Applications/Remux.app)
 #   REMUX_URL         URL that must answer after a relaunch (default: http://127.0.0.1:3000/)
@@ -202,8 +209,17 @@ replace_app() {
   fi
 }
 
-# Picks the newest release on the configured channel and installs it when it is newer.
+# Picks the newest release on the configured channel and installs it when it is newer, or with
+# --check only reports what it would do.
+# $1: optional --check
 main() {
+  local check=false
+  case "${1:-}" in
+    --check) check=true ;;
+    "") ;;
+    *) fail "usage: update-remux-app.sh [--check]" ;;
+  esac
+
   if [[ "$(uname -s)" != "Darwin" ]]; then
     echo "Remux.app updates are macOS only, skipping"
     return 0
@@ -212,8 +228,9 @@ main() {
     echo "$APP is not installed, skipping"
     return 0
   fi
-  # re-run under the lock; the variable marks the inner run so it does not lock again
-  if [[ -z "${REMUX_UPDATE_LOCKED:-}" ]]; then
+  # re-run under the lock; the variable marks the inner run so it does not lock again. A check
+  # changes nothing, so it never waits behind an update that is in progress.
+  if [[ "$check" == false && -z "${REMUX_UPDATE_LOCKED:-}" ]]; then
     REMUX_UPDATE_LOCKED=1 exec /usr/bin/lockf -k -t "$LOCK_TIMEOUT" "$LOCK_FILE" bash "$0" "$@"
   fi
   command -v jq >/dev/null 2>&1 || fail "jq is required to read Remux releases"
@@ -231,6 +248,14 @@ main() {
   IFS=$'\t' read -r tag published version url <<<"$release"
 
   installed="$(bundle_version "$APP")"
+  if [[ "$check" == true ]]; then
+    local behind=0
+    if [[ "$installed" != "$version" ]] && is_release_newer "$installed" "$version" "$published" "$pre"; then
+      behind=1
+    fi
+    printf '%s\t%s\t%s\n' "$installed" "$version" "$behind"
+    return 0
+  fi
   if [[ "$installed" == "$version" ]]; then
     echo "Remux $installed is up to date (channel: $channel)"
     return 0
