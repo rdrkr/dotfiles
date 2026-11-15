@@ -94,13 +94,36 @@ set_border on
 exec 3< <(tail -F -n 0 "$LOG" 2>/dev/null)
 tail_pid=$!
 
-while read -r line <&3; do
-  case "$line" in
-    *"disconnected from server"* | *"entering computer"*)
-      set_border on ;;
-    # A client can never hold the cursor at the moment it connects, so input
-    # is on the Dell then.
-    *"leaving computer"* | *"connected to server"*)
-      set_border off ;;
-  esac
+# connected
+#   Succeeds when the Deskflow client process holds an established TCP
+#   connection (to the server), i.e. the Dell can still own the input.
+connected() {
+  lsof -nP -a -c deskflow-core -iTCP -sTCP:ESTABLISHED >/dev/null 2>&1
+}
+
+# Seconds between connection checks while the border is hidden.
+WATCHDOG_INTERVAL=5
+
+while true; do
+  if read -r -t "$WATCHDOG_INTERVAL" line <&3; then
+    case "$line" in
+      # Only a clean disconnect logs "disconnected from server"; a server that
+      # vanishes (Dell asleep, network drop, keep-alive timeout) logs
+      # "server is dead" and then "failed to connect to server: ..." retries.
+      *"disconnected from server"* | *"entering computer"* | \
+        *"server is dead"* | *"failed to connect to server"*)
+        set_border on ;;
+      # A client can never hold the cursor at the moment it connects, so input
+      # is on the Dell then.
+      *"leaving computer"* | *"connected to server"*)
+        set_border off ;;
+    esac
+  elif (($? > 128)); then
+    # Timed out with no log line. Watchdog for drops that leave nothing in
+    # the log (Mac slept, Deskflow quit, log rotated mid-event): if the
+    # border is hidden but there is no live connection, input must be local.
+    [[ "$state" == off ]] && ! connected && set_border on
+  else
+    break # tail ended
+  fi
 done
