@@ -494,6 +494,14 @@ function ccl { ccs --list }
 function cc1 { ccs --switch-to 1; cc @args }
 function cc2 { ccs --switch-to 2; cc @args }
 
+<#
+.SYNOPSIS
+    Picks worktrees of a repo under development\repos and replaces their submodule junctions with empty folders.
+.EXAMPLE
+    unjunction mgnt.magnet
+#>
+function unjunction { & "$env:USERPROFILE\dotfiles\scripts\worktree-unjunction.ps1" @args }
+
 # dotfiles-sync: keep this repo and the other one in sync (see scripts/dotfiles-sync.sh)
 function dotfiles-sync {
     <#
