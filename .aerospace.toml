@@ -251,7 +251,6 @@ run = 'move-node-to-workspace 5'
 [[on-window-detected]]
 if.app-name-regex-substring = 'contacts'
 run = 'layout floating'
-[[on-window-detected]]
 
 [[on-window-detected]]
 if.app-name-regex-substring = 'deskflow'
