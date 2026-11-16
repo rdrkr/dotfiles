@@ -95,11 +95,11 @@ foreach ($l in (git -C $main worktree list --porcelain)) {
         $cur.Branch = $l.Substring(18)
     }
 }
-if (-not $wts) { Write-Host "No linked worktrees under $main."; return }
+if ($wts.Count -eq 0) { Write-Host "No linked worktrees under $main."; return }
 
 $labels = @($wts | ForEach-Object { "$($_.Branch)  ->  $($_.Path)" })
 $chosen = @(Select-Checkbox -Items $labels -Title "Worktrees of $main")
-if (-not $chosen) { Write-Host 'Nothing selected.'; return }
+if ($chosen.Count -eq 0) { Write-Host 'Nothing selected.'; return }
 
 foreach ($idx in $chosen) {
     $wt = $wts[$idx].Path
