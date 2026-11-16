@@ -38,13 +38,20 @@
 .PARAMETER DisconnectGraceSeconds
     How long the keyboard must stay disconnected before the laptop panel takes over.
 
+.PARAMETER MouseFollowSlot
+    Easy-Switch slot (1-3) of the Mac on the Logitech mouse. When the keyboard
+    leaves the Dell, the mouse (if connected here) is sent to that slot by
+    mouse-host.ps1 beside this script, so it follows the keyboard to the Mac;
+    the Mac does the same in the other direction. 0 turns this off.
+
 .NOTES
     Log: %LOCALAPPDATA%\keyboard-display-watch.log, trimmed to its last 500 lines
     at every start.
 #>
 param(
     [string]$KeyboardMatch = '*Keychron*',
-    [int]$DisconnectGraceSeconds = 3
+    [int]$DisconnectGraceSeconds = 3,
+    [int]$MouseFollowSlot = 1
 )
 
 Set-StrictMode -Version Latest
@@ -52,6 +59,7 @@ $ErrorActionPreference = 'Stop'
 
 $logPath = Join-Path $env:LOCALAPPDATA 'keyboard-display-watch.log'
 $topologyScript = Join-Path $PSScriptRoot 'display-topology.ps1'
+$mouseHostScript = Join-Path $PSScriptRoot 'mouse-host.ps1'
 
 # DEVPKEY_Device_IsConnected-style flag the Bluetooth stack keeps on a paired
 # device node: True while the link is up. The node itself stays present while
@@ -121,6 +129,24 @@ function Set-DeskLayout([bool]$Connected) {
     }
 }
 
+<#
+.SYNOPSIS
+    Sends the Logitech mouse after the keyboard when the keyboard leaves.
+.DESCRIPTION
+    Only the machine still holding the mouse can move it, and when the keyboard
+    leaves the Dell that is this one. A no-op (exit 2, logged) when the mouse is
+    not connected here.
+#>
+function Move-MouseAway {
+    if ($MouseFollowSlot -lt 1) { return }
+    try {
+        $result = & $mouseHostScript switch $MouseFollowSlot 2>&1 | Out-String
+        Write-Log ("keyboard left: mouse -> slot {0} [{1}] {2}" -f $MouseFollowSlot, $LASTEXITCODE, $result.Trim())
+    } catch {
+        Write-Log "keyboard left: moving the mouse failed: $_"
+    }
+}
+
 # --- Main ---------------------------------------------------------------------
 
 Stop-OtherInstances
@@ -175,6 +201,8 @@ try {
         # A new edge supersedes any retry still pending for the previous one.
         $applied = $connected
         $retryUntil = $null
+        # The mouse first: it is instant, the screen switch takes seconds.
+        if (-not $connected) { Move-MouseAway }
         if (-not (Set-DeskLayout $connected)) {
             $retryUntil = (Get-Date).AddSeconds($retryLimitSeconds)
         }
