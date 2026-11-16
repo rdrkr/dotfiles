@@ -118,10 +118,12 @@ while true; do
       *"leaving computer"* | *"connected to server"*)
         set_border off ;;
     esac
-  elif (($? > 128)); then
-    # Timed out with no log line. Watchdog for drops that leave nothing in
-    # the log (Mac slept, Deskflow quit, log rotated mid-event): if the
-    # border is hidden but there is no live connection, input must be local.
+  elif kill -0 "$tail_pid" 2>/dev/null; then
+    # Timed out with no log line (macOS /bin/bash 3.2 returns 1 on a read
+    # timeout, same as EOF, so a live tail is what tells them apart).
+    # Watchdog for drops that leave nothing in the log (Mac slept, Deskflow
+    # quit, log rotated mid-event): if the border is hidden but there is no
+    # live connection, input must be local.
     [[ "$state" == off ]] && ! connected && set_border on
   else
     break # tail ended
