@@ -3,7 +3,7 @@
 config-version = 2
 
 on-focus-changed = [
-    'exec-and-forget osascript -e " tell application \"System Events\" to     if (get name of every process) contains \"AeroSpaceBar\" then         tell application \"AeroSpaceBar\" to «event ascrpsbr» \"updateOnFocusChanged\" "'
+  'exec-and-forget osascript -e " tell application \"System Events\" to     if (get name of every process) contains \"AeroSpaceBar\" then         tell application \"AeroSpaceBar\" to «event ascrpsbr» \"updateOnFocusChanged\" "',
 ]
 
 # You can use it to add commands that run after AeroSpace startup.
@@ -250,6 +250,11 @@ run = 'move-node-to-workspace 5'
 
 [[on-window-detected]]
 if.app-name-regex-substring = 'contacts'
+run = 'layout floating'
+[[on-window-detected]]
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'deskflow'
 run = 'layout floating'
 
 [[on-window-detected]]
