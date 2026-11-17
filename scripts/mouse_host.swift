@@ -31,10 +31,14 @@
 // (System Settings > Privacy & Security > Input Monitoring). From a terminal that is
 // the terminal app; switchbot runs it as its own launchd job (net.ts.mouse-follow) so
 // the grant belongs to this binary alone, not to /bin/bash. A refused open asks for
-// access, which lists the binary there. Rebuilding changes its signature: grant again.
+// access, which lists the binary there. Signed with a developer certificate (below),
+// the grant is tied to identifier + certificate and survives rebuilds; an ad-hoc
+// signature would tie it to this exact build, dropping it on every rebuild.
 //
 // Build (the binary is committed beside this file, like keyboard-idle):
 //   swiftc -O -swift-version 5 -o scripts/mouse-host scripts/mouse_host.swift
+//   codesign --force --options runtime --identifier net.ts.mouse-host \
+//     --sign "Apple Development" scripts/mouse-host
 
 import Foundation
 import IOKit.hid
