@@ -50,8 +50,11 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 # The type survives in the session, so a watcher calling this repeatedly
-# compiles it only once (Add-Type cannot redefine a type).
-if (-not ('MouseHost.Hidpp' -as [type])) {
+# compiles it only once (Add-Type cannot redefine a type). The namespace carries a
+# version: a long-running watcher still holds the type an older copy of this script
+# compiled, and bumping it whenever the C# changes makes that session compile the
+# new one instead of calling a stale type.
+if (-not ('MouseHost.V2.Hidpp' -as [type])) {
     Add-Type -TypeDefinition @'
 using System;
 using System.Collections.Generic;
@@ -61,7 +64,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 
-namespace MouseHost
+namespace MouseHost.V2
 {
     /// <summary>Win32 HID and SetupAPI declarations used by <see cref="Hidpp"/>.</summary>
     internal static class Native
@@ -206,8 +209,13 @@ namespace MouseHost
         /// <summary>HID++ 2.0 feature ID of CHANGE_HOST.</summary>
         public const ushort ChangeHostFeature = 0x1814;
 
-        /// <summary>The HID product name, e.g. "MX Master 4".</summary>
+        /// <summary>The HID product name, e.g. "MX Master 4", or the Bluetooth name
+        /// when the device reports no product string.</summary>
         public string Name { get; private set; }
+
+        /// <summary>Why each Logitech HID collection seen by the last
+        /// <see cref="Find"/> was passed over; printed when no mouse matched.</summary>
+        public static List<string> Rejected = new List<string>();
 
         /// <summary>Overlapped stream over the device handle.</summary>
         readonly FileStream stream;
@@ -230,12 +238,16 @@ namespace MouseHost
         }
 
         /// <summary>Opens every connected Logitech HID++ long-report collection
-        /// whose product name contains <paramref name="match"/>.</summary>
-        /// <param name="match">Case-insensitive product-name substring.</param>
+        /// whose product name or Bluetooth name contains <paramref name="match"/>.</summary>
+        /// <param name="match">Case-insensitive name substring.</param>
+        /// <param name="bluetoothNames">Bluetooth device names keyed by the 12-digit
+        /// lower-case address in the device path. Windows often returns no product
+        /// string for a Bluetooth LE device, so this is the name to match then.</param>
         /// <returns>The opened collections; the caller disposes them.</returns>
-        public static List<Hidpp> Find(string match)
+        public static List<Hidpp> Find(string match, Dictionary<string, string> bluetoothNames)
         {
             var found = new List<Hidpp>();
+            Rejected.Clear();
             Guid guid;
             Native.HidD_GetHidGuid(out guid);
             IntPtr set = Native.SetupDiGetClassDevs(ref guid, IntPtr.Zero, IntPtr.Zero, Native.DIGCF_PRESENT | Native.DIGCF_DEVICEINTERFACE);
@@ -248,7 +260,7 @@ namespace MouseHost
                 {
                     string path = DevicePath(set, ref data);
                     if (path == null) continue;
-                    Hidpp device = TryOpen(path, match);
+                    Hidpp device = TryOpen(path, match, bluetoothNames);
                     if (device != null) found.Add(device);
                 }
             }
@@ -281,31 +293,64 @@ namespace MouseHost
         }
 
         /// <summary>Opens <paramref name="path"/> if it is a Logitech HID++
-        /// long-report collection named like <paramref name="match"/>.</summary>
+        /// long-report collection named like <paramref name="match"/>, noting in
+        /// <see cref="Rejected"/> why a Logitech collection was passed over.</summary>
+        /// <param name="path">HID device interface path.</param>
+        /// <param name="match">Case-insensitive name substring.</param>
+        /// <param name="bluetoothNames">See <see cref="Find"/>.</param>
         /// <returns>The opened collection, or null.</returns>
-        static Hidpp TryOpen(string path, string match)
+        static Hidpp TryOpen(string path, string match, Dictionary<string, string> bluetoothNames)
         {
+            string lower = path.ToLowerInvariant();
+            bool logitechPath = lower.Contains("vid&02046d") || lower.Contains("vid_046d");
+            string shortPath = path.Length > 60 ? "..." + path.Substring(path.Length - 60) : path;
             SafeFileHandle handle = Native.CreateFile(path, Native.GENERIC_READ | Native.GENERIC_WRITE,
                 Native.FILE_SHARE_READ_WRITE, IntPtr.Zero, Native.OPEN_EXISTING, Native.FILE_FLAG_OVERLAPPED, IntPtr.Zero);
-            if (handle.IsInvalid) return null;
+            if (handle.IsInvalid)
+            {
+                if (logitechPath) Rejected.Add(shortPath + ": cannot open (Win32 error " + Marshal.GetLastWin32Error() + ")");
+                return null;
+            }
             bool keep = false;
             try
             {
                 var attributes = new Native.HidAttributes();
                 attributes.Size = Marshal.SizeOf(attributes);
-                if (!Native.HidD_GetAttributes(handle, ref attributes) || attributes.VendorID != LogitechVendorID) return null;
+                if (!Native.HidD_GetAttributes(handle, ref attributes) || attributes.VendorID != LogitechVendorID)
+                {
+                    if (logitechPath) Rejected.Add(string.Format("{0}: vendor ID {1:X4}, not Logitech", shortPath, attributes.VendorID));
+                    return null;
+                }
 
                 IntPtr preparsed;
-                if (!Native.HidD_GetPreparsedData(handle, out preparsed)) return null;
+                if (!Native.HidD_GetPreparsedData(handle, out preparsed))
+                {
+                    Rejected.Add(shortPath + ": no report descriptor");
+                    return null;
+                }
                 var caps = new Native.HidCaps();
                 try { Native.HidP_GetCaps(preparsed, ref caps); }
                 finally { Native.HidD_FreePreparsedData(preparsed); }
-                if (caps.UsagePage != HidppUsagePage || caps.Usage != HidppLongUsage) return null;
+                if (caps.UsagePage != HidppUsagePage || caps.Usage != HidppLongUsage)
+                {
+                    Rejected.Add(string.Format("{0}: usage {1:X4}/{2:X4}, not HID++ FF43/0202", shortPath, caps.UsagePage, caps.Usage));
+                    return null;
+                }
 
                 var nameBuffer = new byte[256];
-                string name = Native.HidD_GetProductString(handle, nameBuffer, nameBuffer.Length)
-                    ? Encoding.Unicode.GetString(nameBuffer).TrimEnd('\0') : "unknown";
-                if (name.IndexOf(match, StringComparison.OrdinalIgnoreCase) < 0) return null;
+                string product = Native.HidD_GetProductString(handle, nameBuffer, nameBuffer.Length)
+                    ? Encoding.Unicode.GetString(nameBuffer).TrimEnd('\0') : "";
+                string bluetooth = null;
+                var address = System.Text.RegularExpressions.Regex.Match(lower, "_([0-9a-f]{12})(&col|#|\\\\)");
+                if (address.Success && bluetoothNames != null) bluetoothNames.TryGetValue(address.Groups[1].Value, out bluetooth);
+                bool matches = product.IndexOf(match, StringComparison.OrdinalIgnoreCase) >= 0
+                    || (bluetooth != null && bluetooth.IndexOf(match, StringComparison.OrdinalIgnoreCase) >= 0);
+                if (!matches)
+                {
+                    Rejected.Add(string.Format("{0}: product '{1}', Bluetooth name '{2}' do not contain '{3}'", shortPath, product, bluetooth, match));
+                    return null;
+                }
+                string name = product.Length > 0 ? product : (bluetooth ?? "unknown");
 
                 keep = true;
                 return new Hidpp(handle, name, caps.InputReportByteLength, caps.OutputReportByteLength);
@@ -420,9 +465,21 @@ namespace MouseHost
 '@
 }
 
-$mice = [MouseHost.Hidpp]::Find($Match)
+# Bluetooth names by address, for devices that report no HID product string. The
+# BTHLE\DEV_<address> node carries the name the device advertises; the address is
+# the same 12 hex digits that appear in its HID collections' paths.
+$bluetoothNames = New-Object 'System.Collections.Generic.Dictionary[string,string]'
+foreach ($node in Get-PnpDevice -PresentOnly -ErrorAction SilentlyContinue) {
+    if ($node.InstanceId -match '^BTH(LE)?\\DEV_([0-9A-F]{12})') {
+        $bluetoothNames[$Matches[2].ToLowerInvariant()] = [string]$node.FriendlyName
+    }
+}
+
+$mice = [MouseHost.V2.Hidpp]::Find($Match, $bluetoothNames)
 if ($mice.Count -eq 0) {
-    Write-Output "no Bluetooth mouse matching '$Match' is connected to this machine"
+    $why = [MouseHost.V2.Hidpp]::Rejected
+    $detail = if ($why.Count) { ' (' + ($why -join '; ') + ')' } else { '' }
+    Write-Output "no Bluetooth mouse matching '$Match' is connected to this machine$detail"
     exit 2
 }
 if ($Command -eq 'switch' -and $Slot -lt 1) {
