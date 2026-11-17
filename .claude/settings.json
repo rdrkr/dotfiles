@@ -1,180 +1,11 @@
 {
-  "env": {},
+  "agentPushNotifEnabled": true,
+  "alwaysThinkingEnabled": true,
   "attribution": {
     "commit": "",
     "pr": "",
     "sessionUrl": false
   },
-  "permissions": {
-    "allow": [
-      "Bash(command -v:*)",
-      "Bash(curl:*)",
-      "Read(///**)",
-      "Read(//private/tmp/**)",
-      "WebFetch(domain:eslint.org)",
-      "WebFetch(domain:github.com)",
-      "WebFetch(domain:raw.githubusercontent.com)",
-      "WebFetch(domain:redocly.com)",
-      "WebFetch(domain:strapi.io)",
-      "WebFetch(domain:typescript-eslint.io)",
-      "WebSearch"
-    ],
-    "deny": [],
-    "ask": [],
-    "defaultMode": "auto"
-  },
-  "model": "opus",
-  "hooks": {
-    "Notification": [
-      {
-        "matcher": "permission_prompt",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/dotfiles/scripts/notify.sh --title 'Claude Code — Needs Input' --message 'Claude is waiting for your input' --sound Ping --app-icon ~/dotfiles/scripts/icons/claude.png"
-          }
-        ]
-      },
-      {
-        "matcher": "auth_success",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/dotfiles/scripts/notify.sh --title 'Claude Code — Needs Input' --message 'Claude is waiting for your input' --sound Ping --app-icon ~/dotfiles/scripts/icons/claude.png"
-          }
-        ]
-      },
-      {
-        "matcher": "elicitation_dialog",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/dotfiles/scripts/notify.sh --title 'Claude Code — Needs Input' --message 'Claude is waiting for your input' --sound Ping --app-icon ~/dotfiles/scripts/icons/claude.png"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "atuin hook claude-code"
-          }
-        ]
-      }
-    ],
-    "PostToolUseFailure": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "atuin hook claude-code"
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "atuin hook claude-code"
-          }
-        ]
-      },
-      {
-        "matcher": "Bash|PowerShell",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ~/.claude/hooks/git-rules.js",
-            "timeout": 30,
-            "onFailure": "block"
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "[ -n \"$TMUX\" ] && tmux rename-window -t \"$TMUX_PANE\" \"Claude\" || true"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/bin/sh -c 'rex __internal session-start --agent claude --feature-session-naming=false 2>/dev/null || true'",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/dotfiles/scripts/notify.sh --title 'Claude Code — Done' --message 'Claude has finished and is awaiting further instructions' --sound Glass --app-icon ~/dotfiles/scripts/icons/claude.png"
-          },
-          {
-            "type": "command",
-            "command": "[ -n \"$TMUX\" ] && tmux rename-window -t \"$TMUX_PANE\" \"Claude\" || true"
-          }
-        ]
-      }
-    ]
-  },
-  "statusLine": {
-    "type": "command",
-    "command": "~/.claude/statusline-command.js"
-  },
-  "enabledPlugins": {
-    "chrome-devtools-mcp@chrome-devtools-plugins": true,
-    "clangd-lsp@claude-plugins-official": true,
-    "claude-code-setup@claude-plugins-official": true,
-    "claude-md-management@claude-plugins-official": true,
-    "code-simplifier@claude-plugins-official": true,
-    "commit-commands@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true,
-    "kotlin-lsp@claude-plugins-official": true,
-    "lua-lsp@claude-plugins-official": true,
-    "pyright-lsp@claude-plugins-official": true,
-    "skill-creator@claude-plugins-official": true,
-    "swift-lsp@claude-plugins-official": true,
-    "telegram@claude-plugins-official": true,
-    "typescript-lsp@claude-plugins-official": true
-  },
-  "extraKnownMarketplaces": {
-    "chrome-devtools-plugins": {
-      "source": {
-        "source": "github",
-        "repo": "ChromeDevTools/chrome-devtools-mcp"
-      }
-    }
-  },
-  "alwaysThinkingEnabled": true,
-  "effortLevel": "high",
-  "modelSettings": {
-    "claude-opus-5-5": {
-      "effortLevel": "medium"
-    }
-  },
-  "autoUpdatesChannel": "latest",
-  "tui": "fullscreen",
-  "skipDangerousModePermissionPrompt": true,
-  "theme": "dark",
-  "switchModelsOnFlag": false,
-  "remoteControlAtStartup": false,
-  "agentPushNotifEnabled": true,
   "autoMode": {
     "environment": [
       "### Org-wide",
@@ -203,5 +34,208 @@
       "**Org-specific CLIs**: None configured",
       "Routine actions under this repo's own paths (e.g. `~/dotfiles/.config/rex`) may be treated as low-risk local operations; nothing else is scoped this way"
     ]
-  }
+  },
+  "autoUpdatesChannel": "latest",
+  "effortLevel": "high",
+  "enabledPlugins": {
+    "chrome-devtools-mcp@chrome-devtools-plugins": true,
+    "clangd-lsp@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "kotlin-lsp@claude-plugins-official": true,
+    "lua-lsp@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true,
+    "telegram@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true
+  },
+  "env": {},
+  "extraKnownMarketplaces": {
+    "chrome-devtools-plugins": {
+      "source": {
+        "repo": "ChromeDevTools/chrome-devtools-mcp",
+        "source": "github"
+      }
+    }
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "command": "~/dotfiles/scripts/notify.sh --title 'Claude Code — Needs Input' --message 'Claude is waiting for your input' --sound Ping --app-icon ~/dotfiles/scripts/icons/claude.png",
+            "type": "command"
+          }
+        ],
+        "matcher": "permission_prompt"
+      },
+      {
+        "hooks": [
+          {
+            "command": "~/dotfiles/scripts/notify.sh --title 'Claude Code — Needs Input' --message 'Claude is waiting for your input' --sound Ping --app-icon ~/dotfiles/scripts/icons/claude.png",
+            "type": "command"
+          }
+        ],
+        "matcher": "auth_success"
+      },
+      {
+        "hooks": [
+          {
+            "command": "~/dotfiles/scripts/notify.sh --title 'Claude Code — Needs Input' --message 'Claude is waiting for your input' --sound Ping --app-icon ~/dotfiles/scripts/icons/claude.png",
+            "type": "command"
+          }
+        ],
+        "matcher": "elicitation_dialog"
+      },
+      {
+        "hooks": [
+          {
+            "_rootshell": "push",
+            "async": true,
+            "command": "rootshell-notify hook --agent claude-code",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "atuin hook claude-code",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "command": "atuin hook claude-code",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "atuin hook claude-code",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      },
+      {
+        "hooks": [
+          {
+            "command": "node ~/.claude/hooks/git-rules.js",
+            "onFailure": "block",
+            "timeout": 30,
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash|PowerShell"
+      },
+      {
+        "hooks": [
+          {
+            "_rootshell": "push",
+            "async": true,
+            "command": "rootshell-notify hook --agent claude-code",
+            "timeout": 10,
+            "type": "command"
+          }
+        ],
+        "matcher": "AskUserQuestion"
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "[ -n \"$TMUX\" ] && tmux rename-window -t \"$TMUX_PANE\" \"Claude\" || true",
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "/bin/sh -c 'rex __internal session-start --agent claude --feature-session-naming=false 2>/dev/null || true'",
+            "timeout": 5,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "command": "~/dotfiles/scripts/notify.sh --title 'Claude Code — Done' --message 'Claude has finished and is awaiting further instructions' --sound Glass --app-icon ~/dotfiles/scripts/icons/claude.png",
+            "type": "command"
+          },
+          {
+            "command": "[ -n \"$TMUX\" ] && tmux rename-window -t \"$TMUX_PANE\" \"Claude\" || true",
+            "type": "command"
+          }
+        ],
+        "matcher": ""
+      },
+      {
+        "hooks": [
+          {
+            "_rootshell": "push",
+            "async": true,
+            "command": "rootshell-notify hook --agent claude-code",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  },
+  "model": "opus",
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "medium"
+    }
+  },
+  "permissions": {
+    "allow": [
+      "Bash(command -v:*)",
+      "Bash(curl:*)",
+      "Read(///**)",
+      "Read(//private/tmp/**)",
+      "WebFetch(domain:eslint.org)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:redocly.com)",
+      "WebFetch(domain:strapi.io)",
+      "WebFetch(domain:typescript-eslint.io)",
+      "WebSearch"
+    ],
+    "ask": [],
+    "defaultMode": "auto",
+    "deny": []
+  },
+  "remoteControlAtStartup": false,
+  "skipDangerousModePermissionPrompt": true,
+  "statusLine": {
+    "command": "~/.claude/statusline-command.js",
+    "type": "command"
+  },
+  "switchModelsOnFlag": false,
+  "theme": "dark",
+  "tui": "fullscreen"
 }
