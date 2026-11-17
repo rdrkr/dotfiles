@@ -44,6 +44,17 @@
     mouse-host.ps1 beside this script, so it follows the keyboard to the Mac;
     the Mac does the same in the other direction. 0 turns this off.
 
+.PARAMETER BarProcess
+    Process name of the status bar to restart after every screen switch (zebar,
+    started by komorebic-hotkeys.ahk). Zebar keeps its window on the monitor it
+    was laid out for and, after a topology change, ends up behind other windows;
+    a fresh start lays it out on the new screen. Only a bar that was running is
+    restarted. Empty turns this off.
+
+.PARAMETER BarSettleSeconds
+    Seconds to wait after a switch before restarting the bar, so it starts on the
+    final arrangement rather than one still changing.
+
 .NOTES
     Log: %LOCALAPPDATA%\keyboard-display-watch.log, trimmed to its last 500 lines
     at every start.
@@ -51,7 +62,9 @@
 param(
     [string]$KeyboardMatch = '*Keychron*',
     [int]$DisconnectGraceSeconds = 3,
-    [int]$MouseFollowSlot = 1
+    [int]$MouseFollowSlot = 1,
+    [string]$BarProcess = 'zebar',
+    [int]$BarSettleSeconds = 2
 )
 
 Set-StrictMode -Version Latest
@@ -122,10 +135,36 @@ function Set-DeskLayout([bool]$Connected) {
         $result = & $topologyScript $mode 2>&1 | Out-String
         $code = $LASTEXITCODE
         Write-Log ("keyboard {0}: {1} -> [{2}] {3}" -f ($(if ($Connected) { 'connected' } else { 'disconnected' })), $mode, $code, $result.Trim())
+        if ($code -eq 0) { Restart-Bar }
         return ($code -eq 0)
     } catch {
         Write-Log "keyboard edge: switching to $mode failed: $_"
         return $false
+    }
+}
+
+<#
+.SYNOPSIS
+    Restarts the status bar after a screen switch, so it is laid out on the new
+    screen and stays in front.
+.DESCRIPTION
+    Only restarts a bar that is running. komorebic-hotkeys.ahk starts zebar
+    elevated; this watcher inherits the hotkey script's elevation, and if it
+    cannot stop the bar, it says so and leaves the old one alone rather than
+    starting a second copy.
+#>
+function Restart-Bar {
+    if (-not $BarProcess) { return }
+    $running = @(Get-Process -Name $BarProcess -ErrorAction SilentlyContinue)
+    if ($running.Count -eq 0) { return }
+    Start-Sleep -Seconds $BarSettleSeconds
+    try {
+        $running | Stop-Process -Force -ErrorAction Stop
+        $running | ForEach-Object { $_.WaitForExit(5000) | Out-Null }
+        Start-Process -FilePath "$BarProcess.exe" -WindowStyle Hidden
+        Write-Log "restarted $BarProcess"
+    } catch {
+        Write-Log "could not restart ${BarProcess}: $_"
     }
 }
 
