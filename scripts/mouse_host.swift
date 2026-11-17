@@ -27,8 +27,11 @@
 // (default "MX Master"). Exit codes: 0 done (or already on SLOT), 2 no such mouse
 // connected to this Mac, 1 any other failure.
 //
-// Opening the HID device may need Input Monitoring for the calling process
-// (System Settings > Privacy & Security > Input Monitoring).
+// Opening the HID device needs Input Monitoring for the responsible process
+// (System Settings > Privacy & Security > Input Monitoring). From a terminal that is
+// the terminal app; switchbot runs it as its own launchd job (net.ts.mouse-follow) so
+// the grant belongs to this binary alone, not to /bin/bash. A refused open asks for
+// access, which lists the binary there. Rebuilding changes its signature: grant again.
 //
 // Build (the binary is committed beside this file, like keyboard-idle):
 //   swiftc -O -swift-version 5 -o scripts/mouse-host scripts/mouse_host.swift
@@ -95,7 +98,7 @@ enum HIDPPError: Error, CustomStringConvertible {
     switch self {
     case .open(let status):
       let hint = status == kIOReturnNotPermitted
-        ? " (grant Input Monitoring to the calling app in System Settings > Privacy & Security)" : ""
+        ? " (grant Input Monitoring to the responsible app or binary in System Settings > Privacy & Security)" : ""
       return String(format: "cannot open the mouse: IOReturn 0x%08X", status) + hint
     case .send(let status):
       return String(format: "cannot send to the mouse: IOReturn 0x%08X", status)
@@ -133,6 +136,11 @@ final class Mouse {
   /// - Throws: `HIDPPError.open` when IOKit refuses access.
   func open() throws {
     let status = IOHIDDeviceOpen(device, IOOptionBits(kIOHIDOptionsTypeNone))
+    if status == kIOReturnNotPermitted {
+      // Registers this binary under Input Monitoring (and asks, the first time), so it
+      // shows up in System Settings ready to be switched on.
+      _ = IOHIDRequestAccess(kIOHIDRequestTypeListenEvent)
+    }
     guard status == kIOReturnSuccess else { throw HIDPPError.open(status) }
     IOHIDDeviceRegisterInputReportCallback(device, reportBuffer, 64, inputReportCallback, nil)
     IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
