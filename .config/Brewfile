@@ -6,7 +6,7 @@ tap "felixkratz/formulae", "https://github.com/FelixKratz/homebrew-formulae"
 tap "gentleman-programming/tap", "https://github.com/Gentleman-Programming/homebrew-tap"
 tap "glzr-io/tap"
 tap "hamed-elfayome/claude-usage"
-tap "machlit/tap"
+tap "hitblast/tap"
 tap "mediosz/tap"
 tap "mocki-toki/formulae"
 tap "nikitabobko/tap"
@@ -142,8 +142,6 @@ brew "mypy"
 brew "neofetch"
 # Ambitious Vim-fork focused on extensibility and agility
 brew "neovim"
-# Open-source, cross-platform JavaScript runtime environment
-brew "node@22"
 # Open-source, cross-platform JavaScript runtime environment
 brew "node@24"
 # Modern shell for the GitHub era
