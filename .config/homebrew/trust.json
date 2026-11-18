@@ -21,6 +21,7 @@
     "vjeantet/tap"
   ],
   "trustedformulae": [
+    "hitblast/tap/cutler",
     "smartthingscommunity/smartthings/smartthings"
   ],
   "trustedcasks": [
