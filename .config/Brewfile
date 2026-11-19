@@ -347,7 +347,7 @@ cask "tailscale-app"
 cask "teamviewer"
 # Macro remote control
 cask "touch-portal"
-# Create, maintain, and interact with Xcode projects at scale
+# Build caching and analytics tool
 cask "tuist"
 # AI image upscaler
 cask "upscayl"
