@@ -1,0 +1,14 @@
+{
+  "id":  "425a5ce9-3095-4d3f-98ad-82175017e167",
+  "name":  "/Users/ronendruker",
+  "projectResources":  {
+    "resources":  [
+      {
+        "gitFolder":  {
+          "folderUri":  "file:///Users/ronendruker",
+          "allowWrite":  true
+        }
+      }
+    ]
+  }
+}
