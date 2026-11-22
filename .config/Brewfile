@@ -146,6 +146,8 @@ brew "mise"
 brew "mkcert"
 # Deep clean and optimize your Mac
 brew "mole"
+# Remote terminal application
+brew "mosh"
 # Experimental optional static type checker for Python
 brew "mypy"
 # Fast, highly customisable system info script
