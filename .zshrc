@@ -1,5 +1,4 @@
 # initialization
-export XDG_CONFIG_HOME="${HOME}/.config"
 
 # keep PATH and FPATH free of duplicates: every nested shell (each tmux pane
 # included) re-runs this file and would otherwise prepend the same dirs again,

@@ -1,4 +1,18 @@
 {
+  "plugins": {
+    "android-cli-plugin": {
+      "enabled": true
+    },
+    "chrome-devtools-plugin": {
+      "enabled": true
+    },
+    "modern-web-guidance-plugin": {
+      "enabled": true
+    },
+    "swarm": {
+      "enabled": true
+    }
+  },
   "userSettings": {
     "globalPermissionGrants": {
       "allow": [
