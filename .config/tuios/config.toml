@@ -129,4 +129,8 @@ leader_key = "ctrl+a"
 preset = "tmux"
 
 [appearance]
-theme = "afterglow"
+theme = "gruvbox_dark"
+border_style = "rounded"
+
+[appearance.sidebar]
+position = "left"
