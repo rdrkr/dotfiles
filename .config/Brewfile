@@ -234,6 +234,8 @@ brew "tree"
 brew "tree-sitter-cli"
 # Find and verify credentials
 brew "trufflehog"
+# Terminal UI OS (Terminal Multiplexer)
+brew "tuios"
 # Language Server Protocol implementation for TypeScript wrapping tsserver
 brew "typescript-language-server"
 # Pretty print math in monospace fonts, using a TeX-like syntax
