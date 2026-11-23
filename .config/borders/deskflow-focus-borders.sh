@@ -36,7 +36,6 @@ fi
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 
 LOG="${DESKFLOW_LOG:-$HOME/Library/Logs/Deskflow/deskflow.log}"
-PIDFILE="${TMPDIR:-/tmp}/deskflow-focus-borders.pid"
 
 # Active-border colour when this Mac has input (same as .aerospace.toml's
 # borders line and bordersrc) and when it does not (fully transparent).
@@ -60,28 +59,26 @@ set_border() {
 }
 
 # stop_previous
-#   Terminates an earlier instance of this script recorded in PIDFILE, if it
-#   is still running (its EXIT trap stops its tail as well).
+#   Terminates earlier instances of this script (their EXIT traps stop their
+#   tails as well). Detached instances are reparented to launchd (PPID 1), so
+#   matching on that skips their process-substitution subshells. Found by
+#   process rather than a pidfile, which a cleaned or differing TMPDIR (GUI
+#   launch vs terminal) would lose, leaving two watchers fighting.
 stop_previous() {
-  local old
-  old=$(cat "$PIDFILE" 2>/dev/null) || return
-  if [[ -n "$old" && "$old" != "$$" ]] &&
-    ps -p "$old" -o command= 2>/dev/null | grep -q deskflow-focus-borders; then
-    kill "$old" 2>/dev/null
-  fi
+  local pid
+  for pid in $(pgrep -P 1 -f deskflow-focus-borders.sh); do
+    [[ "$pid" != "$$" ]] && kill "$pid" 2>/dev/null
+  done
 }
 
 # cleanup
-#   Stops the tail, restores the border and removes the pidfile (if still
-#   ours) when this instance exits.
+#   Stops the tail and restores the border when this instance exits.
 cleanup() {
   [[ -n "$tail_pid" ]] && kill "$tail_pid" 2>/dev/null
   set_border on
-  [[ "$(cat "$PIDFILE" 2>/dev/null)" == "$$" ]] && rm -f "$PIDFILE"
 }
 
 stop_previous
-echo $$ >"$PIDFILE"
 trap cleanup EXIT
 # No HUP: nohup ignores it, so the watcher outlives its terminal.
 trap 'exit 0' TERM INT
