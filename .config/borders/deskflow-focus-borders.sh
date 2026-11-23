@@ -89,6 +89,17 @@ trap 'exit 0' TERM INT
 # Input is local until Deskflow says otherwise (e.g. Mac used on its own).
 set_border on
 
+# ensure_log_dir
+#   Recreates the log file's directory if it is missing. Deskflow reopens the
+#   log on every write and silently drops lines when the directory is gone
+#   (e.g. after a ~/Library/Logs cleanup), which would leave this watcher
+#   blind and the border stuck on.
+ensure_log_dir() {
+  [[ -d "${LOG%/*}" ]] || mkdir -p "${LOG%/*}"
+}
+
+ensure_log_dir
+
 # tail -F follows the file by name, so it waits for the log to appear and
 # survives Deskflow rotating it. -n 0: only react to switches from now on.
 exec 3< <(tail -F -n 0 "$LOG" 2>/dev/null)
@@ -124,6 +135,7 @@ while true; do
     # Watchdog for drops that leave nothing in the log (Mac slept, Deskflow
     # quit, log rotated mid-event): if the border is hidden but there is no
     # live connection, input must be local.
+    ensure_log_dir
     [[ "$state" == off ]] && ! connected && set_border on
   else
     break # tail ended
