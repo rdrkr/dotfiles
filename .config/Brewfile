@@ -365,6 +365,8 @@ cask "sublime-text"
 cask "tailscale-app"
 # Remote access and connectivity software focused on security
 cask "teamviewer"
+# Terminal-based web browser
+cask "terminal-browser"
 # Macro remote control
 cask "touch-portal"
 # Build caching and analytics tool
